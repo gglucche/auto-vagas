@@ -1,8 +1,8 @@
-// Refaz as imagens do README: instala a extensão em um Chrome, Brave ou Edge à parte (sem janela, sem internet,
-// perfil temporário apagado no fim), grava dados de exemplo inventados — o currículo de uma pessoa
-// desenvolvedora React sênior — e fotografa o painel e o popup em docs/.
+// Regenerates the README images: installs the extension in a separate Chrome, Brave or Edge (headless, no internet,
+// temporary profile deleted at the end), writes made-up sample data — the resume of a senior React
+// developer — and screenshots the dashboard and the popup into docs/.
 //
-//   node dev/screenshots.mjs [--light] [--browser=caminho-do-navegador]
+//   node dev/screenshots.mjs [--light] [--browser=path-to-browser]
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -19,7 +19,7 @@ if (!browser) {
   process.exit(1);
 }
 
-// Dados de exemplo: pessoas, empresas e endereços inventados.
+// Sample data: made-up people, companies and addresses.
 function sampleData() {
   const now = Date.now();
   const min = 60e3;
@@ -100,7 +100,7 @@ Fulano de Tal
 
 const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'av-shots-'));
 try {
-  // sem internet: nada sai daqui com os dados de exemplo
+  // no internet: nothing with the sample data leaves this machine
   const b = await launch(browser, profile, ['--hide-scrollbars', '--host-resolver-rules=MAP * ~NOTFOUND']);
   await b.installUnpacked(root);
   const page = await b.dashboard({ wait: 15000 });
@@ -123,7 +123,7 @@ try {
   await view(page, 1360, 820);
   await page.evaluate(`(async () => {
     const data = ${JSON.stringify(sampleData())};
-    // teste de modelos já em cache: o painel não chama a IA com a chave de exemplo
+    // model check already cached: the dashboard doesn't call the AI with the sample key
     const { hashId } = await import(chrome.runtime.getURL('lib/store.js'));
     const working = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'llama-3.1-8b-instant'].map((id) => ({ id }));
     data.aiModels = { groq: { key: hashId(data.settings.groqKey), checkedAt: Date.now(), working, failed: [], others: [] } };
@@ -145,7 +145,7 @@ try {
   await sleep(700);
   await shot(page, 'configuracoes.png');
 
-  // o popup, aberto como página e recortado no tamanho dele
+  // the popup, opened as a page and cropped to its own size
   const tab = await b.api(`/json/new?${encodeURIComponent(base + '/ui/popup.html')}`, { method: 'PUT' });
   const popup = await connect(tab.webSocketDebuggerUrl);
   await popup.send('Page.enable');

@@ -1,4 +1,4 @@
-// Content script: extrai vagas da página quando o background pede ({type:'scan'}).
+// Content script: extracts job postings from the page when the background asks ({type:'scan'}).
 (() => {
   if (window.__autoVagas) return;
   window.__autoVagas = true;
@@ -15,14 +15,14 @@
     }
     return null;
   };
-  // Envia cada vaga assim que é lida: nada se perde se a varredura for interrompida
-  // e as mensagens mantêm o service worker acordado.
+  // Sends each job as soon as it is read: nothing is lost if the scan is interrupted,
+  // and the messages keep the service worker awake.
   const report = (job) => chrome.runtime.sendMessage({ type: 'jobsFound', jobs: [job] }).catch(() => {});
 
   const loggedOut = () => /\/(login|authwall|checkpoint|uas\/)/.test(location.pathname);
 
-  // Página escondida atrás de outra janela não carrega as listas: pede ao background para trazer a janela
-  // de busca para a frente e espera um pouco. Devolve se a página ficou visível.
+  // A page hidden behind another window doesn't load the lists: ask the background to bring the search window
+  // to the front and wait a bit. Returns whether the page became visible.
   async function visible() {
     if (!document.hidden) return true;
     await chrome.runtime.sendMessage({ type: 'scanHidden' }).catch(() => {});
@@ -30,8 +30,8 @@
     return !document.hidden;
   }
 
-  // As vagas do LinkedIn vêm da busca pública, lida pelo background (lib/linkedin.js); aqui ficam só os
-  // posts, que exigem a conta do usuário.
+  // LinkedIn jobs come from the public search, read by the background (lib/linkedin.js); here we only handle
+  // posts, which require the user's account.
   async function scanLinkedinPosts(max) {
     if (loggedOut()) return { error: 'login' };
     const shown = await visible();
@@ -46,7 +46,7 @@
     let count = 0;
     for (const post of posts) {
       if (count >= max) break;
-      // texto cortado: abre o "ver mais" do post antes de ler
+      // truncated text: click the post's "ver mais" (see more) before reading
       const more = [...post.querySelectorAll('button')].find((b) => /^(…|\.\.\.)?\s*(ver mais|exibir mais|see more|show more)$/i.test(text(b)));
       if (more) {
         more.click();
@@ -87,7 +87,7 @@
       idle = 0;
       const card = cards[i++];
       const lines = text(card).split('\n').map((l) => l.trim()).filter(Boolean);
-      // empresa sem logotipo aparece com a inicial no lugar da imagem: não é o título
+      // a company without a logo shows its initial in place of the image: that's not the title
       if (lines[0]?.length === 1) lines.shift();
       const title = lines[0];
       if (!title) continue;
@@ -95,7 +95,7 @@
       (card.querySelector('a, [role="link"], [role="button"]') || card).click();
       await jitter(1800, 2800);
 
-      // painel de detalhes: elemento visível fora da lista cujo texto é o título
+      // details pane: a visible element outside the list whose text is the title
       const same = (s) => s.replace(/\s+/g, ' ').trim() === title.replace(/\s+/g, ' ');
       const head = [...document.querySelectorAll('h1, h2, h3, [role="heading"], div')].find(
         (e) => !e.children.length && e.offsetParent && same(e.textContent) && !e.closest('[data-share-url]')
@@ -127,7 +127,7 @@
     return { count, hidden: !shown };
   }
 
-  // Reserva: qualquer e-mail na página, com o texto ao redor como descrição.
+  // Fallback: any email on the page, with the surrounding text as the description.
   function scanGeneric(source, max) {
     const t = text(document.body);
     const seen = new Set();

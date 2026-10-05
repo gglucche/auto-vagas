@@ -1,5 +1,5 @@
-// Navegador à parte para os scripts de dev/: o Chrome, Brave ou Edge instalado, sem janela e com um perfil
-// próprio, e a extensão instalada como o botão "Carregar sem compactação" faria.
+// Separate browser for the dev/ scripts: the installed Chrome, Brave or Edge, headless and with its own
+// profile, with the extension installed the way the "Carregar sem compactação" (Load unpacked) button would.
 import { spawn, execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -7,7 +7,7 @@ import path from 'node:path';
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export const DASHBOARD = /^chrome-extension:\/\/[a-p]{32}\/ui\/dashboard\.html/;
 
-// --browser=caminho escolhe o navegador; sem ele, vale o primeiro instalado desta lista
+// --browser=path picks the browser; without it, the first one installed from this list is used
 export const findBrowser = (args) =>
   args.find((a) => a.startsWith('--browser='))?.slice(10) ||
   [
@@ -28,7 +28,7 @@ export function connect(wsUrl) {
     let n = 0;
     const pending = new Map();
     const events = [];
-    // a página pode fechar no meio de uma chamada (a extensão se recarrega): nenhuma espera é para sempre
+    // the page may close in the middle of a call (the extension reloads itself): no wait lasts forever
     const send = (method, params = {}) =>
       new Promise((res, rej) => {
         const id = ++n;
@@ -58,17 +58,17 @@ export function connect(wsUrl) {
   });
 }
 
-// Abre o navegador com o perfil dado. O perfil fica na pasta temporária do sistema: caminhos longos (mais
-// de 260 caracteres) impedem o navegador de abrir.
+// Opens the browser with the given profile. The profile lives in the system temp folder: long paths (over
+// 260 characters) keep the browser from starting.
 const children = [];
 export async function launch(browser, profile, extraArgs = []) {
-  const portFile = path.join(profile, 'DevToolsActivePort'); // o navegador escreve aqui a porta de depuração que escolheu
+  const portFile = path.join(profile, 'DevToolsActivePort'); // the browser writes the debugging port it picked here
   fs.rmSync(portFile, { force: true });
   const child = spawn(
     browser,
     [
       '--headless=new', '--remote-debugging-port=0', '--remote-allow-origins=*', `--user-data-dir=${profile}`,
-      // só a conexão por "pipe" instala extensão: o Chrome não aceita mais --load-extension
+      // only the "pipe" connection installs extensions: Chrome no longer accepts --load-extension
       '--remote-debugging-pipe', '--enable-unsafe-extension-debugging',
       '--no-first-run', '--no-default-browser-check', '--window-size=1400,1100', ...extraArgs, 'about:blank',
     ],
@@ -80,7 +80,7 @@ export async function launch(browser, profile, extraArgs = []) {
   const port = fs.readFileSync(portFile, 'utf8').split('\n')[0].trim();
   const api = (p, init) => fetch(`http://127.0.0.1:${port}${p}`, { ...init, signal: AbortSignal.timeout(10000) }).then((r) => r.json());
 
-  // comandos pelo pipe: mensagens JSON separadas por \0
+  // commands over the pipe: JSON messages separated by \0
   let buffer = '';
   let lastId = 0;
   const waiting = new Map();
@@ -101,7 +101,7 @@ export async function launch(browser, profile, extraArgs = []) {
     return Promise.race([answer, sleep(20000).then(() => Promise.reject(new Error(`${method}: sem resposta em 20 s`)))]);
   };
 
-  // Instala a extensão com o modo de desenvolvedor ligado: sem ele, o navegador a desativa quando ela se recarrega.
+  // Installs the extension with developer mode on: without it, the browser disables the extension when it reloads.
   const installUnpacked = async (dir) => {
     const tab = await api('/json/new?chrome://extensions', { method: 'PUT' });
     const settings = await connect(tab.webSocketDebuggerUrl);
@@ -110,7 +110,7 @@ export async function launch(browser, profile, extraArgs = []) {
     settings.close();
     return pipe('Extensions.loadUnpacked', { path: dir });
   };
-  // painel aberto pela própria extensão (ao instalar ou ao se atualizar); not = alvo antigo a ignorar
+  // dashboard opened by the extension itself (on install or on update); not = old target to ignore
   const dashboard = async ({ not, wait = 10000 } = {}) => {
     for (const end = Date.now() + wait; Date.now() < end; await sleep(250)) {
       const target = (await api('/json/list').catch(() => [])).find((t) => t.type === 'page' && DASHBOARD.test(t.url) && t.id !== not);
@@ -118,7 +118,7 @@ export async function launch(browser, profile, extraArgs = []) {
     }
     return null;
   };
-  // fecha com calma, para o navegador gravar o que tem em cache
+  // closes gracefully, so the browser saves what it has in cache
   const quit = async () => {
     const exited = new Promise((r) => child.once('exit', r));
     const all = await connect((await api('/json/version')).webSocketDebuggerUrl);

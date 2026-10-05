@@ -28,7 +28,7 @@ $('#scan').onclick = async () => {
   $('#msg').textContent = 'Busca iniciada: os sites são consultados direto, sem abrir aba. Leva menos de um minuto.';
 };
 
-// Roda na página aberta (qualquer site de vagas) e devolve o anúncio.
+// Runs on the open page (any job site) and returns the job posting.
 function grabPage() {
   const EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9-]+(?:\.[A-Z0-9-]+)*\.[A-Z]{2,}/gi;
   const picked = String(getSelection());
@@ -46,7 +46,7 @@ function grabPage() {
   };
 }
 
-// Formulário de candidatura em qualquer site: preenche o que souber, sem clicar em nada.
+// Application form on any site: fills in whatever it knows, without clicking anything.
 $('#fill').onclick = async () => {
   $('#msg').textContent = 'Preenchendo…';
   const res = await call('apply:fill');

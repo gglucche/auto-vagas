@@ -1,4 +1,4 @@
-// Simula a API chrome.* para abrir o painel fora da extensão (node dev/server.mjs).
+// Mocks the chrome.* API to open the dashboard outside the extension (node dev/server.mjs).
 (() => {
   const now = Date.now();
   const h = 3600e3;
@@ -10,7 +10,7 @@
     description: 'Buscamos pessoa desenvolvedora com experiência em Oracle APEX, PL/SQL, JavaScript e integrações REST.\n\nRequisitos:\n- Oracle APEX 20+\n- PL/SQL avançado\n- Git\n- Inglês técnico\n\nEnvie seu currículo para o e-mail informado.',
     ...o,
   });
-  // empresas, pessoas e endereços inventados
+  // made-up companies, people and addresses
   const jobs = [
     job('a1', { title: 'Desenvolvedor Oracle APEX Sênior', company: 'Alfa Sistemas', email: 'talentos@alfa.exemplo.com.br', fit: 88, aiDone: true,
       note: 'Perfil muito aderente: experiência direta com APEX e PL/SQL em projetos de grande porte.',
@@ -72,7 +72,7 @@
       return { ok: true, entry: { checkedAt: Date.now(), others: [],
         working: [{ id: 'openai/gpt-oss-120b', ok: true, ms: 820 }, { id: 'qwen/qwen3.8-27b', ok: true, ms: 610 }, { id: 'openai/gpt-oss-20b', ok: true, ms: 400 }],
         failed: [{ id: 'llama-3.3-70b-versatile', ok: false, reason: '(404): The model does not exist or you do not have access to it.' }] } };
-    // ?mismatch mostra o aviso de endereço não cadastrado no cliente OAuth
+    // ?mismatch shows the warning for a redirect URL not registered in the OAuth client
     if (m.type === 'gmail:connect' && new URLSearchParams(location.search).has('mismatch'))
       return { ok: false, error: 'O Google ainda não conhece o endereço desta extensão. No Google Cloud, abra Clientes → o seu cliente OAuth e, em “URIs de redirecionamento autorizados”, clique em “Adicionar URI”, cole https://abcdefghijklmnop.chromiumapp.org/ e salve. Pode levar alguns minutos para valer.' };
     if (m.type === 'scanNow') {

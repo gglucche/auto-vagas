@@ -1,5 +1,5 @@
-// Servidor de pré-visualização: abre o painel no navegador com a API chrome.* simulada.
-// Uso: node dev/server.mjs  →  http://localhost:5178/ui/dashboard.html  (?empty para o primeiro uso)
+// Preview server: opens the dashboard in the browser with the chrome.* API mocked.
+// Usage: node dev/server.mjs  →  http://localhost:5178/ui/dashboard.html  (?empty for the first-run state)
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';

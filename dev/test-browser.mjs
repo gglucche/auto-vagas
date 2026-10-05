@@ -1,13 +1,13 @@
-// Teste no navegador de verdade: instala a extensão em um Chrome, Brave ou Edge à parte (sem janela, com um
-// perfil temporário apagado no fim) e confere o que os testes simulados não alcançam: que ela abre sem erros,
-// o endereço de retorno do OAuth, o login do chrome.identity, a candidatura simplificada numa réplica da
-// janela do LinkedIn e a troca do código de fundo em cache.
+// Test in a real browser: installs the extension in a separate Chrome, Brave or Edge (headless, with a
+// temporary profile deleted at the end) and checks what the mocked tests cannot reach: that it opens without
+// errors, the OAuth redirect URL, the chrome.identity login, Easy Apply on a replica of the LinkedIn window,
+// and the replacement of the cached background code.
 //
-//   node dev/test-browser.mjs [id-do-cliente-oauth] [--live] [--browser=caminho-do-navegador]
+//   node dev/test-browser.mjs [oauth-client-id] [--live] [--browser=path-to-browser]
 //
-// Com o ID do cliente, também clica em "Conectar Gmail" e mostra o que a extensão responde depois de
-// consultar o Google. A consulta é anônima; o login em si só o usuário pode fazer, no navegador dele.
-// Com --live, faz uma busca pequena de verdade nos sites de vagas.
+// With the client ID, it also clicks "Conectar Gmail" and shows what the extension answers after querying
+// Google. The query is anonymous; only the user can do the actual login, in their own browser.
+// With --live, it runs a small real search on the job sites.
 import http from 'node:http';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -31,9 +31,9 @@ const check = (name, ok, detail = '') => {
 };
 const step = (msg) => process.env.AV_DEBUG && console.log('   ·', msg);
 
-// Réplica local da "Candidatura simplificada" do LinkedIn (rótulos, papéis e textos como os da página real,
-// em português): formulário em etapas dentro de um diálogo, validação a cada etapa e tela de confirmação.
-// tipo: 'simples' | 'pergunta' (tem uma pergunta que o perfil não responde) | 'externa' | 'ja'
+// Local replica of LinkedIn's "Candidatura simplificada" (Easy Apply), with labels, roles and texts as on the real
+// page, in Portuguese: a multi-step form inside a dialog, validation at each step and a confirmation screen.
+// kind: 'simples' | 'pergunta' (has a question the profile does not answer) | 'externa' | 'ja' (already applied)
 const easyApplyPage = (kind) => `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Vaga de teste</title>
 <style>.visually-hidden{position:absolute;clip:rect(0 0 0 0);width:1px;height:1px;overflow:hidden}[role=dialog]{border:1px solid #888;padding:16px;margin:16px;max-width:560px}</style></head>
 <body><main><h1>Desenvolvedor Oracle APEX</h1><p>Empresa X · Remoto</p>
@@ -103,14 +103,14 @@ function advance() {
     return;
   }
   step++;
-  setTimeout(render, 250); // a página real troca de etapa depois de uma chamada à rede
+  setTimeout(render, 250); // the real page moves to the next step after a network call
 }
 document.querySelector('.jobs-apply-button')?.addEventListener('click', () => ${JSON.stringify(kind !== 'externa')} && setTimeout(render, 300));
 </script></body></html>`;
 const KINDS = { 1: 'simples', 2: 'pergunta', 3: 'externa', 4: 'ja', 5: 'simples' };
-const submitted = []; // o que a réplica recebeu em cada candidatura enviada
+const submitted = []; // what the replica received for each submitted application
 
-// Servidor local: provedor de login de mentira (para exercitar chrome.identity sem depender de uma conta) e a vaga de teste.
+// Local server: a fake login provider (to exercise chrome.identity without needing an account) and the test job.
 let back = '';
 const provider = http.createServer((req, res) => {
   const view = /^\/jobs\/view\/(\d+)/.exec(req.url);
@@ -134,7 +134,7 @@ await new Promise((r) => provider.listen(0, '127.0.0.1', r));
 
 const work = fs.mkdtempSync(path.join(os.tmpdir(), 'av-'));
 try {
-  // ---------- 1) a extensão desta pasta, como o usuário a carrega ----------
+  // ---------- 1) the extension from this folder, as the user loads it ----------
   const b = await launch(browser, path.join(work, 'perfil'));
   await b.installUnpacked(root);
   console.log('Navegador:', (await b.api('/json/version')).Browser, '—', path.basename(browser), '\n');
@@ -147,7 +147,7 @@ try {
 
   await page.send('Runtime.enable');
   await page.send('Page.enable');
-  await page.send('Page.reload'); // recarrega com o registro ligado, para pegar erro de script na abertura
+  await page.send('Page.reload'); // reloads with logging on, to catch script errors at load time
   await sleep(2500);
   const errors = page.events.filter((e) => e.method === 'Runtime.exceptionThrown').map((e) => e.params.exceptionDetails.exception?.description || e.params.exceptionDetails.text);
   check('painel abre sem erros de script', errors.length === 0, errors.join(' | '));
@@ -157,7 +157,7 @@ try {
   const shown = await page.evaluate(`document.querySelector('#redirectUri').textContent`);
   check('endereço de retorno mostrado no passo 3 é o que o navegador usa', shown === back && back === `https://${id}.chromiumapp.org/`, JSON.stringify([shown, back]));
 
-  // login silencioso (renovação do token), com as opções que a extensão usa
+  // silent login (token renewal), with the options the extension uses
   const base = `http://127.0.0.1:${provider.address().port}/`;
   const flow = (route, options = 'SILENT_FLOW') =>
     page.evaluate(`(async () => {
@@ -177,7 +177,7 @@ try {
   r = await flow('nada');
   check('login silencioso: página que não responde é abandonada em 8 s', !!r.error && r.ms > 7000 && r.ms < 12000, JSON.stringify(r));
 
-  // janela de login esquecida aberta (página que nunca responde): o navegador só mantém uma
+  // login window left open (a page that never answers): the browser keeps only one
   await page.evaluate(`void chrome.identity.launchWebAuthFlow({ url: '${base}nada', interactive: true }).catch(() => {})`);
   await sleep(2000);
   r = await flow('direto', '{ interactive: true }');
@@ -195,7 +195,7 @@ try {
   check('fechada a janela, o login com janela volta a funcionar', r.url?.includes('access_token=FALSO_DIRETO'), JSON.stringify(r));
 
   if (args.includes('--live')) {
-    // Busca de verdade, feita pelo service worker nos sites reais (poucas consultas: 2 termos, 5 vagas por termo em cada site).
+    // Real search, run by the service worker on the real sites (few queries: 2 terms, 5 jobs per term on each site).
     const t0 = Date.now();
     await page.evaluate(
       `chrome.storage.local.set({ settings: { keywords: 'Oracle APEX, Consultor Oracle', location: 'Brasil', remoteOnly: true, srcLinkedinJobs: true, srcBoards: true, srcLinkedinPosts: false, srcGoogle: false, maxPerSearch: 5 } }).then(() => chrome.runtime.sendMessage({ type: 'scanNow' }))`
@@ -220,7 +220,7 @@ try {
 
   let connectReport = '';
   if (clientId) {
-    // cola o ID do cliente e clica em Conectar, como o usuário faria
+    // pastes the client ID and clicks Conectar, as the user would
     await page.evaluate(`(() => {
       const input = document.querySelector('[data-key="gmailClientId"]');
       input.value = ${JSON.stringify(clientId)};
@@ -242,8 +242,8 @@ try {
   page.close();
   killAll();
 
-  // ---------- 2) código de fundo antigo guardado pelo navegador ----------
-  // Uma cópia da extensão, para poder mudar os arquivos "no disco" como acontece a cada correção.
+  // ---------- 2) old background code kept by the browser ----------
+  // A copy of the extension, so the files can be changed "on disk" the way it happens with every fix.
   const copy = path.join(work, 'ext');
   fs.cpSync(root, copy, { recursive: true, filter: (src) => !['dev', '.git', '.claude', 'node_modules'].includes(path.relative(root, src).split(path.sep)[0]) });
   const setBuild = (version) => {
@@ -272,7 +272,7 @@ try {
   await sleep(1500);
   const first = await running(dash);
 
-  // ---------- candidatura simplificada, do clique no painel até o envio, em uma réplica da janela do LinkedIn ----------
+  // ---------- Easy Apply, from the click in the dashboard to submission, on a replica of the LinkedIn window ----------
   await dash.evaluate(`(async () => {
     const { textToPdf, pdfToB64 } = await import(chrome.runtime.getURL('lib/pdf.js'));
     const job = (n) => ({ id: 'e' + n, dupKey: 'e' + n, source: 'linkedin_jobs', title: 'Vaga de teste ' + n, company: 'Empresa X', location: 'Remoto', url: '${base}jobs/view/' + n, description: 'Oracle APEX', emails: [], email: '', status: 'sem_email', easyApply: true, foundAt: Date.now(), tags: [] });
@@ -314,7 +314,7 @@ try {
   check('em lote: vaga com candidatura no site da empresa fica marcada assim, e vaga já candidatada vira candidatura feita',
     outside.easyApply === false && outside.status === 'sem_email' && already.status === 'enviado' && /já tinha se candidatado/.test(already.note || ''), JSON.stringify([outside.easyApply, outside.error, already.status, already.note]));
 
-  // modo conferir: preenche tudo e espera o usuário clicar em Enviar
+  // review mode: fills everything in and waits for the user to click Enviar (Submit)
   await dash.evaluate(`chrome.storage.local.get('settings').then(({ settings }) => chrome.storage.local.set({ settings: { ...settings, applyReview: true } }))`);
   await applyTo(['e5']);
   job = await waitJob('e5', (x) => x.applyState === 'revisar' || x.status === 'enviado');
@@ -328,18 +328,18 @@ try {
   job = await waitJob('e5', (x) => x.status === 'enviado', 30000);
   check('quando o usuário clica em Enviar na página, a extensão registra a candidatura', job.status === 'enviado' && !!sentFor(5), JSON.stringify([job.status, job.applyState]));
 
-  setBuild('9.9.8'); // correção chega aos arquivos; o navegador continua com o código de fundo que guardou
-  await dash.send('Page.reload').catch(() => {}); // o usuário aperta F5 no painel
+  setBuild('9.9.8'); // a fix lands in the files; the browser keeps running the background code it stored
+  await dash.send('Page.reload').catch(() => {}); // the user presses F5 on the dashboard
   let fresh = await c.dashboard({ not: dash.target.id, wait: 20000 });
   let note = fresh ? await toastOf(fresh) : '';
   check('arquivos mudaram e o painel foi recarregado (F5): a extensão se atualiza e reabre o painel sozinha', note.includes(`da versão ${first} para a 9.9.8`), JSON.stringify([first, note]));
   check('depois disso o código de fundo é o novo', fresh && (await running(fresh)) === '9.9.8');
 
-  await c.quit(); // o usuário fecha o navegador…
-  setBuild('9.9.9'); // …os arquivos mudam de novo…
-  c = await launch(browser, path.join(work, 'perfil2')); // …e ele abre o navegador outra vez
-  await c.api('/json/new?' + encodeURI(fresh.target.url.split('#')[0]), { method: 'PUT' }); // e o painel
-  // Procura um painel que responda com o código de fundo novo (abas restauradas da sessão anterior não respondem).
+  await c.quit(); // the user closes the browser…
+  setBuild('9.9.9'); // …the files change again…
+  c = await launch(browser, path.join(work, 'perfil2')); // …and they open the browser again
+  await c.api('/json/new?' + encodeURI(fresh.target.url.split('#')[0]), { method: 'PUT' }); // and the dashboard
+  // Looks for a dashboard answering with the new background code (tabs restored from the last session don't answer).
   let seen = null;
   for (const end = Date.now() + 30000; Date.now() < end && !seen; await sleep(500)) {
     for (const t of (await c.api('/json/list').catch(() => [])).filter((x) => x.type === 'page' && DASHBOARD.test(x.url))) {

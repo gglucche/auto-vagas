@@ -20,13 +20,13 @@ async function openDashboard() {
 }
 
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
-  // migração do formato antigo (todas as vagas em uma chave só)
+  // migration from the old format (all jobs under a single key)
   const { jobs } = await chrome.storage.local.get('jobs');
   if (jobs) {
     await putJobs(Object.values(jobs));
     await chrome.storage.local.remove('jobs');
   }
-  // 0.6.0: a busca passou a ser por consulta direta. As fontes que abrem janela ficam desligadas até o usuário religar.
+  // 0.6.0: search switched to direct queries. Sources that open a window stay off until the user turns them back on.
   const { migrated = {}, settings: saved } = await chrome.storage.local.get(['migrated', 'settings']);
   if (!migrated.directSearch) {
     if (saved && (saved.srcLinkedinPosts || saved.srcGoogle)) {
@@ -37,7 +37,7 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   }
   setupAlarms();
   refreshBadge();
-  // autoReload: o painel pediu a atualização da extensão (ui/fresh.js) e foi fechado por ela
+  // autoReload: the dashboard asked for the extension update (ui/fresh.js) and was closed by it
   const { autoReload } = await chrome.storage.local.get('autoReload');
   if (reason === 'install' || Date.now() - (autoReload?.at || 0) < 60_000) openDashboard();
   if (reason === 'update') retryFailed(true);
@@ -50,7 +50,7 @@ async function setupAlarms() {
   await chrome.alarms.clear('scan');
   const mins = Number(s.scanEveryHours) * 60;
   if (mins > 0) chrome.alarms.create('scan', { periodInMinutes: mins, delayInMinutes: mins });
-  // Rede de segurança: retoma a fila se o service worker for encerrado no meio.
+  // Safety net: resumes the queue if the service worker is shut down midway.
   chrome.alarms.create('queue', { periodInMinutes: 1 });
 }
 
@@ -58,7 +58,7 @@ chrome.alarms.onAlarm.addListener((a) => {
   if (a.name === 'scan') runScan();
   if (a.name === 'queue') {
     processQueue();
-    runApply(); // retoma candidaturas pelo site que ficaram na fila
+    runApply(); // resumes website applications left in the queue
   }
 });
 
@@ -68,19 +68,19 @@ async function refreshBadge() {
   chrome.action.setBadgeText({ text: n ? String(n) : '' });
 }
 
-// ---------- Varredura ----------
+// ---------- Scan ----------
 
-// A busca é feita por consulta HTTP direta às fontes de lib/sources.js: cada termo vira uma busca própria
-// em cada fonte, as fontes correm em paralelo, e nada abre aba nem usa a conta do usuário. As duas fontes
-// que só existem dentro de uma página (posts do LinkedIn e vagas do Google) são opcionais e abrem uma janela.
+// Search runs as direct HTTP queries to the sources in lib/sources.js: each term becomes a search of its own
+// in each source, sources run in parallel, and nothing opens a tab or uses the user's account. The two sources
+// that only exist inside a page (LinkedIn posts and Google Jobs) are optional and open a window.
 const PAGE_LABEL = { linkedin_post: 'Posts do LinkedIn', google_jobs: 'Vagas do Google' };
 
-// "Qualquer lugar", "remoto" e afins não são um lugar: no Google viram ruído, e o LinkedIn os entende como
-// nome de cidade. Sem lugar definido, a busca vale para o país do idioma do navegador.
+// "Qualquer lugar" (anywhere), "remoto" (remote) and the like are not places: on Google they become noise, and
+// LinkedIn reads them as a city name. With no place set, the search covers the country of the browser's language.
 const ANYWHERE = /^(qualquer( lugar)?|anywhere|remoto|remote|home ?office)$/i;
 const WORLDWIDE = /^(mundo( todo)?|mundialmente|worldwide|global|internacional)$/i;
 const homeCountry = () => ({ 'pt-br': 'Brasil', 'pt-pt': 'Portugal' })[(chrome.i18n?.getUILanguage?.() || '').toLowerCase()];
-// Senioridade e conectivos só estreitam a busca de posts, que exige todas as palavras.
+// Seniority words and connectives only narrow the posts search, which requires every word.
 const coreTerms = (kw) => kw.replace(/\b(s[êe]nior|pleno|j[úu]nior|jr|sr)\b\.?/gi, ' ').replace(/\s+(e|and|&)\s+/gi, ' ').replace(/\s+/g, ' ').trim();
 
 function pageSearches(s, terms) {
@@ -123,7 +123,7 @@ async function askContent(tabId, msg) {
         sleep(5 * 60_000).then(() => ({ ok: false, error: 'tempo esgotado' })),
       ]);
     } catch (e) {
-      lastErr = e; // content script ainda não carregou
+      lastErr = e; // content script not loaded yet
       await sleep(1000);
     }
   }
@@ -134,12 +134,12 @@ const scan = { running: false, stop: false, i: 0, total: 0, label: '', keyword: 
 const publishScan = (extra = {}) =>
   chrome.storage.local.set({ scan: { running: scan.running, i: scan.i, total: scan.total, label: scan.label, found: scan.found, ...extra } });
 
-// Se o service worker reiniciou no meio de uma busca, o estado salvo ficaria preso em "rodando".
+// If the service worker restarted in the middle of a search, the saved state would be stuck at "running".
 chrome.storage.local.get('scan').then(({ scan: saved }) => {
   if (saved?.running && !scan.running) chrome.storage.local.set({ scan: { ...saved, running: false } });
 });
 
-// Região do LinkedIn para o lugar das configurações. Fica guardada: muda pouco e custa uma consulta.
+// LinkedIn region for the location in the settings. It is cached: it rarely changes and costs a lookup.
 async function linkedinPlace(text) {
   text = text.trim();
   if (!text || ANYWHERE.test(text)) text = homeCountry() || '';
@@ -151,7 +151,7 @@ async function linkedinPlace(text) {
   return place;
 }
 
-// País da busca do jeito que as fontes internacionais escrevem; '' = qualquer país.
+// The search country as the international sources write it; '' = any country.
 const COUNTRY = { brasil: 'Brazil', portugal: 'Portugal', 'estados unidos': 'United States', espanha: 'Spain', argentina: 'Argentina', mexico: 'Mexico', canada: 'Canada', alemanha: 'Germany', 'reino unido': 'United Kingdom' };
 function countryOf(place) {
   if (place.geoId === WORLD.geoId) return '';
@@ -169,21 +169,21 @@ async function pool(items, size, fn) {
   }));
 }
 
-// Por que uma vaga lida não entra no painel ('' = entra). Os sites devolvem muita coisa só "parecida".
+// Why a job that was read stays out of the dashboard ('' = it gets in). Sites return a lot that is only "similar".
 function rejection(term, card, ctx, s) {
   if (!card.title) return 'sem título';
   if (tooOld(card)) return 'antiga';
   const text = `${card.title}\n${card.description || ''}`;
   if (ctx.remoteOnly && !(card.remote ?? extractTags(`${text}\n${card.location || ''}`).includes('Remoto'))) return 'não é remota';
   if (!relevant(term, card)) return 'fora do termo';
-  // cita o termo só de passagem e pouco tem a ver com o currículo
+  // mentions the term only in passing and has little to do with the resume
   const fit = localFit(text, s.resumeText, s.skills);
   if (fit && fit.fit < 35 && !inTitle(term, card)) return 'pouca aderência';
   return '';
 }
 
-// Uma busca: um termo em uma fonte. Lê a lista, completa a descrição só do que ainda não foi visto,
-// filtra e guarda. state é compartilhado pela busca inteira (o que já está no painel, o que já foi recusado).
+// One search: one term in one source. Reads the list, fills in the description only for jobs not seen yet,
+// filters and stores. state is shared by the whole scan (what is already on the dashboard, what was already rejected).
 async function scanSource(src, term, ctx, state, s) {
   const stat = state.stats[src.id];
   const cards = (await src.list(term, ctx)).slice(0, ctx.max);
@@ -198,14 +198,14 @@ async function scanSource(src, term, ctx, state, s) {
       try {
         for (const [k, v] of Object.entries(await src.details(card))) if (v) card[k] = v;
       } catch (e) {
-        card.skipped = true; // fica para a próxima busca
+        card.skipped = true; // left for the next search
         if (e.limited) state.off[src.id] = stat.error = e.message;
       }
     });
   const jobs = [];
   for (const card of fresh) {
     if (card.skipped) continue;
-    state.seen[seenKey(card)] = Date.now(); // lida: recusada, guardada ou repetida de outro site, não vale consultar de novo
+    state.seen[seenKey(card)] = Date.now(); // read: rejected, stored or a repeat from another site; not worth querying again
     if (rejection(term, card, ctx, s)) continue;
     const description = (card.description || '').slice(0, 8000);
     const emails = [...new Set((description.match(EMAIL_RE) || []).map((e) => e.toLowerCase()))];
@@ -242,7 +242,7 @@ async function runScan() {
         off: {},
       };
       const base = { geoId: place.geoId, country: countryOf(place), remoteOnly: s.remoteOnly, max };
-      // fontes em paralelo; dentro de cada fonte, um termo por vez (para não apressar nenhum site)
+      // sources in parallel; within each source, one term at a time (so as not to rush any site)
       await Promise.all(
         sources.map(async (src) => {
           for (const term of terms) {
@@ -250,7 +250,7 @@ async function runScan() {
               scan.label = `${src.label} · ${term}`;
               scan.keyword = term;
               publishScan();
-              // LinkedIn: a primeira busca de cada termo olha 30 dias para trás; as seguintes, o tempo desde a anterior
+              // LinkedIn: the first search for each term looks back 30 days; later ones, the time since the previous one
               const key = `${term}|${place.geoId}|${s.remoteOnly}`;
               const seconds = liScanAt[key] ? Math.min(30 * 86400, Math.max(86400, (Date.now() - liScanAt[key]) / 1000 + 3600)) : 30 * 86400;
               try {
@@ -280,7 +280,7 @@ async function runScan() {
       Object.assign(scan, { keyword: search.keyword, label: `${PAGE_LABEL[search.source]} · ${search.keyword}` });
       await publishScan();
       if (!scan.winId) {
-        // Janela própria: abas em segundo plano não carregam as listas.
+        // Dedicated window: background tabs don't load the lists.
         const win = await chrome.windows.create({ url: 'about:blank', focused: false, width: 1250, height: 900 });
         scan.winId = win.id;
         tabId = win.tabs[0].id;
@@ -302,7 +302,7 @@ async function runScan() {
     scan.i = scan.total;
     await publishScan({ last: Date.now() });
     if (scan.winId) chrome.windows.remove(scan.winId).catch(() => {});
-    // devolve o foco à janela em que o usuário estava, se a busca precisou vir para a frente
+    // give focus back to the window the user was in, if the search had to come to the front
     if (scan.stoleFocus && before?.id) chrome.windows.update(before.id, { focused: true }).catch(() => {});
   }
   if (s.notify && scan.found)
@@ -315,8 +315,8 @@ async function runScan() {
   processQueue();
 }
 
-// As fontes correm em paralelo: as entradas no painel passam uma de cada vez, para a mesma vaga vinda de
-// dois sites não ser guardada duas vezes.
+// Sources run in parallel: additions to the dashboard go through one at a time, so the same job coming from
+// two sites is not stored twice.
 let adding = Promise.resolve();
 function addJobs(found, keyword) {
   const run = adding.then(() => storeJobs(found, keyword));
@@ -340,7 +340,7 @@ async function storeJobs(found, keyword) {
   for (const f of found) {
     const emails = (f.emails || []).filter(okEmail);
     const id = hashId(f.source === 'linkedin_post' ? `${emails[0] || ''}|${f.title}` : f.url);
-    // mesma vaga costuma aparecer em mais de uma fonte
+    // the same job often shows up in more than one source
     const dupKey = f.source === 'linkedin_post' ? id : normKey(f.title, f.company);
     if (ids.has(id) || dups.has(dupKey)) continue;
     const head = `${f.title} ${f.company}`.toLowerCase();
@@ -365,7 +365,7 @@ async function storeJobs(found, keyword) {
   return { added: fresh.length };
 }
 
-// Currículo ou habilidades mudaram: refaz a aderência local das vagas em aberto (a nota dada pela IA fica).
+// Resume or skills changed: recomputes the local fit of open jobs (the score given by the AI is kept).
 let fitBasis = null;
 async function recalcFit() {
   const s = await getSettings();
@@ -379,7 +379,7 @@ async function recalcFit() {
   }
 }
 
-// ---------- Modelos de IA: quais respondem com a chave do usuário ----------
+// ---------- AI models: which ones respond with the user's key ----------
 
 const MODELS_TTL = 24 * 3600e3;
 async function workingModels(s, force = false) {
@@ -393,7 +393,7 @@ async function workingModels(s, force = false) {
   return entry;
 }
 
-// Configurações prontas para chamar a IA: sem modelo escolhido, usa o melhor que respondeu ao teste.
+// Settings ready for calling the AI: with no model chosen, uses the best one that responded to the test.
 async function aiSettings(force = false) {
   const s = await getSettings();
   const p = providerOf(s);
@@ -406,7 +406,7 @@ async function aiSettings(force = false) {
   return { ...s, [p.modelField]: entry.working[0].id };
 }
 
-// Chama a IA; se o modelo deixou de existir ou a chave perdeu o acesso, troca pelo melhor disponível e repete.
+// Calls the AI; if the model is gone or the key lost access, switches to the best available one and retries.
 async function withAi(fn) {
   const s = await aiSettings();
   try {
@@ -417,13 +417,13 @@ async function withAi(fn) {
     const bad = s[p.modelField];
     const fresh = await aiSettings(true);
     if (fresh[p.modelField] === bad) throw e;
-    if ((await getSettings())[p.modelField]) await setSettings({ [p.modelField]: '' }); // volta para a escolha automática
+    if ((await getSettings())[p.modelField]) await setSettings({ [p.modelField]: '' }); // back to automatic selection
     await log(`${p.label}: o modelo ${bad} não está disponível para esta chave; passei a usar ${fresh[p.modelField]}.`);
     return fn(fresh);
   }
 }
 
-// ---------- Preparação (template ou IA) ----------
+// ---------- Preparation (template or AI) ----------
 
 const getResumePdf = async () => (await chrome.storage.local.get('resumePdf')).resumePdf;
 
@@ -443,7 +443,7 @@ async function prepare(id, { forceAi = false } = {}) {
           }
         : { status: 'ignorado', note: r.reason || 'A IA avaliou que não é um anúncio de vaga.', error: '' };
     } catch (e) {
-      // "Adaptar com IA" manual não tira a vaga de onde está; só mostra o erro.
+      // A manual "Adaptar com IA" (Tailor with AI) leaves the job where it is; it only shows the error.
       patch = forceAi && job.status !== 'novo' ? { error: e.message } : { status: 'erro', error: e.message, errorBasis: aiBasis(s) };
     }
   } else {
@@ -452,8 +452,8 @@ async function prepare(id, { forceAi = false } = {}) {
   await patchJob(id, patch);
 }
 
-// Vaga que falhou na preparação por IA (ficou sem assunto) volta para a fila quando há motivo para dar
-// certo agora: a extensão foi atualizada (all) ou a configuração da IA mudou desde a falha.
+// A job whose AI preparation failed (left with no subject) goes back to the queue when there is reason for it
+// to work now: the extension was updated (all) or the AI configuration changed since the failure.
 const aiBasis = (s) => hashId([s.mode, s.provider, aiKey(s), s[providerOf(s).modelField]].join('|'));
 async function retryFailed(all = false) {
   const basis = aiBasis(await getSettings());
@@ -466,7 +466,7 @@ async function retryFailed(all = false) {
   if (retried) processQueue();
 }
 
-// ---------- Envio ----------
+// ---------- Sending ----------
 
 const today = () => new Date().toLocaleDateString('sv');
 async function sentToday() {
@@ -505,7 +505,7 @@ async function followUp(id, body) {
   await log(`Follow-up enviado para ${job.email} — ${job.title}`);
 }
 
-// A fila tenta de novo a cada minuto: registra e avisa a pausa uma vez só.
+// The queue retries every minute: the pause is logged and notified only once.
 async function pauseSending(reason) {
   const msg = `Envio pausado: ${reason}`;
   const { log: [last] = [] } = await chrome.storage.local.get('log');
@@ -515,7 +515,7 @@ async function pauseSending(reason) {
 }
 
 let busy = false;
-let again = false; // alguém pediu a fila enquanto ela rodava
+let again = false; // someone asked for the queue while it was running
 async function processQueue() {
   if (busy) {
     again = true;
@@ -525,8 +525,8 @@ async function processQueue() {
   try {
     const tried = new Set();
     for (;;) {
-      // 1) prepara vagas novas (inclusive as que chegaram durante um envio): 3 por vez,
-      //    ou uma de cada vez quando a IA é de cota gratuita, para não estourar o limite por minuto
+      // 1) prepare new jobs (including those that arrived during a send): 3 at a time,
+      //    or one at a time when the AI is on a free quota, so as not to exceed the per-minute limit
       const cfg = await getSettings();
       const batch = cfg.mode === 'ai' && providerOf(cfg).serial ? 1 : 3;
       for (;;) {
@@ -537,20 +537,20 @@ async function processQueue() {
         refreshBadge();
       }
 
-      // 2) piloto automático: vagas prontas com aderência suficiente entram na fila
+      // 2) autopilot: ready jobs with enough fit go into the queue
       const s = await getSettings();
       if (s.autoSend)
         for (const j of await getJobs())
           if (j.status === 'pronto' && (j.fit == null || j.fit >= Number(s.minFit))) await patchJob(j.id, { status: 'fila', queuedAt: Date.now() });
 
-      // 3) envia uma da fila, respeitando o limite diário, e volta ao passo 1
+      // 3) send one from the queue, respecting the daily limit, and go back to step 1
       if ((await sentToday()) >= Number(s.dailyLimit)) break;
       const next = (await getJobs()).filter((j) => j.status === 'fila').sort((a, b) => (a.queuedAt || 0) - (b.queuedAt || 0))[0];
       if (!next) break;
       try {
         await send(next.id, { interactive: false });
       } catch (e) {
-        // Problema de login/configuração não é culpa da vaga: mantém na fila e avisa.
+        // A login/configuration problem is not the job's fault: keep it in the queue and warn.
         if (e.setup) {
           await pauseSending(e.message);
           break;
@@ -569,14 +569,14 @@ async function processQueue() {
   }
 }
 
-// ---------- Candidatura no site: "Candidatura simplificada" do LinkedIn e formulários ----------
-// O formulário é preenchido na própria página (content/apply.js), em uma janela à vista do usuário, com a
-// conta dele. As respostas saem só do que ele informou (lib/answers.js): pergunta sem resposta para a
-// candidatura e vai para o painel, para ser respondida uma vez.
+// ---------- Website applications: LinkedIn's "Candidatura simplificada" (Easy Apply) and forms ----------
+// The form is filled in on the page itself (content/apply.js), in a window the user can see, with their own
+// account. Answers come only from what they provided (lib/answers.js): an unanswered question stops the
+// application and goes to the dashboard, to be answered once.
 
 const applying = { running: false, stop: false, batch: false, winId: null, tabId: null, keepOpen: false, waiters: new Map() };
 
-// Candidaturas feitas pelo site hoje: limite próprio, separado do de e-mails.
+// Website applications made today: their own limit, separate from the email one.
 async function appliedToday() {
   const { applyLog } = await chrome.storage.local.get('applyLog');
   return applyLog?.date === today() ? applyLog.count : 0;
@@ -588,11 +588,11 @@ async function openApplyTab(url) {
       await chrome.tabs.update(applying.tabId, { url });
       await chrome.windows.update(applying.winId, { focused: true });
     } catch {
-      applying.winId = null; // o usuário fechou a janela
+      applying.winId = null; // the user closed the window
     }
   }
   if (applying.winId == null) {
-    // janela própria e à frente: a página só monta o formulário quando está visível
+    // dedicated window in the foreground: the page only builds the form when it is visible
     const win = await chrome.windows.create({ url, focused: true, width: 1180, height: 920 });
     applying.winId = win.id;
     applying.tabId = win.tabs[0].id;
@@ -606,7 +606,7 @@ async function runInPage(tabId, msg) {
   return Promise.race([chrome.tabs.sendMessage(tabId, msg), sleep(5 * 60_000).then(() => ({ status: 'erro', error: 'tempo esgotado' }))]);
 }
 
-// Perguntas que pararam uma candidatura por falta de resposta: o painel mostra para o usuário responder uma vez.
+// Questions that stopped an application for lack of an answer: the dashboard shows them so the user answers once.
 async function rememberPending(questions, job) {
   const { applyPending = [] } = await chrome.storage.local.get('applyPending');
   for (const q of questions || []) {
@@ -627,7 +627,7 @@ async function markApplied(id, note = '') {
   }
 }
 
-// Uma candidatura. Devolve false quando a fila deve parar (o usuário ficou de conferir e não enviou).
+// One application. Returns false when the queue must stop (the user was going to review it and did not submit).
 async function applyOne(id, s) {
   const job = await getJob(id);
   if (!job || job.status === 'enviado') return true;
@@ -643,7 +643,7 @@ async function applyOne(id, s) {
     if (e.setup) throw e;
     res = { status: 'erro', error: e.message };
   }
-  // retrato do formulário (sem respostas) quando não chegou ao fim: serve para ajustar o preenchimento
+  // snapshot of the form (without answers) when it did not reach the end: helps tune the form filling
   if (res?.debug) await patchJob(id, { applyDebug: { status: res.status, at: Date.now(), ...res.debug } });
   switch (res?.status) {
     case 'enviada':
@@ -653,7 +653,7 @@ async function applyOne(id, s) {
       await markApplied(id, 'Você já tinha se candidatado a esta vaga no LinkedIn.');
       break;
     case 'revisar': {
-      // preenchida até o fim: o usuário confere e clica em Enviar na janela do LinkedIn
+      // filled to the end: the user reviews it and clicks Enviar (Submit) in the LinkedIn window
       await patchJob(id, { applyState: 'revisar' });
       applying.keepOpen = true;
       const sent = await Promise.race([new Promise((r) => applying.waiters.set(id, r)), sleep(10 * 60_000).then(() => false)]);
@@ -666,7 +666,7 @@ async function applyOne(id, s) {
     case 'pendente':
       await rememberPending(res.questions, job);
       await patchJob(id, { applyState: 'pendente', error: `Falta responder: ${(res.questions || []).map((q) => `“${q.label}”`).join(', ') || 'um campo do formulário'}. Responda em Configurações → Candidatura no site e clique em Candidatar de novo.` });
-      applying.keepOpen = !applying.batch; // fora do lote, o formulário fica aberto para o usuário terminar
+      applying.keepOpen = !applying.batch; // outside a batch, the form stays open for the user to finish
       break;
     case 'externa':
       await patchJob(id, { easyApply: false, applyState: '', error: 'Esta vaga não tem candidatura simplificada: a candidatura é feita no site da empresa.' });
@@ -691,7 +691,7 @@ async function runApply() {
       const s = await getSettings();
       const limit = Number(s.applyDailyLimit) || 20;
       if ((await appliedToday()) >= limit) {
-        // a fila é retomada a cada minuto: registra uma vez só
+        // the queue resumes every minute: log it only once
         const msg = `Candidaturas pelo site: limite de ${limit} por dia atingido; as demais ficam na fila para amanhã.`;
         const { log: [last] = [] } = await chrome.storage.local.get('log');
         if (last?.msg !== msg) await log(msg);
@@ -702,7 +702,7 @@ async function runApply() {
       try {
         go = await applyOne(id, s);
       } catch (e) {
-        // sem login não adianta insistir: esvazia a fila e avisa
+        // without a login there is no point in retrying: empty the queue and warn
         await chrome.storage.local.set({ applyQueue: [] });
         for (const queued of applyQueue) await patchJob(queued, { applyState: '', ...(queued === id && { error: `Candidatura no LinkedIn: ${e.message}.` }) });
         await log(`Candidaturas pelo site pausadas: ${e.message}.`);
@@ -711,7 +711,7 @@ async function runApply() {
       const { applyQueue: now = [] } = await chrome.storage.local.get('applyQueue');
       await chrome.storage.local.set({ applyQueue: now.filter((x) => x !== id) });
       if (!go) break;
-      if (now.length > 1 && !applying.stop) await sleep(6000 + Math.random() * 8000); // sem pressa entre uma candidatura e outra
+      if (now.length > 1 && !applying.stop) await sleep(6000 + Math.random() * 8000); // no rush between applications
     }
   } finally {
     applying.running = false;
@@ -723,7 +723,7 @@ async function runApply() {
   }
 }
 
-// ---------- Mensagens (content script, popup e painel) ----------
+// ---------- Messages (content script, popup and dashboard) ----------
 
 const handlers = {
   jobsFound: (m) => addJobs(m.jobs, scan.keyword),
@@ -735,7 +735,7 @@ const handlers = {
   scanStop: () => {
     scan.stop = true;
   },
-  // A página da busca está escondida atrás de outra janela e não carrega as listas: traz a janela para a frente.
+  // The search page is hidden behind another window and does not load the lists: bring the window to the front.
   scanHidden: async () => {
     if (!scan.winId) return;
     scan.stoleFocus = true;
@@ -751,7 +751,7 @@ const handlers = {
   'gmail:connect': async () => {
     const s = await getSettings();
     await connectGmail(s.gmailClientId, s.email);
-    processQueue(); // o que estava parado por falta de login volta a sair
+    processQueue(); // whatever was held up for lack of a login starts going out again
   },
   'gmail:test': async () => {
     const s = await getSettings();
@@ -760,7 +760,7 @@ const handlers = {
     const attachment = await buildAttachment(null, s).catch(() => undefined);
     await sendEmail(token, { to: s.email, subject: 'Teste do Auto Vagas', body: 'Se você recebeu este e-mail, o envio está funcionando.', attachment });
   },
-  // ---- candidatura no site ----
+  // ---- website application ----
   'apply:start': async (m) => {
     const { applyQueue = [] } = await chrome.storage.local.get('applyQueue');
     const ids = m.ids.filter((id) => !applyQueue.includes(id));
@@ -776,13 +776,13 @@ const handlers = {
     await chrome.storage.local.set({ applyQueue: [] });
     for (const id of applyQueue) if ((await getJob(id))?.applyState === 'fila') await patchJob(id, { applyState: '' });
   },
-  // a página pergunta o que pôr em cada campo
+  // the page asks what to put in each field
   'apply:answers': async (m) => {
     const settings = await getSettings();
     const job = m.jobId ? await getJob(m.jobId) : null;
     return { answers: m.questions.map((q) => answerFor(q, { settings, job })) };
   },
-  // o usuário respondeu à mão na página: vale para as próximas candidaturas
+  // the user answered by hand on the page: it applies to future applications
   'apply:learn': async (m) => {
     const { applyAnswers = {} } = await getSettings();
     const { applyPending = [] } = await chrome.storage.local.get('applyPending');
@@ -796,13 +796,13 @@ const handlers = {
     await setSettings({ applyAnswers });
     await chrome.storage.local.set({ applyPending: applyPending.filter((p) => !keys.includes(p.key)) });
   },
-  // o usuário concluiu na página uma candidatura que tinha parado
+  // on the page, the user finished an application that had stopped
   'apply:done': async (m) => {
     const waiting = applying.waiters.get(m.jobId);
     if (waiting) waiting(true);
     else await markApplied(m.jobId);
   },
-  // botão "Preencher esta página" do popup: qualquer formulário, sem clicar em nada
+  // the popup's "Preencher esta página" (Fill this page) button: any form, without clicking anything
   'apply:fill': async () => {
     const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
     if (!tab?.id) throw new Error('Abra a página do formulário e clique de novo.');
@@ -831,7 +831,7 @@ const handlers = {
   'job:patch': async (m) => {
     const before = await getJob(m.id);
     await patchJob(m.id, m.patch);
-    // vaga sem e-mail que ganhou um endereço entra no fluxo de revisão
+    // a job with no email that got an address enters the review flow
     if (before?.status === 'sem_email' && m.patch.email) {
       await patchJob(m.id, { status: before.subject ? 'pronto' : 'novo' });
       processQueue();

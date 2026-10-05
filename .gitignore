@@ -1,14 +1,14 @@
-# Pacote da extensão e a chave que o navegador gera ao empacotar (a .pem é privada)
+# Packaged extension and the key the browser generates when packing it (the .pem is private)
 *.crx
 *.pem
 *.zip
 
-# Credenciais do Google Cloud e variáveis locais
+# Google Cloud credentials and local environment variables
 client_secret*.json
 .env
 .env.*
 
-# Dependências e arquivos do sistema
+# Dependencies and operating system files
 node_modules/
 *.log
 Thumbs.db

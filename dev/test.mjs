@@ -1,8 +1,8 @@
-// Teste de integração do background (service worker) fora do Chrome, com a API chrome.* simulada.
-// Cobre: entrada de vagas, deduplicação, preparo (modelo e IA), envio pela API do Gmail,
-// follow-up, piloto automático e varredura. Rede real não é usada.
+// Integration test of the background (service worker) outside Chrome, with the chrome.* API mocked.
+// Covers: job intake, deduplication, preparation (template and AI), sending through the Gmail API,
+// follow-up, autopilot and scanning. No real network is used.
 //
-//   node dev/test.mjs [caminho-de-um-curriculo.pdf]
+//   node dev/test.mjs [path-to-a-resume.pdf]
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import path from 'node:path';
@@ -13,7 +13,7 @@ const mod = (p) => import(pathToFileURL(path.join(root, p)).href);
 const sha = (b) => crypto.createHash('sha256').update(b).digest('hex');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// ---------- chrome.* simulado ----------
+// ---------- mocked chrome.* ----------
 const data = {};
 const ev = () => {
   const fns = [];
@@ -51,7 +51,7 @@ globalThis.chrome = {
   identity: {
     getRedirectURL: () => 'https://teste.chromiumapp.org/',
     launchWebAuthFlow: async (o) => {
-      // como o navegador: só uma janela de login por vez; o login silencioso não é afetado
+      // like the browser: only one login window at a time; silent login is not affected
       if (o.interactive && auth.windowOpen) throw new Error('Only one web auth flow is allowed at a time.');
       auth.flows.push(o);
       const back = auth.answer(o);
@@ -60,8 +60,8 @@ globalThis.chrome = {
     },
   },
 };
-// Login do Google simulado: answer devolve o fim do endereço de retorno, ou null se a janela foi fechada / nada voltou;
-// config é o que o Google acha do cliente OAuth ('ok' ou o código do erro mostrado na página dele).
+// Mocked Google login: answer returns the tail of the redirect URL, or null if the window closed / nothing came back;
+// config is what Google thinks of the OAuth client ('ok' or the error code shown on its page).
 const granted = '#access_token=TOKEN_TESTE&expires_in=3600';
 const auth = { flows: [], answer: () => granted, config: 'ok', asked: [], windowOpen: false };
 const authErrorPage = (code) =>
@@ -69,19 +69,19 @@ const authErrorPage = (code) =>
   encodeURIComponent(Buffer.from(`\n${String.fromCharCode(code.length)}${code}\x12\x10texto para humanos`, 'latin1').toString('base64')) +
   '&client_id=x';
 
-// ---------- rede simulada ----------
+// ---------- mocked network ----------
 const net = { gmail: [], ai: [], li: [], boards: [], gmailOff: false, aiOff: false, liLimited: false };
 const aiAnswer = {
   is_job_posting: true, fit: 83, reason: 'Boa aderência.', strengths: ['Oracle APEX'], gaps: ['Delphi'],
   subject: 'Assunto escrito pela IA', body: 'Corpo escrito pela IA', resume: 'Fulano de Tal\nfulano@exemplo.com\n# Experiência\n- Oracle APEX e PL/SQL',
 };
-// Catálogo do provedor de IA como a chave gratuita o enxerga: nem tudo o que é listado pode ser usado.
+// The AI provider's catalog as the free key sees it: not everything listed can be used.
 const catalog = [
-  { id: 'llama-3.3-70b-versatile', context_window: 131072 }, // só em plano Enterprise: 404 para esta chave
+  { id: 'llama-3.3-70b-versatile', context_window: 131072 }, // Enterprise plan only: 404 for this key
   { id: 'openai/gpt-oss-120b', context_window: 131072 },
-  { id: 'openai/gpt-oss-20b', context_window: 131072 }, // cota do minuto estourada: 429
+  { id: 'openai/gpt-oss-20b', context_window: 131072 }, // per-minute quota exceeded: 429
   { id: 'qwen/qwen3.8-27b', context_window: 131072 },
-  { id: 'modelo-tagarela-40b', context_window: 8192 }, // responde, mas não em JSON
+  { id: 'modelo-tagarela-40b', context_window: 8192 }, // answers, but not in JSON
   { id: 'whisper-large-v3' },
   { id: 'meta-llama/llama-prompt-guard-2-86m' },
   { id: 'openai/gpt-oss-safeguard-20b' },
@@ -95,7 +95,7 @@ globalThis.fetch = async (url, init) => {
     net.gmail.push({ url, init });
     return reply(200, { id: 'm' + net.gmail.length, threadId: 'thread1' });
   }
-  // busca pública do LinkedIn: lugar -> código de região, lista em páginas de 10 e detalhe de cada vaga
+  // LinkedIn public search: place -> region code, list in pages of 10, and each job's details
   if (url.startsWith('https://www.linkedin.com/jobs-guest/')) {
     const u = new URL(url);
     const page = (status, text) => ({ ok: status < 400, status, headers: { get: () => null }, text: async () => text });
@@ -113,7 +113,7 @@ globalThis.fetch = async (url, init) => {
       <div class="show-more-less-html__markup relative"><p>Vaga remota para Oracle APEX e PL/SQL &amp; JavaScript.</p><ul><li>Requisito: Git</li><li>Diferencial: Delphi</li></ul>${id === '1002' ? '<p>Envie seu currículo para vagas@empresa-li.example</p>' : ''}</div><button class="show-more-less-html__button">ver mais</button>
       <span class="description__job-criteria-text">Pleno-sênior</span><span class="description__job-criteria-text">Tempo integral</span>`);
   }
-  // sites de vagas consultados direto (lib/sources.js): respostas pequenas, no formato real de cada um
+  // job sites queried directly (lib/sources.js): small responses, in each site's real format
   if (/^https:\/\/(portal\.gupy\.io|www\.infojobs\.com\.br|www\.vagas\.com\.br|api\.remotar\.com\.br|himalayas\.app)\//.test(url)) {
     const u = new URL(url);
     const page = (text) => ({ ok: true, status: 200, headers: { get: () => null }, text: async () => text });
@@ -170,7 +170,7 @@ globalThis.fetch = async (url, init) => {
   throw new Error('rede não esperada no teste: ' + url);
 };
 
-// ---------- utilidades do teste ----------
+// ---------- test helpers ----------
 const results = [];
 const check = (name, ok, detail = '') => {
   results.push(ok);
@@ -218,7 +218,7 @@ const postJob = (n, email) => ({
   description: `Vaga Oracle APEX e PL/SQL, JavaScript. Envie seu currículo para ${email}`,
 });
 
-// ---------- cenário ----------
+// ---------- scenario ----------
 await mod('background.js');
 await onInstalled.fns[0]({ reason: 'install' });
 await sleep(50);
@@ -228,7 +228,7 @@ const { DEFAULTS } = await mod('lib/store.js');
 data.settings = { ...DEFAULTS, name: 'Fulano de Tal', email: 'eu@meu-email.example', keywords: 'desenvolvedor oracle apex', gmailClientId: 'id.apps.googleusercontent.com', resumeText, skills: 'oracle apex, pl/sql' };
 data.resumePdf = { name: 'CV.pdf', b64: cvBytes.toString('base64') };
 
-// 1) entrada de vagas
+// 1) job intake
 let r = await send({ type: 'jobsFound', jobs: [googleJob(1), googleJob(2), postJob(1, 'rh@empresa-teste.example')] });
 check('3 vagas novas entram', r?.ok && r.added === 3, JSON.stringify(r));
 await until(() => jobs().length === 3 && !jobs().some((j) => j.status === 'novo'));
@@ -241,11 +241,11 @@ check('post com e-mail fica pronto, sem usar o meu próprio e-mail', p1?.status 
 check('assunto e corpo vêm do modelo', p1?.subject === 'Candidatura – Estamos contratando dev APEX 1' && p1.body.includes('Fulano de Tal'), JSON.stringify(p1?.subject));
 check('contador no ícone mostra 1 pronta', calls.badge.at(-1) === '1', String(calls.badge.at(-1)));
 
-// 2) duplicatas
+// 2) duplicates
 r = await send({ type: 'jobsFound', jobs: [googleJob(1), googleJob(2, { url: 'https://outro-site.example/vaga' })] });
 check('vagas repetidas (mesmo link ou mesmo título+empresa) são ignoradas', r?.added === 0, JSON.stringify(r));
 
-// 3) envio pela API do Gmail com o currículo padrão
+// 3) sending through the Gmail API with the default resume
 r = await send({ type: 'job:send', id: p1.id });
 check('envio responde ok', r?.ok, JSON.stringify(r));
 const m1 = net.gmail[0] && decodeMime(net.gmail[0]);
@@ -258,22 +258,22 @@ check('contagem diária registra 1 envio', data.sentLog?.count === 1);
 r = await send({ type: 'job:send', id: p1.id });
 check('não envia duas vezes a mesma candidatura', r?.ok === false && net.gmail.length === 1, JSON.stringify(r));
 
-// 4) follow-up na mesma conversa, sem anexo
+// 4) follow-up in the same thread, with no attachment
 r = await send({ type: 'job:followup', id: p1.id, body: 'Reforço meu interesse.' });
 const m2 = net.gmail[1] && decodeMime(net.gmail[1]);
 check('follow-up vai na mesma conversa e sem anexo', r?.ok && m2?.threadId === 'thread1' && m2.parts.length === 1 && m2.subject === 'Re: ' + sent.subject, JSON.stringify([r, m2?.subject]));
 
-// 5) e-mail já usado
+// 5) e-mail address already used
 r = await send({ type: 'jobsFound', jobs: [postJob(2, 'rh@empresa-teste.example')] });
 await until(() => jobs().length === 4);
 check('novo anúncio para e-mail que já recebeu candidatura é descartado', jobs().find((j) => j.title.endsWith('APEX 2') && j.source === 'linkedin_post')?.status === 'descartado');
 
-// 6) vaga sem e-mail que ganha um endereço
+// 6) job without an e-mail that gets an address
 await send({ type: 'job:patch', id: g1.id, patch: { email: 'vagas@outra-empresa.example' } });
 await until(() => jobs().find((j) => j.id === g1.id)?.status === 'pronto');
 check('vaga sem e-mail entra em revisão quando recebe um endereço', jobs().find((j) => j.id === g1.id)?.status === 'pronto');
 
-// 7) IA (provedor compatível com OpenAI) e currículo adaptado em PDF
+// 7) AI (OpenAI-compatible provider) and tailored resume as a PDF
 data.settings = { ...data.settings, provider: 'groq', groqKey: 'chave' };
 r = await send({ type: 'job:regen', id: g1.id });
 const ai = jobs().find((j) => j.id === g1.id);
@@ -290,7 +290,7 @@ r = await send({ type: 'job:send', id: g1.id });
 const m3 = decodeMime(net.gmail.at(-1));
 check('candidatura com IA anexa o PDF do currículo adaptado', r?.ok && m3.parts[1].data.subarray(0, 5).toString() === '%PDF-' && sha(m3.parts[1].data) !== sha(cvBytes));
 
-// 7b) modelo escolhido à mão que a chave não pode usar (o erro 404 do Groq): troca sozinho e segue
+// 7b) hand-picked model the key cannot use (Groq's 404 error): switches on its own and carries on
 data.settings = { ...data.settings, groqModel: 'llama-3.3-70b-versatile' };
 const g2 = jobs().find((j) => j.title.endsWith('APEX 2') && j.source === 'google_jobs');
 const callsBefore = net.ai.length;
@@ -301,7 +301,7 @@ check('modelo indisponível em tempo de execução: troca pelo melhor e conclui'
 check('a escolha volta para o automático e o registro explica a troca',
   data.settings.groqModel === '' && /llama-3\.3-70b-versatile não está disponível.*gpt-oss-120b/.test(data.log?.[0]?.msg || ''), JSON.stringify([data.settings.groqModel, data.log?.[0]?.msg]));
 
-// 8) piloto automático com limite de aderência
+// 8) autopilot with a minimum fit
 data.settings = { ...data.settings, provider: 'anthropic', autoSend: true, minFit: 50 };
 const before = net.gmail.length;
 await send({ type: 'jobsFound', jobs: [postJob(3, 'talentos@terceira.example'), { ...postJob(4, 'rh@quarta.example'), description: 'Vaga de Spark, Hadoop, Kafka e Airflow. Envie para rh@quarta.example' }] });
@@ -311,7 +311,7 @@ const low = jobs().find((j) => j.title.endsWith('APEX 4'));
 check('piloto automático envia a vaga aderente', auto?.status === 'enviado' && decodeMime(net.gmail.at(-1)).to === 'talentos@terceira.example', JSON.stringify([auto?.status, auto?.fit]));
 check('piloto automático segura a vaga de baixa aderência', low?.status === 'pronto' && low.fit < 50, JSON.stringify([low?.status, low?.fit]));
 
-// 9) limite diário
+// 9) daily limit
 data.settings = { ...data.settings, dailyLimit: data.sentLog.count };
 const n = net.gmail.length;
 await send({ type: 'jobsFound', jobs: [postJob(5, 'rh@quinta.example')] });
@@ -319,7 +319,7 @@ await until(() => jobs().find((j) => j.title.endsWith('APEX 5'))?.status === 'fi
 await sleep(300);
 check('limite diário atingido: fica na fila sem enviar', net.gmail.length === n && jobs().find((j) => j.title.endsWith('APEX 5'))?.status === 'fila');
 
-// 10) varredura: a aba de busca responde com vagas, como faria o content script
+// 10) scan: the search tab answers with jobs, as the content script would
 data.settings = { ...data.settings, autoSend: false, srcLinkedinJobs: false, srcBoards: false, srcLinkedinPosts: false, srcGoogle: true };
 chrome.tabs.sendMessage = async () => {
   await send({ type: 'jobsFound', jobs: [googleJob(9), postJob(9, 'rh@nona.example')] });
@@ -334,7 +334,7 @@ check('avisa sobre vagas novas', calls.notifications.some((m) => m.startsWith('2
 await until(() => jobs().find((j) => j.title.endsWith('APEX 9') && j.source === 'linkedin_post')?.status === 'pronto');
 check('post achado na varredura usa a palavra-chave da busca no assunto', jobs().find((j) => j.title.endsWith('APEX 9') && j.source === 'linkedin_post')?.subject === 'Candidatura – desenvolvedor oracle apex');
 
-// 11) currículo/habilidades mudam: a aderência das vagas em aberto é refeita
+// 11) resume/skills change: the fit of open jobs is recomputed
 const open = jobs().find((j) => j.title.endsWith('APEX 9') && j.source === 'google_jobs');
 data.settings = { ...data.settings, skills: 'oracle apex, pl/sql, delphi, html, css' };
 await send({ type: 'settings:changed' });
@@ -342,7 +342,7 @@ await until(() => jobs().find((j) => j.id === open.id).fit !== open.fit, 5000);
 const redone = jobs().find((j) => j.id === open.id);
 check('mudar as habilidades refaz a aderência das vagas em aberto', redone.fit > open.fit && !redone.missing.includes('delphi'), JSON.stringify([open.fit, redone.fit, redone.missing]));
 
-// 12) conectar o Gmail: erro de configuração é explicado antes de a janela do Google abrir
+// 12) connecting Gmail: a configuration error is explained before the Google window opens
 const flowUrl = (f) => new URL(f.url).searchParams;
 auth.flows.length = 0;
 auth.config = 'redirect_uri_mismatch';
@@ -362,7 +362,7 @@ auth.answer = () => '#error=access_denied';
 r = await send({ type: 'gmail:connect' });
 check('acesso negado pelo usuário: diz que foi cancelado', r?.ok === false && /cancelou/.test(r.error), JSON.stringify(r));
 
-// 13) token vencido e o Google exige novo login: a fila espera, sem marcar erro nas vagas
+// 13) expired token and Google demands a new login: the queue waits, without flagging the jobs as errors
 const queued = () => jobs().find((j) => j.title.endsWith('APEX 5'));
 const pauses = () => (data.log || []).filter((l) => l.msg.startsWith('Envio pausado')).length;
 data.settings = { ...data.settings, dailyLimit: 100, email: 'fulano@gmail.com' };
@@ -382,7 +382,7 @@ onAlarm.fns[0]({ name: 'queue' });
 await sleep(400);
 check('pausa é registrada e avisada uma vez só', pauses() === pausesBefore + 1 && calls.notifications.length === alertsBefore + 1 && calls.notifications.at(-1).startsWith('Gmail desconectado'), JSON.stringify([pauses(), calls.notifications.slice(alertsBefore)]));
 
-// 14) reconectar retoma a fila; uma hora depois o token se renova sozinho
+// 14) reconnecting resumes the queue; an hour later the token renews itself
 auth.flows.length = 0;
 auth.answer = () => granted;
 r = await send({ type: 'gmail:connect' });
@@ -397,7 +397,7 @@ await until(() => jobs().find((j) => j.id === low4.id).status === 'enviado', 300
 check('token vencido se renova sem janela e o envio segue',
   jobs().find((j) => j.id === low4.id).status === 'enviado' && auth.flows.length === 1 && auth.flows[0].interactive === false && data.gmailToken.exp > Date.now(), JSON.stringify([jobs().find((j) => j.id === low4.id).status, auth.flows]));
 
-// 15) Gmail API desligada no projeto do Google Cloud: também é pausa, não erro da vaga
+// 15) Gmail API disabled in the Google Cloud project: also a pause, not a job error
 const nine = jobs().find((j) => j.title.endsWith('APEX 9') && j.source === 'linkedin_post');
 net.gmailOff = true;
 await send({ type: 'job:queue', ids: [nine.id] });
@@ -406,7 +406,7 @@ check('Gmail API desativada: vaga fica na fila com a explicação no registro',
   jobs().find((j) => j.id === nine.id).status === 'fila' && /^Envio pausado: A Gmail API não está ativada/.test(data.log[0].msg), JSON.stringify([jobs().find((j) => j.id === nine.id).status, data.log[0].msg]));
 net.gmailOff = false;
 
-// 16) janela de login esquecida aberta (o navegador só mantém uma): Conectar explica, e a fila não trava
+// 16) login window left open (the browser keeps only one): Conectar explains, and the queue does not get stuck
 auth.windowOpen = true;
 auth.flows.length = 0;
 r = await send({ type: 'gmail:connect' });
@@ -418,7 +418,7 @@ check('com a janela aberta, a fila ainda renova o token em silêncio e envia',
   jobs().find((j) => j.id === nine.id).status === 'enviado' && auth.flows.length === 1 && auth.flows[0].interactive === false, JSON.stringify([jobs().find((j) => j.id === nine.id).status, auth.flows.map((f) => f.interactive)]));
 auth.windowOpen = false;
 
-// 17) vaga que falhou na preparação por IA tenta de novo quando a configuração da IA muda ou a extensão é atualizada
+// 17) a job whose AI preparation failed is retried when the AI settings change or the extension is updated
 const byTitle = (n) => jobs().find((j) => j.title.endsWith('APEX ' + n) && j.source === 'linkedin_post');
 data.settings = { ...data.settings, mode: 'ai', provider: 'groq', groqKey: 'chave', groqModel: '', autoSend: false };
 net.aiOff = true;
@@ -443,7 +443,7 @@ await onInstalled.fns[0]({ reason: 'update' });
 await until(() => byTitle(21).status === 'pronto', 30000);
 check('extensão atualizada: vagas que falharam na IA são preparadas de novo', byTitle(21).status === 'pronto' && calls.tabsCreated.length === tabsBefore, JSON.stringify([byTitle(21).status, byTitle(21).error]));
 
-// 18) versão do código de fundo: o painel usa para saber se o navegador ainda roda um service worker antigo
+// 18) background code version: the dashboard uses it to tell if the browser still runs an old service worker
 const { BUILD } = await mod('lib/build.js');
 r = await send({ type: 'version' });
 check('service worker informa a versão, igual à do manifest', r?.build === BUILD && BUILD === JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8')).version, JSON.stringify([r, BUILD]));
@@ -451,7 +451,7 @@ data.autoReload = { to: BUILD, from: '0.4.1', at: Date.now() };
 await onInstalled.fns[0]({ reason: 'update' });
 check('atualização pedida pelo painel: reabre o painel que a recarga fechou', calls.tabsCreated.length === tabsBefore + 1 && calls.tabsCreated.at(-1).endsWith('ui/dashboard.html'), JSON.stringify(calls.tabsCreated.slice(tabsBefore)));
 
-// 19) busca por consulta direta: cada termo em cada fonte, fontes em paralelo, sem janela
+// 19) search by direct query: each term on each source, sources in parallel, no window
 const { searchTerms, relevant } = await mod('lib/sources.js');
 check('termos separados por vírgula, ponto e vírgula ou linha viram buscas próprias, sem repetir',
   searchTerms('Oracle APEX, PL/SQL;  oracle apex\nConsultor Oracle ,').join('|') === 'Oracle APEX|PL/SQL|Consultor Oracle', searchTerms('Oracle APEX, PL/SQL;  oracle apex\nConsultor Oracle ,').join('|'));
@@ -519,7 +519,7 @@ check('LinkedIn limitou as consultas: o resumo avisa, o segundo termo não insis
   liSearches().length === searchesLimited + 1 && /LinkedIn 0 lida\(s\), 0 nova\(s\) \(limitou as consultas por agora\) · Gupy 4 lida\(s\)/.test(data.log[0].msg), JSON.stringify([liSearches().length - searchesLimited, data.log[0].msg]));
 net.liLimited = false;
 
-// 20) quem já usava a versão anterior: as fontes que abrem janela são desligadas uma vez, com aviso
+// 20) users of the previous version: sources that open a window are turned off once, with a notice
 delete data.migrated;
 data.settings = { ...data.settings, srcLinkedinPosts: true, srcGoogle: true };
 await onInstalled.fns[0]({ reason: 'update' });
@@ -529,7 +529,7 @@ data.settings = { ...data.settings, srcGoogle: true };
 await onInstalled.fns[0]({ reason: 'update' });
 check('se o usuário religar uma delas, a escolha é respeitada nas atualizações seguintes', data.settings.srcGoogle === true);
 
-// 21) candidatura no site: as respostas saem só do que o usuário informou
+// 21) applying on the website: answers come only from what the user provided
 const { answerFor, questionKey } = await mod('lib/answers.js');
 const prof = {
   ...DEFAULTS, name: 'Fulano de Tal', email: 'eu@gmail.example', phone: '+55 (19) 99999-8888', city: 'Campinas, São Paulo', skills: 'oracle apex, pl/sql',
@@ -556,7 +556,7 @@ check('respostas: aceita termo obrigatório, não segue a empresa, usa a pretens
   ans('Li e concordo com os termos', 'checkbox') === true && ans('Seguir a Empresa X para ficar por dentro das novidades', 'checkbox', undefined, false) === false && ans('Quero receber novidades', 'checkbox', undefined, false) === null &&
     ans('Pretensão salarial', 'number') === '12000' && ans('Carta de apresentação', 'textarea') === 'Olá, tenho interesse.');
 
-// 22) fila de candidaturas pelo site (a página do LinkedIn é simulada: devolve o que o formulário faria)
+// 22) website application queue (the LinkedIn page is simulated: it returns what the form would)
 const site = { runs: [], url: 'https://www.linkedin.com/jobs/view/1/', answer: () => ({ status: 'enviada' }) };
 chrome.scripting = { executeScript: async () => [] };
 chrome.tabs.get = async () => ({ status: 'complete', url: site.url });

@@ -1,9 +1,9 @@
 import { BUILD } from '../lib/build.js';
 
-// Garante que o código de fundo é o mesmo desta tela (ver lib/build.js). Devolve:
-//   { ok: true, updatedFrom }  fundo em dia; updatedFrom vem preenchido logo depois de uma atualização automática
-//   { ok: false }              a recarga automática já foi tentada há pouco e não resolveu
-// Se o fundo é de outra versão, recarrega a extensão — a tela fecha e o painel reabre sozinho.
+// Ensures the background code is the same version as this page (see lib/build.js). Returns:
+//   { ok: true, updatedFrom }  background up to date; updatedFrom is set right after an automatic update
+//   { ok: false }              the automatic reload was already tried recently and didn't fix it
+// If the background's version differs, reloads the extension — the page closes and the dashboard reopens by itself.
 export async function freshBackground() {
   const res = await chrome.runtime.sendMessage({ type: 'version' }).catch(() => null);
   const { autoReload } = await chrome.storage.local.get('autoReload');

@@ -31,7 +31,7 @@ const VIEWS = {
 const PAGES = { stats: 'Estatísticas', settings: 'Configurações' };
 const SOURCE = { linkedin_jobs: 'LinkedIn', linkedin_post: 'Post no LinkedIn', google_jobs: 'Google', gupy: 'Gupy', infojobs: 'InfoJobs', vagas: 'Vagas.com', remotar: 'Remotar', himalayas: 'Himalayas', captura: 'Capturada' };
 const STAGES = { aguardando: 'Aguardando', respondeu: 'Responderam', entrevista: 'Entrevista', oferta: 'Oferta', rejeitado: 'Recusada' };
-// Vaga do LinkedIn com candidatura simplificada (ou ainda não conferida): dá para a extensão preencher e enviar.
+// LinkedIn job with Easy Apply (or not checked yet): the extension can fill in and submit the application.
 const canApply = (j) => j.source === 'linkedin_jobs' && j.status === 'sem_email' && j.easyApply !== false;
 const APPLY_PILL = { fila: ['Na fila', 'acc'], rodando: ['Candidatando…', 'acc'], revisar: ['Conferir e enviar', 'warn'], pendente: ['Falta resposta', 'bad'] };
 
@@ -44,7 +44,7 @@ const S = {
   tab: 'email', scan: {}, meta: {}, sending: new Map(), busy: new Set(),
 };
 
-// ---------- utilidades ----------
+// ---------- utilities ----------
 function ago(t) {
   const m = Math.round((Date.now() - t) / 60000);
   if (m < 1) return 'agora';
@@ -76,7 +76,7 @@ function download(name, href) {
   a.click();
 }
 
-// ---------- renderização (agrupada: várias mudanças na mesma tarefa viram um redesenho) ----------
+// ---------- rendering (batched: several changes in the same task become a single redraw) ----------
 let dirty = new Set();
 function render(...parts) {
   if (!dirty.size) queueMicrotask(flush);
@@ -148,7 +148,7 @@ function renderList() {
   if (!list.some((j) => j.id === S.sel)) S.sel = matchMedia('(max-width: 760px)').matches ? null : list[0]?.id || null;
   for (const id of S.checked) if (!list.some((j) => j.id === id)) S.checked.delete(id);
 
-  // candidatura simplificada em lote: as selecionadas ou, sem seleção, todas as da lista
+  // bulk Easy Apply: the selected jobs or, with nothing selected, every job in the list
   const easy = S.view === 'noemail' ? (S.checked.size ? list.filter((j) => S.checked.has(j.id)) : list).filter(canApply).length : 0;
   const applyAll = easy ? `<button class="primary" data-act="bulkApply">⚡ Candidatar ${S.checked.size ? `nas ${easy} selecionadas` : `nas ${easy} do LinkedIn`}</button>` : '';
   $('#bulk').classList.toggle('on', S.checked.size > 0 || !!applyAll);
@@ -195,7 +195,7 @@ function renderDetail() {
   if (!VIEWS[S.view]) return;
   const j = S.jobs.get(S.sel);
   const key = j ? `${j.id}|${j.status}` : '';
-  // não redesenha por cima de um campo que o usuário está editando
+  // don't redraw over a field the user is editing
   if (key === shown && $('#detail').contains(document.activeElement) && document.activeElement.matches('[data-f]')) return;
   shown = key;
   if (!j) return ($('#detail').innerHTML = `<div class="empty">Selecione uma vaga na lista.</div>`);
@@ -315,7 +315,7 @@ function renderStats() {
     <div class="card"><h3>De onde vêm as vagas</h3>${Object.entries(SOURCE).map(([k, l]) => hbar(l, jobs.filter((j) => j.source === k).length, jobs.length)).join('')}</div>`;
 }
 
-// ---------- ações ----------
+// ---------- actions ----------
 function go(view) {
   flushEdit();
   S.view = view;
@@ -343,7 +343,7 @@ function move(delta) {
   }
 }
 
-// edição com salvamento automático
+// editing with autosave
 let edit = null; // { id, patch, timer }
 function flushEdit() {
   if (!edit) return;
@@ -362,12 +362,12 @@ function onEdit(el) {
 }
 
 function patch(id, p) {
-  Object.assign(S.jobs.get(id) || {}, p); // resposta imediata; o storage confirma em seguida
+  Object.assign(S.jobs.get(id) || {}, p); // immediate feedback; storage confirms it right after
   render();
   return call('job:patch', { id, patch: p });
 }
 
-// Ao tirar vagas da lista, a seleção pula para a vizinha (e não volta ao topo).
+// When jobs are removed from the list, the selection jumps to a neighboring job (not back to the top).
 function advance(ids) {
   if (!ids.includes(S.sel)) return;
   const list = visible();
@@ -403,7 +403,7 @@ async function sendJob(id) {
   if (!j.subject || !j.body) return toast('Assunto e texto do e-mail não podem ficar vazios.', { bad: true });
 
   if (!S.settings.gmailClientId) {
-    // Sem OAuth configurado: abre o Gmail preenchido e entrega o anexo para o usuário arrastar.
+    // No OAuth configured: opens Gmail prefilled and hands the user the attachment to drag in.
     const u = new URL('https://mail.google.com/mail/?view=cm&fs=1');
     u.searchParams.set('to', j.email);
     u.searchParams.set('su', j.subject);
@@ -413,7 +413,7 @@ async function sendJob(id) {
     return toast('Gmail aberto. Anexe o currículo, envie e depois clique em “Já me candidatei”.', { ms: 9000 });
   }
 
-  // 5 segundos para desfazer antes de enviar de verdade
+  // 5 seconds to undo before actually sending
   advance([id]);
   S.sending.set(id, setTimeout(async () => {
     const res = await call('job:send', { id });
@@ -573,8 +573,8 @@ document.addEventListener('keydown', (e) => {
   e.preventDefault();
 });
 
-// ---------- configurações (salvamento automático) ----------
-// Os campos de chave e modelo apontam para a configuração do provedor escolhido.
+// ---------- settings (autosave) ----------
+// The key and model fields point to the chosen provider's settings.
 $('#aiProvider').innerHTML = Object.entries(PROVIDERS).map(([id, p]) => `<option value="${id}">${p.label}</option>`).join('');
 function bindProvider() {
   const p = providerOf(S.settings);
@@ -589,7 +589,7 @@ function bindProvider() {
   checkModels(false);
 }
 
-// Mostra quais modelos responderam ao teste feito com a chave do usuário e qual está em uso.
+// Shows which models responded to the test with the user's key, and which one is in use.
 let checkRun = 0;
 async function checkModels(force) {
   const run = ++checkRun;
@@ -605,7 +605,7 @@ async function checkModels(force) {
   status.textContent = 'Testando quais modelos respondem com a sua chave…';
   $('#aiCheck').disabled = true;
   const res = await call('ai:models', { force });
-  if (run !== checkRun) return; // o usuário já trocou de provedor ou de chave
+  if (run !== checkRun) return; // the user has already switched provider or key
   $('#aiCheck').disabled = false;
   if (!res?.ok) return (status.textContent = res?.error || 'Não consegui testar os modelos.');
   const { working, failed, others = [] } = res.entry;
@@ -614,7 +614,7 @@ async function checkModels(force) {
     others.map((id) => `<option value="${esc(id)}" label="não testado">`).join('');
   let chosen = S.settings[p.modelField];
   if (chosen && failed.some((f) => f.id === chosen)) {
-    // o modelo escolhido não responde com esta chave: volta para a escolha automática
+    // the chosen model doesn't respond with this key: fall back to automatic selection
     toast(`O modelo ${chosen} não está disponível para esta chave. Voltei para a escolha automática.`, { ms: 8000 });
     await setSettings({ [p.modelField]: '' });
     S.settings = await getSettings();
@@ -633,7 +633,7 @@ $('#aiCheck').addEventListener('click', async () => {
 });
 $('#aiModel').addEventListener('change', () => setTimeout(() => checkModels(false), 600));
 $('#aiProvider').addEventListener('change', async () => {
-  await saveSettings(); // grava a chave/modelo do provedor anterior antes de trocar os campos
+  await saveSettings(); // saves the previous provider's key/model before swapping the fields
   S.settings = await getSettings();
   bindProvider();
 });
@@ -700,7 +700,7 @@ async function saveResume(file) {
 const PROFILE_FIELDS = { name: 'nome', email: 'e-mail', location: 'localização', skills: 'habilidades', keywords: 'buscas', resumeText: 'texto do currículo', phone: 'celular', city: 'cidade', linkedinUrl: 'LinkedIn' };
 const listPt = (items) => (items.length > 1 ? `${items.slice(0, -1).join(', ')} e ${items.at(-1)}` : items[0] || '');
 
-// Lê o PDF e preenche sozinho o que estiver vazio. Campo que já tinha valor só muda se o usuário pedir.
+// Reads the PDF and auto-fills whatever is empty. A field that already had a value only changes if the user asks.
 async function fillFromResume(bytes) {
   let profile;
   try {
@@ -711,12 +711,12 @@ async function fillFromResume(bytes) {
   if (profile.resumeText.length < 200)
     return toast('Currículo salvo, mas o PDF parece ser uma imagem, sem texto para ler. Preencha os campos à mão ou use “Refinar com IA”.', { bad: true, ms: 10000 });
 
-  // dados de contato para os formulários de candidatura no site
+  // contact details for the application forms on job websites
   profile.phone = profile.resumeText.match(/(?:\+?55[\s.-]*)?\(?\d{2}\)?[\s.-]*9?\d{4}[\s.-]?\d{4}/)?.[0].trim() || '';
   profile.linkedinUrl = (profile.resumeText.match(/linkedin\.com\/in\/[\w%-]+/i) || [])[0]?.replace(/^/, 'https://www.') || '';
   profile.city = profile.location;
 
-  await saveSettings(); // o que já está digitado na tela conta como preenchido
+  await saveSettings(); // whatever is already typed on screen counts as filled in
   const current = await getSettings();
   const fill = {};
   const replace = {};
@@ -790,7 +790,7 @@ $('#analyzeBtn').addEventListener('click', (e) =>
     toast('Pronto: preenchi nome, habilidades e sugestões de busca. Confira abaixo.', { ms: 6000 });
   })
 );
-// O conserto de um erro de conexão é feito no Google Cloud, em outra aba: o aviso fica na tela até a próxima tentativa.
+// A connection error is fixed in Google Cloud, in another tab: the warning stays on screen until the next attempt.
 function gmailProblem(msg) {
   const el = $('#gmailProblem');
   el.hidden = !msg;
@@ -852,8 +852,8 @@ $('#wipe').addEventListener('click', async () => {
   toast('Tudo apagado.');
 });
 
-// ---------- sincronização com o storage ----------
-// Perguntas que pararam uma candidatura no site e as respostas que o usuário já salvou.
+// ---------- storage sync ----------
+// Questions that stopped an application on a job website, and the answers the user has already saved.
 async function renderApply() {
   const { applyPending = [] } = await chrome.storage.local.get('applyPending');
   const field = (p, i) =>
@@ -893,7 +893,7 @@ $('#applyAnswers').addEventListener('click', async (e) => {
 
 async function loadMeta() {
   const { resumePdf, gmailToken, log = [] } = await chrome.storage.local.get(['resumePdf', 'gmailToken', 'log']);
-  // o token vale 1 hora, mas se renova sozinho: só deixa de existir quando o Google exige um novo login
+  // the token is valid for 1 hour but renews itself: it only goes away when Google requires a new login
   S.meta = { resumePdf: resumePdf?.name, gmailOk: !!gmailToken };
   $('#resumeName').textContent = resumePdf ? `✓ ${resumePdf.name} — clique ou arraste para trocar` : 'Arraste o PDF do currículo aqui ou clique para escolher';
   $('#gmailStatus').textContent = S.meta.gmailOk ? '✓ Conectado' : '';
@@ -917,7 +917,7 @@ chrome.storage.onChanged.addListener(async (ch) => {
   else render('nav');
 });
 
-// Tela nova com código de fundo antigo dá erros que já foram corrigidos: confere antes de montar o painel.
+// A new page with old background code hits errors that were already fixed: check before building the dashboard.
 const background = await freshBackground();
 if (!background.ok) toast(STALE_HELP, { bad: true, ms: 3600e3 });
 else if (background.updatedFrom) {
@@ -933,4 +933,4 @@ fillSettings();
 renderApply();
 if (location.hash === '#settings' || !S.settings.keywords.trim()) S.view = 'settings';
 render();
-setInterval(() => render('nav'), 60_000); // mantém "há X min" atualizado
+setInterval(() => render('nav'), 60_000); // keeps "há X min" ("X min ago") up to date

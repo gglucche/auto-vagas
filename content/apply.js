@@ -1,7 +1,7 @@
-// Preenche formulários de candidatura na página: a "Candidatura simplificada" do LinkedIn, etapa por etapa,
-// e — a pedido do usuário, pelo botão da extensão — os campos de qualquer formulário aberto.
-// É injetado pelo background. As respostas vêm dele (lib/answers.js); aqui só se lê e se mexe na página.
-// Os elementos são achados pelo texto e pelo papel (botão, diálogo, rótulo), não por classes, que mudam.
+// Fills in application forms on the page: LinkedIn's "Candidatura simplificada" (Easy Apply), step by step,
+// and — at the user's request, via the extension's button — the fields of any open form.
+// Injected by the background. Answers come from it (lib/answers.js); this script only reads and manipulates the page.
+// Elements are found by their text and role (button, dialog, label), not by class names, which change.
 (() => {
   if (window.__autoVagasApply) return;
   window.__autoVagasApply = true;
@@ -24,7 +24,7 @@
     sent: /candidatura (foi )?enviada|application (was )?(sent|submitted)|sua candidatura foi|your application was sent/,
     applied: /candidatou-se|candidatura enviada|voce se candidatou|\bapplied\b/,
     closed: /nao aceita mais candidaturas|no longer accepting applications|vaga encerrada/,
-    // dados que não se guardam nem se aprendem
+    // data that is never stored or learned
     secret: /senha|password|cpf|\brg\b|passaporte|passport|cartao|card|cvv|social security|\bssn\b/,
   };
 
@@ -38,9 +38,9 @@
     return null;
   }
 
-  // ---------- campos ----------
+  // ---------- fields ----------
 
-  // Texto de um rótulo. O LinkedIn repete o texto em um trecho só para leitores de tela: fica o visível.
+  // A label's text. LinkedIn repeats the text in a part meant only for screen readers: keep the visible one.
   const pick = (node) => (node ? (node.querySelector?.('[aria-hidden="true"]')?.textContent || node.textContent || '').replace(/\s+/g, ' ').trim() : '');
   function labelOf(el) {
     const own = el.id && el.ownerDocument.querySelector(`label[for="${CSS.escape(el.id)}"]`);
@@ -51,7 +51,7 @@
   const isRequired = (el, label) => el.required || el.getAttribute('aria-required') === 'true' || /\*\s*$/.test(label) || !!el.closest('[aria-required="true"], [required]');
   const EMPTY_OPTION = /^(selecion|select|escolh|choose|--|—|$)/;
 
-  // Os campos de um formulário, no formato que o background entende.
+  // A form's fields, in the format the background understands.
   function collect(root) {
     const fields = [];
     const groups = new Set();
@@ -87,7 +87,7 @@
     return fields.filter((f) => f.label);
   }
 
-  // Escreve em campos controlados por React e afins: valor pelo "setter" nativo e os eventos que eles escutam.
+  // Writes to fields controlled by React and the like: value via the native setter, plus the events they listen for.
   function setValue(el, value) {
     const proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : el.tagName === 'SELECT' ? HTMLSelectElement.prototype : HTMLInputElement.prototype;
     Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, value);
@@ -109,7 +109,7 @@
       el.focus();
       setValue(el, String(answer));
       if (field.combo) {
-        // campo com sugestões (cidade, por exemplo): fica com a primeira
+        // field with suggestions (a city, for example): take the first one
         const option = await waitFor(() => [...document.querySelectorAll('[role="listbox"] [role="option"], [role="option"]')].find(visible), 2500);
         option?.click();
       }
@@ -117,7 +117,7 @@
     await pause(120, 320);
   }
 
-  // Pede as respostas ao background e preenche o que ele souber. Devolve os campos que ficaram sem resposta.
+  // Asks the background for the answers and fills in whatever it knows. Returns the fields left unanswered.
   async function answerFields(fields, opts) {
     const open = fields.filter((f) => f.kind !== 'file' && (f.empty || (f.kind === 'checkbox' && /seguir|follow/.test(norm(f.label)))));
     if (!open.length) return [];
@@ -133,7 +133,7 @@
 
   const describe = (f) => ({ label: f.label, kind: f.kind, options: f.options });
 
-  // O usuário respondeu à mão o que faltava: guarda para a próxima candidatura (nunca senhas nem documentos).
+  // The user filled in the gaps by hand: save the answers for the next application (never passwords or ID documents).
   function learnFrom(fields) {
     for (const field of fields) {
       if (RE.secret.test(norm(field.label))) continue;
@@ -146,7 +146,7 @@
     }
   }
 
-  // ---------- candidatura simplificada do LinkedIn ----------
+  // ---------- LinkedIn Easy Apply ----------
 
   const dialogs = () => [...document.querySelectorAll('[role="dialog"]')].filter(visible);
   const applyDialog = () => dialogs().reverse().find((d) => find(d, RE.submit) || find(d, RE.review) || find(d, RE.next) || d.querySelector('form'));
@@ -164,7 +164,7 @@
     input.files = data.files;
     input.dispatchEvent(new Event('change', { bubbles: true }));
     state.uploaded = true;
-    await sleep(2500); // o envio do arquivo é feito em segundo plano pela página
+    await sleep(2500); // the page uploads the file in the background
   }
 
   async function closeDialog() {
@@ -175,12 +175,12 @@
     (await waitFor(() => dialogs().map((d) => find(d, RE.discard)).find(Boolean), 3000))?.click();
   }
 
-  // Fica de olho depois de parar (falta resposta, ou o usuário quer conferir): quando ele mesmo enviar, avisa o background.
+  // Keeps watching after stopping (missing answer, or the user wants to check): when the user submits, tells the background.
   function watchForSend(opts) {
     waitFor(wasSent, 15 * 60_000, 1000).then((ok) => ok && ask({ type: 'apply:done', jobId: opts.jobId, status: 'enviada' }));
   }
 
-  // Sem botão de candidatura simplificada, o que a página diz da vaga: encerrada, já candidatada ou candidatura no site da empresa.
+  // Without an Easy Apply button, what the page says about the job: closed, already applied, or apply on the company's site.
   function otherState() {
     const top = norm((document.querySelector('main') || document.body).innerText).slice(0, 4000);
     if (RE.closed.test(top)) return 'fechada';
@@ -191,7 +191,7 @@
   async function easyApply(opts) {
     let button = await waitFor(() => find(document, RE.easy) || otherState(), 15000);
     if (typeof button === 'string') {
-      await sleep(1500); // o topo da vaga pode ainda estar montando
+      await sleep(1500); // the top of the job page may still be rendering
       button = find(document, RE.easy) || button;
     }
     if (!button || typeof button === 'string') return { status: button || 'externa' };
@@ -203,7 +203,7 @@
       const dlg = await waitFor(() => (wasSent() ? document.body : applyDialog()), step ? 6000 : 12000);
       if (wasSent()) break;
       if (!dlg) return { status: 'erro', error: 'a janela da candidatura não abriu' };
-      const more = find(dlg, RE.resume); // aviso de segurança antes do formulário
+      const more = find(dlg, RE.resume); // safety notice before the form
       if (more && !dlg.querySelector('form')) {
         more.click();
         continue;
@@ -216,14 +216,14 @@
       if (!action) return { status: 'erro', error: 'não achei o botão para avançar na candidatura' };
       const sending = action === find(dlg, RE.submit);
       const stop = async (status, questions) => {
-        if (opts.batch && status === 'pendente') await closeDialog(); // em lote, deixa o LinkedIn limpo e segue para a próxima
+        if (opts.batch && status === 'pendente') await closeDialog(); // in a batch, leave LinkedIn clean and move on to the next
         else {
           learnFrom(questions.length ? questions : collect(dlg).filter((f) => f.empty));
           watchForSend(opts);
         }
         return { status, questions: questions.map(describe) };
       };
-      // falta resposta obrigatória: para aqui, sem inventar
+      // a required answer is missing: stop here, don't make one up
       const required = unknown.filter((f) => f.required);
       if (required.length) return stop('pendente', required);
       if (sending && !opts.submit) return stop('revisar', []);
@@ -233,7 +233,7 @@
       if (wasSent()) break;
       const now = applyDialog();
       if (now && signature(now) === before) {
-        // não avançou: a página recusou algum campo
+        // didn't advance: the page rejected some field
         const fields = collect(now);
         const bad = invalid(now, fields);
         if (++stuck > 1 || bad.length || unknown.length) return stop('pendente', bad.length ? bad : unknown.length ? unknown : fields.filter((f) => f.empty));
@@ -246,7 +246,7 @@
     return { status: 'enviada' };
   }
 
-  // ---------- qualquer formulário ----------
+  // ---------- any form ----------
 
   async function fillPage(opts) {
     const blank = () => collect(document.body).filter((f) => f.empty && f.kind !== 'file' && f.kind !== 'checkbox').length;
@@ -258,8 +258,8 @@
     return { status: 'preenchida', filled: before - blank() + (state.uploaded ? 1 : 0), questions: unknown.map(describe) };
   }
 
-  // Retrato do formulário quando a candidatura não chega ao fim — só rótulos e textos de botões, sem o que
-  // foi digitado. Fica guardado na vaga, para dar para ver o que a página tinha de diferente do esperado.
+  // Snapshot of the form when the application doesn't finish — only labels and button texts, not what was
+  // typed. Saved with the job, so we can see how the page differed from what was expected.
   function snapshot() {
     const root = applyDialog() || document.body;
     return {
