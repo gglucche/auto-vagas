@@ -1,0 +1,16 @@
+# Pacote da extensão e a chave que o navegador gera ao empacotar (a .pem é privada)
+*.crx
+*.pem
+*.zip
+
+# Credenciais do Google Cloud e variáveis locais
+client_secret*.json
+.env
+.env.*
+
+# Dependências e arquivos do sistema
+node_modules/
+*.log
+Thumbs.db
+desktop.ini
+.DS_Store

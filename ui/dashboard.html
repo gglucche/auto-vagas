@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Auto Vagas</title>
+  <link rel="icon" href="../icons/48.png">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+<div id="app">
+  <aside id="side">
+    <div class="brand"><img src="../icons/48.png" alt=""><span>Auto Vagas</span></div>
+    <nav id="nav"></nav>
+    <div id="setup"></div>
+    <div id="scanBox"></div>
+  </aside>
+
+  <section id="listPane">
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Buscar vaga, empresa ou e-mail  ( / )">
+      <select id="sort" title="Ordenar">
+        <option value="fit">Maior aderência</option>
+        <option value="date">Mais recentes</option>
+      </select>
+    </div>
+    <div id="bulk"></div>
+    <div id="list" tabindex="-1"></div>
+  </section>
+
+  <section id="detailPane"><div id="detail"></div></section>
+
+  <section id="page">
+    <div id="stats" class="page"></div>
+
+    <form id="settings" class="page" autocomplete="off">
+      <div class="page-head"><h2>Configurações</h2><span id="saveStatus" class="muted"></span></div>
+
+      <div class="card">
+        <h3><span class="step">1</span> Seu currículo</h3>
+        <label id="drop" class="drop">
+          <input id="resumeFile" type="file" accept="application/pdf" hidden>
+          <b id="resumeName">Arraste o PDF do currículo aqui ou clique para escolher</b>
+          <span class="muted">Os campos abaixo se preenchem sozinhos a partir dele. É também o arquivo anexado nas candidaturas quando a IA está desligada.</span>
+        </label>
+        <div class="grid2">
+          <label>Nome <input data-key="name" placeholder="Seu nome completo"></label>
+          <label>Seu e-mail <input data-key="email" type="email" placeholder="voce@gmail.com"></label>
+        </div>
+        <label>Suas habilidades (separadas por vírgula) — usadas no cálculo de aderência
+          <input data-key="skills" placeholder="react, typescript, sql, inglês"></label>
+
+        <div class="seg" id="modeSeg">
+          <button type="button" data-mode="template"><b>Currículo padrão</b><span>Mesmo PDF e e-mail modelo para todas as vagas. Grátis.</span></button>
+          <button type="button" data-mode="ai"><b>Adaptado por IA</b><span>Currículo e e-mail reescritos para cada vaga, sem inventar nada.</span></button>
+        </div>
+
+        <label>Provedor de IA
+          <select data-key="provider" id="aiProvider"></select></label>
+        <div class="grid2">
+          <label><span>Chave de API (salva só neste navegador) · <a id="aiKeyLink" target="_blank" rel="noopener">obter chave ↗</a></span>
+            <input id="aiKey" type="password"></label>
+          <label>Modelo
+            <input id="aiModel" list="aiModels"><datalist id="aiModels"></datalist></label>
+        </div>
+        <p class="muted" id="aiHint"></p>
+        <div class="row" id="aiCheckRow">
+          <button type="button" id="aiCheck">Testar modelos</button>
+          <span class="muted" id="aiModelStatus"></span>
+        </div>
+        <div class="row">
+          <button type="button" id="refillBtn">Preencher de novo pelo PDF</button>
+          <button type="button" id="analyzeBtn">✦ Refinar com IA</button>
+          <span class="muted">Opcional: a IA relê o currículo e melhora o texto, as habilidades e as sugestões de busca.</span>
+        </div>
+        <details>
+          <summary>Texto do currículo usado pela IA</summary>
+          <textarea data-key="resumeText" rows="10" placeholder="Preenchido sozinho quando você carrega o PDF — ou cole o texto do seu currículo."></textarea>
+        </details>
+      </div>
+
+      <div class="card">
+        <h3><span class="step">2</span> O que buscar</h3>
+        <label>Termos de busca, separados por vírgula ou um por linha — cada termo vira uma busca própria em cada site
+          <textarea data-key="keywords" rows="3" placeholder="React, TypeScript, Analista de Dados"></textarea></label>
+        <p class="muted">Prefira termos curtos, com a tecnologia: “React” acha mais e melhor do que “Desenvolvedor Front-end React e Node.js Sênior”. Só entram vagas que citam as tecnologias do termo.</p>
+        <div class="grid2">
+          <label>Localização <input data-key="location" placeholder="Cidade, estado ou país — vazio: o país inteiro; “Mundo”: qualquer país"></label>
+          <label>Ignorar vagas com estes termos no título ou empresa (um por linha)
+            <textarea data-key="excludeTerms" rows="2" placeholder="estágio&#10;sênior"></textarea></label>
+        </div>
+        <div class="row">
+          <label class="check"><input type="checkbox" data-key="remoteOnly"> Só vagas remotas</label>
+          <label class="check"><input type="checkbox" data-key="srcLinkedinJobs"> LinkedIn</label>
+          <label class="check"><input type="checkbox" data-key="srcBoards"> Gupy, InfoJobs, Vagas.com, Remotar e Himalayas</label>
+        </div>
+        <p class="muted">Esses sites são consultados direto, todos ao mesmo tempo, sem abrir aba e sem usar nenhuma conta sua. Eles quase nunca publicam e-mail: as vagas aparecem em “Candidatar no site”.</p>
+        <div class="grid2">
+          <label>Buscar sozinho a cada
+            <select data-key="scanEveryHours">
+              <option value="0">Nunca (só quando eu clicar)</option>
+              <option value="3">3 horas</option><option value="6">6 horas</option>
+              <option value="12">12 horas</option><option value="24">24 horas</option>
+            </select></label>
+          <label>Máximo de vagas lidas por termo em cada site <input data-key="maxPerSearch" type="number" min="1" max="50"></label>
+        </div>
+        <div class="row"><label class="check"><input type="checkbox" data-key="notify"> Avisar quando encontrar vagas novas</label></div>
+        <details>
+          <summary>Avançado</summary>
+          <p class="muted">Fontes que só existem dentro de uma página: abrem uma janela de busca, que precisa ficar visível, e são mais lentas.</p>
+          <div class="row">
+            <label class="check"><input type="checkbox" data-key="srcLinkedinPosts"> Posts do LinkedIn com e-mail (usa o seu login no LinkedIn)</label>
+            <label class="check"><input type="checkbox" data-key="srcGoogle"> Vagas do Google</label>
+          </div>
+          <label>Domínios de e-mail a ignorar (um por linha) <textarea data-key="blockedDomains" rows="3"></textarea></label>
+        </details>
+      </div>
+
+      <div class="card">
+        <h3><span class="step">3</span> Envio pelo Gmail</h3>
+        <ol class="guide">
+          <li>Ative a <a href="https://console.cloud.google.com/apis/library/gmail.googleapis.com" target="_blank" rel="noopener">Gmail API</a> em um projeto do Google Cloud.</li>
+          <li>Abra <a href="https://console.cloud.google.com/auth/audience" target="_blank" rel="noopener">Público-alvo</a>. Na primeira vez o Google pede um nome para o app: escolha o tipo “Externo”. Depois clique em <b>“Publicar app”</b>; se deixar em “Teste”, adicione o seu e-mail em “Usuários de teste” e o Google vai pedir o login de novo a cada 7 dias.</li>
+          <li>Em <a href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noopener">Clientes</a>, crie um cliente OAuth do tipo <b>“Aplicativo da Web”</b> (não “Extensão do Chrome”). Em <b>“URIs de redirecionamento autorizados”</b> (não em “Origens JavaScript”), clique em “Adicionar URI”, cole este endereço e salve:
+            <span class="copy"><code id="redirectUri"></code><button type="button" id="copyUri">Copiar</button></span></li>
+          <li>Cole o ID do cliente abaixo e clique em Conectar. Na tela “O Google não verificou este app”, clique em “Avançado” e depois no link pequeno do fim da página, <b>“Acessar … (não seguro)”</b>; na tela seguinte, em “Continuar”. O aviso aparece porque o app é o seu e não passou pela revisão do Google; a única permissão pedida é enviar e-mails.</li>
+        </ol>
+        <label>ID do cliente OAuth <input data-key="gmailClientId" placeholder="xxxx.apps.googleusercontent.com"></label>
+        <p class="muted">Só o ID do cliente é usado. A chave secreta e o arquivo JSON que o Google oferece para baixar não são necessários.</p>
+        <div class="row">
+          <button type="button" id="gmailBtn" class="primary">Conectar Gmail</button>
+          <button type="button" id="gmailTest">Enviar e-mail de teste para mim</button>
+          <span id="gmailStatus" class="muted"></span>
+        </div>
+        <div id="gmailProblem" class="alert" hidden></div>
+        <p class="muted">Sem isso o app ainda funciona: o botão Enviar abre o Gmail com tudo preenchido e baixa o currículo para você anexar.</p>
+        <hr>
+        <div class="row"><label class="check"><input type="checkbox" data-key="autoSend"> <b>Piloto automático</b> — enviar sem eu revisar</label></div>
+        <div class="grid2">
+          <label>Limite de e-mails por dia <input data-key="dailyLimit" type="number" min="1" max="100"></label>
+          <label>Aderência mínima para envio automático (0–100) <input data-key="minFit" type="number" min="0" max="100"></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="step">4</span> Candidatura no site</h3>
+        <p class="muted">Para as vagas de “Candidatura simplificada” do LinkedIn: a extensão abre a vaga em uma janela, preenche o formulário com as respostas abaixo, anexa o seu currículo e envia — uma vaga ou várias de uma vez. Ela não inventa resposta: pergunta que não souber para a candidatura e aparece aqui, para você responder uma vez só.</p>
+        <div id="applyPending"></div>
+        <div class="grid2">
+          <label>Celular, com DDD <input data-key="phone" placeholder="19 99999-8888"></label>
+          <label>Cidade onde você mora <input data-key="city" placeholder="Campinas, São Paulo"></label>
+        </div>
+        <div class="grid2">
+          <label>Endereço do seu LinkedIn <input data-key="linkedinUrl" placeholder="https://www.linkedin.com/in/voce"></label>
+          <label>Portfólio, GitHub ou site (opcional) <input data-key="portfolioUrl"></label>
+        </div>
+        <div class="grid2">
+          <label>Anos de experiência profissional <input data-key="yearsExperience" placeholder="10"></label>
+          <label>Pretensão salarial (só números) <input data-key="salary" placeholder="12000"></label>
+        </div>
+        <label>Anos de experiência por tecnologia (uma por linha)
+          <textarea data-key="skillYears" rows="3" placeholder="react: 7&#10;typescript: 5"></textarea></label>
+        <div class="grid2">
+          <label>Nível de inglês
+            <select data-key="englishLevel"><option value="">Não informar</option><option>Básico</option><option>Intermediário</option><option>Avançado</option><option>Fluente</option></select></label>
+          <label>Disponibilidade para começar <input data-key="availability" placeholder="Imediata"></label>
+        </div>
+        <div class="row"><label class="check"><input type="checkbox" data-key="applyReview"> Parar antes de enviar, para eu conferir cada candidatura</label></div>
+        <div class="grid2">
+          <label>Limite de candidaturas pelo site por dia <input data-key="applyDailyLimit" type="number" min="1" max="60"></label>
+        </div>
+        <details><summary id="applyAnswersTitle">Respostas salvas</summary><div id="applyAnswers"></div></details>
+        <p class="muted">Em formulários de outros sites, abra a página e clique no ícone da extensão → “Preencher esta página”: ela preenche o que souber, etapa por etapa, e você confere e envia. Atenção: o LinkedIn não permite automação nos termos de uso e pode restringir contas que exageram; por isso há limite diário e pausa entre as candidaturas.</p>
+      </div>
+
+      <div class="card">
+        <h3>Modelos de e-mail</h3>
+        <p class="muted">Usados quando a IA está desligada. Variáveis: {vaga}, {empresa}, {nome}.</p>
+        <label>Assunto <input data-key="subjectTemplate"></label>
+        <label>E-mail <textarea data-key="bodyTemplate" rows="7"></textarea></label>
+        <div class="grid2">
+          <label>Sugerir follow-up após (dias sem resposta) <input data-key="followUpDays" type="number" min="1" max="60"></label>
+        </div>
+        <label>Follow-up <textarea data-key="followUpTemplate" rows="5"></textarea></label>
+      </div>
+
+      <div class="card">
+        <h3>Dados</h3>
+        <div class="row">
+          <button type="button" id="exportCsv">Exportar candidaturas (CSV)</button>
+          <button type="button" id="clearArchive">Apagar arquivadas</button>
+          <button type="button" id="wipe" class="danger">Apagar todas as vagas</button>
+        </div>
+        <details><summary>Registro de atividade</summary><ul id="logList"></ul></details>
+      </div>
+    </form>
+  </section>
+</div>
+<div id="toasts"></div>
+<script type="module" src="dashboard.js"></script>
+</body>
+</html>

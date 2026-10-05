@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <style>
+    :root { --bg: #fff; --text: #171a21; --muted: #667085; --line: #e4e7ec; --accent: #4f46e5; --soft: #eef0ff; color-scheme: light dark; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #161a21; --text: #e7eaf0; --muted: #8f99a8; --line: #272d38; --accent: #8b87ff; --soft: #23234a; } }
+    body { margin: 0; width: 300px; padding: 14px; font: 14px/1.45 "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); }
+    header { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; margin-bottom: 12px; }
+    header img { width: 22px; height: 22px; }
+    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .kpis div { border: 1px solid var(--line); border-radius: 10px; padding: 8px; text-align: center; font-size: 11.5px; color: var(--muted); }
+    .kpis b { display: block; font-size: 20px; color: var(--text); }
+    button { width: 100%; font: inherit; font-weight: 500; padding: 9px; margin-top: 6px; border: 1px solid var(--line); border-radius: 8px; background: none; color: var(--text); cursor: pointer; }
+    button:hover { border-color: var(--accent); background: var(--soft); }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    button:disabled { opacity: .55; cursor: default; }
+    #msg { margin: 10px 0 0; font-size: 12.5px; color: var(--muted); min-height: 18px; }
+  </style>
+</head>
+<body>
+  <header><img src="../icons/48.png" alt="">Auto Vagas</header>
+  <div class="kpis">
+    <div><b id="kReview">0</b>para revisar</div>
+    <div><b id="kToday">0</b>enviadas hoje</div>
+    <div><b id="kTotal">0</b>candidaturas</div>
+  </div>
+  <button id="open" class="primary">Abrir painel</button>
+  <button id="scan">Buscar vagas agora</button>
+  <button id="capture">Salvar a vaga desta página</button>
+  <button id="fill">Preencher esta página</button>
+  <p id="msg"></p>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Auto Vagas",
+  "version": "0.7.0",
+  "description": "Busca vagas no LinkedIn, Gupy, InfoJobs e outros sites, calcula a aderência ao seu currículo, prepara a candidatura (currículo padrão ou adaptado por IA) e envia por e-mail.",
+  "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" },
+  "permissions": ["storage", "unlimitedStorage", "alarms", "tabs", "identity", "notifications", "scripting", "activeTab"],
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "https://portal.gupy.io/*",
+    "https://www.infojobs.com.br/*",
+    "https://www.vagas.com.br/*",
+    "https://api.remotar.com.br/*",
+    "https://himalayas.app/*",
+    "https://www.google.com/*",
+    "https://accounts.google.com/*",
+    "https://gmail.googleapis.com/*",
+    "https://api.anthropic.com/*",
+    "https://api.openai.com/*",
+    "https://api.groq.com/*",
+    "https://opencode.ai/*"
+  ],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "action": { "default_title": "Auto Vagas", "default_popup": "ui/popup.html" },
+  "options_page": "ui/dashboard.html",
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/*", "https://www.google.com/search*"],
+      "js": ["content/extract.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
