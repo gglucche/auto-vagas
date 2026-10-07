@@ -39,7 +39,9 @@ Tudo fica em **Configurações**, em quatro passos:
 
 **Busca.** Cada termo vira uma consulta no LinkedIn, Gupy, InfoJobs, Vagas.com, Remotar e Himalayas, feita direto por HTTP: não abre aba e não usa a sua conta. Ficam só as vagas que citam as tecnologias do termo, dos últimos 45 dias, sem repetição entre os sites. Roda no botão **Buscar vagas agora** ou sozinha a cada 3, 6, 12 ou 24 horas.
 
-**Para revisar.** Vagas com e-mail de contato. Cada uma chega com a nota de aderência ao seu currículo, o e-mail escrito e o currículo anexado. Confira e clique em **Enviar candidatura**, ou ligue o **Piloto automático**, que envia sozinho dentro do limite diário e da aderência mínima que você escolher.
+**Aderência.** A nota de 0 a 100 olha o que um recrutador olha primeiro: a tecnologia do título, os requisitos obrigatórios, o tipo de função e o nível. Diferenciais contam pouco; benefícios e a descrição da empresa não contam; Git, Scrum e inglês, que quase toda vaga pede, pesam pouco. Quando a nota fica limitada, o painel diz o motivo, como "é vaga de estágio" ou "Angular, do título da vaga, não aparece no seu currículo". Com a IA ligada, ela avalia requisito por requisito e mostra o trecho do seu currículo que prova cada um. O que ela diz que você tem sem um trecho que prove conta só pela metade. A IA também avalia, aos poucos, as vagas para candidatar no site.
+
+**Para revisar.** Vagas com e-mail de contato. Cada uma chega com a nota de aderência ao seu currículo, o e-mail escrito e o currículo anexado. Confira e clique em **Enviar candidatura**, ou ligue o **Piloto automático**, que envia sozinho dentro do limite diário e da aderência mínima que você escolher. Com a IA, o e-mail e o currículo adaptado só são escritos para vagas com aderência de 40 ou mais; nas outras fica o seu modelo, e **Adaptar com IA** escreve quando você pedir. Antes de chegar a você, o texto da IA é conferido: sai markdown e campo para preencher, e o que não está no seu currículo volta para a IA corrigir ou é tirado.
 
 **Candidatar no site.** Vagas sem e-mail, que são a maioria. Nas de Candidatura simplificada do LinkedIn, **⚡ Candidatar** abre a vaga em uma janela, passa pelas etapas, anexa o currículo e envia. O botão do topo faz todas, uma depois da outra. A extensão não inventa respostas: uma pergunta que ela não sabe interrompe aquela candidatura e aparece em Configurações, para você responder uma vez só.
 
@@ -65,6 +67,7 @@ Não há etapa de build: o navegador carrega a pasta como está. Ao mudar o cód
 
 ```bash
 node dev/test.mjs          # testes com a API chrome.* simulada
+node dev/test-quality.mjs  # aderência contra notas de recrutadores e conferência do texto da IA
 node dev/test-pdf.mjs      # leitura do PDF do currículo
 node dev/test-browser.mjs  # a extensão instalada em um Chrome, Brave ou Edge sem janela
 node dev/server.mjs        # o painel em http://localhost:5178, com dados de exemplo

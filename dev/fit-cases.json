@@ -1,0 +1,490 @@
+{
+ "note": "Dados inventados: currículos e vagas fictícios, escritos para testar o cálculo de aderência. gold = mediana das notas de três avaliadores independentes (recrutador, gestor da vaga, orientador de carreira), de 0 a 100.",
+ "profiles": {
+  "apex": {
+   "resumeText": "Marcelo Tavares Lindner\nmarcelo.lindner@exemplo.com | (16) 98123-4567 | Araraquara, SP | linkedin.example/in/marcelo-lindner\n\n# Resumo Profissional\nDesenvolvedor sênior com cerca de 10 anos de experiência no ecossistema Oracle. Trabalho com Oracle APEX desde a versão 4, além de PL/SQL e Oracle Database (packages, tuning de SQL e rotinas batch). Nos últimos 3 anos passei a atuar também com Java e Spring Boot em serviços de integração e com APIs REST usando ORDS, JSON e OAuth2. Tenho experiência em implantação e sustentação de Oracle Retail (RMS, ReIM e MOM) em uma grande rede varejista. Falo inglês e espanhol fluentes. Trabalho em regime remoto e já liderei informalmente pequenas equipes de desenvolvimento.\n\n# Experiência Profissional\nDesenvolvedor Oracle Sênior | Grupo Varejo Alfa | mar/2021 - atual | Remoto\n- Sustentação e evolução do Oracle Retail Merchandising (RMS, ReIM e MOM) em uma rede com mais de 300 lojas: correção de batches, customizações em PL/SQL e apoio aos fechamentos de estoque e fiscal.\n- Participação na implantação do ReIM (conciliação de notas fiscais de fornecedores): mapeamento de regras, cargas iniciais e testes integrados com Contas a Pagar.\n- Desenvolvimento, desde 2023, de serviços de integração em Java 17 com Spring Boot entre o RMS, o e-commerce e o WMS, expondo e consumindo APIs REST (JSON, OAuth2).\n- Criação de módulos REST no ORDS para disponibilizar dados de itens, preços e estoque a parceiros.\n- Tuning de SQL e de processos batch em Oracle Database 19c (planos de execução, índices, particionamento), reduzindo o batch noturno de preços de 4h para 1h20.\n- Desenvolvimento de aplicações Oracle APEX (21.x a 23.x) de apoio à operação: portal de divergências de recebimento, aprovação de pedidos e painéis de acompanhamento.\n- Coordenação informal de um time de 3 desenvolvedores: divisão de tarefas, revisão de código e integração de novos membros.\n\nDesenvolvedor PL/SQL e Oracle APEX | Delta Sistemas Consultoria | jan/2018 - fev/2021 | Campinas, SP\n- Desenvolvimento de aplicações Oracle APEX (5.1 a 20.2) para clientes de agronegócio, saúde e distribuição.\n- Criação de packages, procedures, functions e triggers em PL/SQL; cargas com SQL*Loader e external tables.\n- Customizações de interface com JavaScript, jQuery, Dynamic Actions e plug-ins APEX.\n- Migração de aplicações Oracle Forms para APEX, com levantamento de regras junto aos usuários.\n- Atendimento a clientes da Argentina e do Chile, em espanhol.\n\nAnalista Desenvolvedor Júnior | Cooperativa Agro Gama | fev/2016 - dez/2017 | Araraquara, SP\n- Primeiras aplicações em Oracle APEX 4.2 e PL/SQL para controle de entregas dos cooperados.\n- Relatórios em SQL, scripts shell e agendamentos em Linux, suporte a usuários.\n\n# Formação Acadêmica\n- Bacharelado em Sistemas de Informação | Centro Universitário Exemplo de Araraquara | 2012 - 2015\n- Especialização em Engenharia de Software | Faculdade Exemplo de Tecnologia | 2019 - 2020\n\n# Competências Técnicas\n- Oracle APEX (4.2 a 23.x): Interactive Reports e Grids, Dynamic Actions, plug-ins, autenticação e autorização\n- PL/SQL: packages, procedures, functions, triggers, bulk collect, tratamento de exceções\n- Oracle Database 11g, 12c e 19c: modelagem, tuning de SQL, planos de execução, particionamento\n- Java 17 e Spring Boot (3 anos): APIs REST, Spring Data JPA, serviços de integração\n- Integrações: ORDS, REST, JSON, OAuth2 e web services SOAP legados\n- Oracle Retail: RMS, ReIM e MOM (implantação e sustentação)\n- JavaScript e jQuery aplicados ao APEX\n- Git, Linux (shell script), OCI (uso básico de Autonomous Database e Object Storage)\n\n# Idiomas\n- Português: nativo\n- Inglês: fluente\n- Espanhol: fluente\n\n# Informações Adicionais\n- Preferência por trabalho remoto; disponível para viagens pontuais.\n- Cursos livres de Spring Boot e de arquitetura de APIs REST (2022-2023).",
+   "skills": "Oracle APEX, PL/SQL, Oracle Database, SQL, Tuning de SQL, Java, Spring Boot, APIs REST, ORDS, JSON, OAuth2, Oracle Retail, RMS, ReIM, MOM, JavaScript, jQuery, Git, Linux, OCI, Inglês, Espanhol",
+   "keywords": "Desenvolvedor Oracle APEX\nDesenvolvedor PL/SQL\nConsultor Oracle Retail\nDesenvolvedor Oracle Sênior"
+  },
+  "front": {
+   "resumeText": "Larissa Andrade Moreira\nlarissa.moreira@exemplo.com | (31) 98765-4321 | Belo Horizonte, MG | linkedin.example/in/larissa-moreira | github.example/larissa-am\n\n# Resumo profissional\nDesenvolvedora Front-end Pleno com 4 anos de experiência construindo aplicações web em React, TypeScript e Next.js. Atuo do protótipo no Figma até a entrega em produção: componentização, integração com APIs REST e GraphQL, testes automatizados com Jest e React Testing Library e atenção a performance e acessibilidade. Experiência em squads ágeis (Scrum) em fintech e agência digital, com contribuições pontuais em BFFs com Node.js e Express. Busco oportunidades híbridas em Belo Horizonte ou remotas.\n\n# Experiência profissional\nDesenvolvedora Front-end Pleno | Pagamentos Delta S.A. (fintech) | mar/2024 – atual | Belo Horizonte, MG (híbrido)\n- Desenvolvo e mantenho o portal web de lojistas em Next.js e TypeScript, usado por mais de 40 mil estabelecimentos para acompanhar vendas, recebíveis e antecipações.\n- Migrei telas legadas em React com JavaScript para TypeScript e Next.js (App Router), reduzindo em 35% o tempo de carregamento inicial das páginas mais acessadas.\n- Criei e documentei em Storybook cerca de 30 componentes do design system interno, estilizados com Tailwind CSS e alinhados ao Figma com o time de design.\n- Integrei o front-end a APIs REST e a um gateway GraphQL com Apollo Client e React Query, tratando cache, paginação e estados de erro.\n- Aumentei a cobertura de testes do portal de 40% para 78% com Jest e React Testing Library, incluindo os fluxos críticos de pagamento.\n- Implementei um BFF em Node.js com Express para agregar dados de três serviços internos e simplificar o consumo pelo front-end.\n- Participo de cerimônias Scrum, refinamentos técnicos e code reviews; acompanho dois desenvolvedores júnior no dia a dia.\n\nDesenvolvedora Front-end Júnior | Agência Pixel Norte | out/2022 – fev/2024 | Belo Horizonte, MG\n- Desenvolvi sites institucionais, landing pages e painéis administrativos para clientes de varejo, educação e saúde usando React, Next.js e styled-components.\n- Converti layouts do Figma em interfaces responsivas e acessíveis, seguindo boas práticas de HTML semântico e WCAG.\n- Consumi APIs REST de CMSs headless e de sistemas dos clientes, com tratamento de erros e estados de carregamento.\n- Escrevi testes unitários com Jest e React Testing Library para componentes compartilhados entre projetos.\n- Trabalhei com Git (GitFlow, pull requests) e quadros Kanban/Scrum junto a designers, back-end e atendimento.\n\n# Formação acadêmica\n- Bacharelado em Sistemas de Informação | Faculdade de Tecnologia Serra Azul | 2018 – 2022\n\n# Cursos e certificações\n- Next.js App Router e Server Components | curso online | 2024\n- Testes em aplicações React com Jest e Testing Library | curso online | 2023\n- GraphQL para desenvolvedores front-end | curso online | 2023\n- Acessibilidade na web (WCAG 2.1) | curso online | 2022\n\n# Competências técnicas\n- Front-end: React, TypeScript, JavaScript (ES6+), Next.js, HTML5, CSS3\n- Estilização: Tailwind CSS, styled-components, design responsivo, Storybook\n- Dados e integração: APIs REST, GraphQL, Apollo Client, React Query\n- Testes: Jest, React Testing Library\n- Back-end (básico): Node.js, Express (BFFs)\n- Ferramentas e processos: Git, GitHub, Figma, Scrum, Kanban, Jira\n\n# Idiomas\n- Português: nativo\n- Inglês: intermediário (leitura de documentação técnica com facilidade, conversação básica)\n\n# Projetos pessoais\n- Painel de finanças pessoais em Next.js, TypeScript e Tailwind CSS, com testes em Jest e deploy contínuo a partir do GitHub.",
+   "skills": "React, TypeScript, JavaScript, Next.js, Tailwind CSS, styled-components, HTML5, CSS3, Jest, React Testing Library, APIs REST, GraphQL, Apollo Client, React Query, Node.js, Express, Figma, Git, GitHub, Scrum, Kanban, Storybook, Design responsivo, Acessibilidade web",
+   "keywords": "Desenvolvedor Front-end React\nFront-end Pleno\nDesenvolvedor React TypeScript\nDesenvolvedor Next.js\nFrontend Engineer"
+  },
+  "dados": {
+   "resumeText": "Mariana Kowalski Tavares\nmariana.tavares@exemplo.com | (41) 90000-4821 | Curitiba, PR | linkedin.example/in/mariana-tavares\n\n# Resumo profissional\nAnalista de Dados com 5 anos de experiência no setor financeiro, em back-office bancário e fintech de crédito. Atuo com SQL (PostgreSQL e SQL Server), Power BI (DAX, Power Query e modelagem dimensional), Excel avançado e rotinas de ETL com SSIS. Construo dashboards de KPIs, automatizo relatórios gerenciais e trabalho próxima das áreas de negócio (operações, crédito, cobrança e financeiro) para transformar perguntas em indicadores confiáveis. Uso Python com pandas em análises ad hoc e tratamento de bases. Busco posição de Analista de Dados ou de BI (pleno/sênior) em modelo híbrido em Curitiba.\n\n# Experiência profissional\nAnalista de Dados Pleno | Fintech Beta Crédito Digital | Curitiba, PR | mar/2023 - atual\n- Desenvolvo e mantenho mais de 20 dashboards no Power BI para Crédito, Cobrança e Produto (inadimplência, taxa de aprovação, ticket médio, safras e roll rate).\n- Modelei o dataset corporativo de crédito em esquema estrela, com medidas DAX para safra e PDD gerencial; o tempo de atualização caiu de 40 para 12 minutos.\n- Escrevo consultas, views e CTEs em PostgreSQL sobre a base transacional, em parceria com a engenharia para criação de índices e réplicas de leitura.\n- Faço análises ad hoc em Python (pandas, Jupyter) para conciliação de bases e investigação de desvios em indicadores.\n- Conduzo reuniões quinzenais com gestores para definir KPIs e documento regras de negócio e dicionário de dados no Confluence.\n- Substituí 15 planilhas manuais de fechamento mensal por relatórios automatizados, economizando cerca de 30 horas por mês da equipe financeira.\n\nAnalista de Dados Júnior | Banco Araucária Alfa S.A. | Curitiba, PR | jul/2022 - fev/2023\n- Desenvolvi e mantive pacotes SSIS para carga diária de dados de operações de back-office (TED, boletos, conciliação bancária) no SQL Server.\n- Migrei 30 relatórios de Excel para Power BI, com segurança em nível de linha (RLS) por área.\n- Criei procedures e consultas em SQL Server para relatórios internos de SLA operacional e volumetria.\n- Apoiei Operações e Tesouraria com indicadores diários de produtividade e pendências.\n\nAnalista de Back-office | Banco Araucária Alfa S.A. | Curitiba, PR | set/2021 - jun/2022\n- Conciliação de lançamentos e controle de pendências operacionais com Excel avançado (tabelas dinâmicas, PROCX, Power Query e macros VBA simples).\n- Elaborei o relatório diário de pendências da coordenação, depois automatizado na transição para a área de dados.\n\n# Formação acadêmica\n- Bacharelado em Ciências Econômicas | Universidade Exemplo do Paraná | 2016 - 2020\n- MBA em Business Intelligence e Analytics | Faculdade Exemplo Digital (EAD) | 2022 - 2023\n\n# Competências técnicas\n- SQL: PostgreSQL e SQL Server (CTEs, window functions, views, procedures, otimização básica de consultas)\n- Power BI: DAX, Power Query (M), modelagem dimensional, RLS, Power BI Service e gateway\n- Excel avançado: tabelas dinâmicas, PROCX, Power Query, VBA básico\n- ETL: SSIS (SQL Server Integration Services)\n- Python básico: pandas e Jupyter para análises ad hoc\n- Ferramentas: Git (básico), Jira, Confluence\n- Negócio: indicadores financeiros, crédito e cobrança (safra, inadimplência, roll rate), conciliação bancária\n\n# Certificações e cursos\n- Microsoft Certified: Power BI Data Analyst Associate (PL-300) | 2023\n- Curso de SQL para Análise de Dados | plataforma online | 2021\n- Curso de Python para Análise de Dados (pandas) | plataforma online | 2024\n\n# Idiomas\n- Português: nativo\n- Inglês: intermediário (leitura técnica fluente, conversação intermediária)\n\n# Informações adicionais\n- Disponível para modelo híbrido em Curitiba e região metropolitana.",
+   "skills": "SQL, PostgreSQL, SQL Server, T-SQL, Power BI, DAX, Power Query, Modelagem dimensional, Excel avançado, VBA, SSIS, ETL, Python, pandas, Dashboards, KPIs, Relatórios gerenciais, Análise de dados, Git, Jira, Confluence, Crédito e cobrança, Conciliação bancária",
+   "keywords": "Analista de Dados\nAnalista de BI\nAnalista de Business Intelligence\nAnalista de Dados Power BI\nAnalista de Dados Pleno"
+  }
+ },
+ "cases": [
+  {
+   "id": "apex-01",
+   "profile": "apex",
+   "category": "forte",
+   "title": "Desenvolvedor(a) Oracle APEX Sênior",
+   "description": "Sobre a vaga\nA Distribuidora Ômega Logística está ampliando o time de Sistemas Corporativos e procura uma pessoa desenvolvedora Oracle APEX sênior para evoluir as aplicações internas de compras, faturamento, armazenagem e transporte. São mais de 40 aplicações APEX em produção e um banco Oracle 19c com alto volume de transações. O trabalho é 100% remoto, com encontros presenciais a cada trimestre em Campinas (despesas pagas pela empresa).\n\nResponsabilidades\n- Desenvolver e manter aplicações em Oracle APEX 23.x (Interactive Grids, Dynamic Actions, plug-ins, esquemas de autorização);\n- Criar e otimizar packages, procedures e functions em PL/SQL;\n- Analisar planos de execução e fazer tuning de consultas e rotinas batch em Oracle Database 19c;\n- Publicar e consumir APIs REST via ORDS para integração com transportadoras e parceiros;\n- Participar de code review e apoiar tecnicamente os desenvolvedores plenos do time.\n\nRequisitos obrigatórios\n- 6+ anos de experiência com Oracle APEX e PL/SQL;\n- SQL avançado e experiência com tuning em Oracle Database;\n- ORDS, JSON e integrações REST (incluindo autenticação OAuth2);\n- JavaScript/jQuery aplicado a customizações no APEX;\n- Git.\n\nDiferenciais\n- Java com Spring Boot;\n- Noções de OCI (Autonomous Database, Object Storage);\n- Vivência em varejo, distribuição ou supply chain.\n\nBenefícios\n- Salário compatível com o mercado + PLR;\n- Plano de saúde e odontológico sem coparticipação;\n- VR/VA flexível (cartão multibenefícios);\n- Auxílio home office de R$ 200/mês;\n- Auxílio bem-estar e day off no aniversário.",
+   "judges": [
+    95,
+    95,
+    96
+   ],
+   "gold": 95
+  },
+  {
+   "id": "apex-02",
+   "profile": "apex",
+   "category": "forte",
+   "title": "Consultor(a) Técnico(a) Oracle Retail (RMS/ReIM) Sênior",
+   "description": "Sobre a vaga\nA Sigma Consultoria em Varejo atende grandes redes do varejo alimentar e de moda na América Latina e está ampliando a equipe de projetos e sustentação Oracle Retail. Buscamos consultor(a) técnico(a) sênior para atuar em um novo rollout do RMS e do ReIM em um cliente da região Sul, com atuação remota.\n\nO que você vai fazer\n- Participar do desenho técnico e desenvolver customizações no Oracle Retail Merchandising (RMS, ReIM, RPM/Pricing);\n- Desenvolver extensões em PL/SQL e ajustes em batches e interfaces;\n- Apoiar cargas de dados (itens, fornecedores, custos) e testes integrados;\n- Construir e manter integrações via APIs REST e serviços de integração (Java/Spring Boot ou ORDS);\n- Interagir diretamente com usuários-chave e com o time funcional, inclusive em espanhol.\n\nRequisitos\n- Experiência comprovada em implantação ou sustentação de Oracle Retail (RMS e/ou ReIM);\n- PL/SQL avançado e tuning em Oracle Database;\n- Experiência com integrações REST/JSON;\n- Vivência com Linux e versionamento com Git.\n\nDiferenciais\n- Experiência com Oracle APEX para aplicações de apoio;\n- Espanhol fluente;\n- Conhecimento de OCI.\n\nO que oferecemos\n- Contratação CLT ou PJ (a combinar);\n- Trabalho remoto, com viagens eventuais ao cliente;\n- Plano de saúde, VR/VA, auxílio educação e apoio para certificações.",
+   "judges": [
+    93,
+    93,
+    93
+   ],
+   "gold": 93
+  },
+  {
+   "id": "apex-03",
+   "profile": "apex",
+   "category": "nucleo-ausente",
+   "title": "Desenvolvedor(a) Front-end Angular Sênior",
+   "description": "Sobre nós\nA Fintech Beta oferece crédito e meios de pagamento para pequenos e médios varejistas em todo o Brasil. Somos cerca de 400 pessoas e estamos reconstruindo o portal do lojista para torná-lo mais rápido e acessível.\n\nSobre a vaga\nProcuramos uma pessoa Desenvolvedora Front-end Angular Sênior para o squad de Experiência do Lojista.\n\nResponsabilidades\n- Desenvolver novas funcionalidades do portal do lojista em Angular;\n- Criar componentes reutilizáveis e contribuir com o nosso design system;\n- Integrar o front-end com as APIs REST do back-end;\n- Participar das cerimônias Scrum e dos refinamentos no Jira;\n- Garantir qualidade com testes unitários e end-to-end.\n\nRequisitos obrigatórios\n- Experiência sólida com Angular (14+), TypeScript e RxJS;\n- Gerenciamento de estado com NgRx;\n- HTML5, CSS3/SCSS e boas práticas de acessibilidade (WCAG);\n- Testes com Jest, Karma ou Cypress;\n- Git e fluxo de pull requests;\n- Consumo de APIs REST com autenticação OAuth2/JWT.\n\nDiferenciais\n- Noções de SQL e bancos relacionais;\n- Familiaridade com Linux e pipelines de CI/CD;\n- Inglês para leitura de documentação e reuniões com fornecedores;\n- Experiência no mercado financeiro ou de varejo.\n\nBenefícios\n- Modelo híbrido: 2 dias por semana no escritório da Av. Paulista;\n- Plano de saúde e odontológico, VR/VA flexível;\n- Auxílio creche, PLR e auxílio academia.",
+   "judges": [
+    15,
+    17,
+    17
+   ],
+   "gold": 17
+  },
+  {
+   "id": "apex-04",
+   "profile": "apex",
+   "category": "nucleo-ausente",
+   "title": "Desenvolvedor .NET Sênior (C#)",
+   "description": "Sobre a vaga\nA Seguradora Kappa está modernizando sua plataforma de sinistros e procura uma pessoa desenvolvedora .NET sênior para o squad responsável pela migração de sistemas legados para microsserviços em .NET 8, rodando em Azure.\n\nResponsabilidades\n- Desenvolver APIs REST em C# com ASP.NET Core;\n- Modelar e evoluir a camada de dados com Entity Framework Core e Dapper;\n- Integrar os novos serviços com sistemas legados que ainda usam bancos Oracle e SQL Server;\n- Escrever testes automatizados (xUnit) e participar de code reviews;\n- Atuar nas cerimônias Scrum e acompanhar demandas no Jira.\n\nRequisitos obrigatórios\n- Experiência sólida com C# e .NET (Core 3.1, 6 ou 8);\n- ASP.NET Core Web API e Entity Framework Core;\n- SQL Server e bom domínio de SQL (conhecimento de Oracle é um plus);\n- Autenticação OAuth2 / OpenID Connect;\n- Git, Azure DevOps e pipelines de CI/CD;\n- Inglês intermediário para leitura técnica e conversas com fornecedores.\n\nDesejável\n- Azure (App Service, Service Bus, Functions);\n- Mensageria com RabbitMQ ou Service Bus;\n- Docker e Linux;\n- Experiência no setor de seguros.\n\nBenefícios\n- CLT, 100% remoto;\n- Plano de saúde e odontológico nacional;\n- Seguro de vida, VR/VA e PLR;\n- Bolsa de estudos para idiomas e pós-graduação.",
+   "judges": [
+    20,
+    20,
+    22
+   ],
+   "gold": 20
+  },
+  {
+   "id": "apex-05",
+   "profile": "apex",
+   "category": "generico-inflado",
+   "title": "Analista de Qualidade de Software (QA) Sênior",
+   "description": "Sobre a vaga\nA Rede Supermercados Lambda, com 120 lojas no interior paulista, busca Analista de Qualidade de Software Sênior para o time de Sistemas de Loja e Retaguarda. A pessoa será responsável pela estratégia de testes dos projetos de ERP, PDV e e-commerce.\n\nResponsabilidades\n- Planejar, escrever e executar casos de teste funcionais, regressivos e integrados;\n- Validar fluxos de compras, recebimento e precificação no ERP (Oracle Retail RMS) e em aplicações internas desenvolvidas em Oracle APEX;\n- Montar massas de dados e validar resultados por meio de consultas SQL no banco Oracle;\n- Testar APIs REST com Postman e analisar logs em servidores Linux;\n- Registrar e acompanhar defeitos no Jira e participar das cerimônias ágeis;\n- Apoiar a automação de testes com Cypress ou Selenium.\n\nRequisitos\n- Mínimo de 5 anos de experiência com testes de software (QA);\n- Domínio de técnicas de teste (partição de equivalência, valor-limite, BDD/Gherkin);\n- SQL para consultas de validação;\n- Postman, Jira e Git;\n- Experiência com automação de testes (Cypress, Selenium ou Robot Framework).\n\nDiferenciais\n- Certificação CTFL;\n- Vivência em varejo;\n- Leitura básica de código PL/SQL ou Java;\n- Inglês intermediário.\n\nBenefícios\n- Modelo híbrido (3x por semana em Jundiaí);\n- Desconto de 10% nas lojas da rede;\n- Plano de saúde, VR, VT e PLR.",
+   "judges": [
+    20,
+    22,
+    22
+   ],
+   "gold": 22
+  },
+  {
+   "id": "apex-06",
+   "profile": "apex",
+   "category": "diferencial",
+   "title": "Engenheiro(a) de Dados Sênior",
+   "description": "Sobre a vaga\nNa Moda Rho Varejo, dados orientam desde a compra de coleções até a reposição nas lojas. Buscamos uma pessoa Engenheira de Dados Sênior para construir e manter nosso lakehouse e os pipelines que alimentam os times de Planejamento, Comercial e CRM.\n\nResponsabilidades\n- Desenvolver pipelines de ingestão batch e streaming com Python e PySpark;\n- Orquestrar fluxos no Airflow e modelar as camadas bronze/silver/gold no Databricks;\n- Criar modelos analíticos com dbt e garantir qualidade de dados (Great Expectations);\n- Trabalhar com infraestrutura em AWS (S3, Glue, Lambda, IAM) e Terraform;\n- Apoiar cientistas de dados na disponibilização de features.\n\nRequisitos obrigatórios\n- Python avançado e PySpark;\n- Experiência com Airflow e Databricks (ou Spark em EMR);\n- Modelagem dimensional e SQL avançado;\n- AWS (S3, Glue, Lambda);\n- Git e práticas de CI/CD.\n\nDiferenciais\n- Experiência com bancos Oracle e PL/SQL (nossos principais sistemas de origem);\n- Conhecimento de Oracle Retail (RMS/ReIM) e do modelo de dados de merchandising;\n- Familiaridade com Oracle APEX e ORDS para extração de dados via REST;\n- Inglês avançado.\n\nBenefícios\n- 100% remoto, com auxílio home office;\n- Plano de saúde e odontológico, VR/VA e PLR;\n- 30% de desconto nas lojas;\n- Licença parental estendida.",
+   "judges": [
+    28,
+    30,
+    30
+   ],
+   "gold": 30
+  },
+  {
+   "id": "apex-07",
+   "profile": "apex",
+   "category": "senioridade",
+   "title": "Estágio em Desenvolvimento de Sistemas (Oracle APEX / PL/SQL)",
+   "description": "Sobre a vaga\nA Indústria Theta Alimentos está com vaga de estágio na área de Tecnologia da Informação, no time responsável pelos sistemas internos desenvolvidos em Oracle APEX. É uma ótima oportunidade para quem está começando e quer aprender desenvolvimento com banco de dados Oracle.\n\nAtividades\n- Apoiar o desenvolvimento de telas e relatórios em Oracle APEX;\n- Escrever consultas SQL e pequenas rotinas PL/SQL sob supervisão;\n- Auxiliar nos testes e na documentação das aplicações;\n- Atender chamados simples de usuários internos.\n\nRequisitos\n- Estar cursando Sistemas de Informação, Ciência da Computação, Engenharia de Computação ou áreas correlatas (do 2º ao 6º semestre);\n- Disponibilidade para estagiar 6 horas por dia, presencialmente em São Carlos;\n- Noções de lógica de programação e SQL;\n- Vontade de aprender!\n\nDesejável\n- Conhecimento básico de HTML, CSS e JavaScript;\n- Inglês básico.\n\nBenefícios\n- Bolsa-auxílio de R$ 1.700,00;\n- Vale-transporte e refeição no local;\n- Seguro de vida;\n- Possibilidade de efetivação.",
+   "judges": [
+    8,
+    12,
+    15
+   ],
+   "gold": 12
+  },
+  {
+   "id": "apex-08",
+   "profile": "apex",
+   "category": "parcial",
+   "title": "Desenvolvedor(a) Back-end Java Sênior",
+   "description": "Sobre a vaga\nA Pagamentos Mu processa milhões de transações por dia e está em plena expansão. Procuramos uma pessoa Desenvolvedora Back-end Java Sênior para o time de Conciliação, responsável por cruzar dados de adquirentes, bancos e ERPs de clientes.\n\nResponsabilidades\n- Projetar e desenvolver microsserviços em Java 17 com Spring Boot;\n- Construir integrações REST e assíncronas (Kafka) com parceiros;\n- Escrever testes automatizados e garantir observabilidade (logs, métricas, traces);\n- Trabalhar com bases relacionais (PostgreSQL e Oracle) e otimizar consultas;\n- Participar das decisões de arquitetura do time.\n\nRequisitos obrigatórios\n- Java 11+ e Spring Boot (Spring Web, Spring Data);\n- Experiência com arquitetura de microsserviços em produção;\n- Mensageria com Kafka;\n- Docker e Kubernetes;\n- AWS (ECS/EKS, SQS, RDS);\n- Bancos relacionais e SQL avançado;\n- APIs REST, OAuth2 e Git.\n\nDiferenciais\n- Experiência com integração de ERPs (Oracle, SAP ou similares);\n- Vivência com sistemas de varejo;\n- Espanhol ou inglês para conversar com parceiros da América Latina.\n\nBenefícios\n- Remoto, com encontros presenciais semestrais;\n- Stock options;\n- Plano de saúde, VR/VA, auxílio home office e bônus anual.",
+   "judges": [
+    42,
+    45,
+    45
+   ],
+   "gold": 45
+  },
+  {
+   "id": "apex-09",
+   "profile": "apex",
+   "category": "ingles",
+   "title": "Senior Oracle APEX Developer (Remote - LATAM)",
+   "description": "About the role\nHelix Supply Chain Software builds planning and replenishment tools for mid-sized retailers in the US and Latin America. Our customer portals and back-office tools run on Oracle APEX and Oracle Database, and we are hiring a Senior Oracle APEX Developer to join our product engineering team. This is a fully remote contractor position open to candidates based in Latin America, with working hours overlapping US Central Time.\n\nWhat you'll do\n- Build and maintain APEX applications (APEX 22+), including Interactive Grids, Faceted Search and custom plug-ins;\n- Write clean, efficient PL/SQL packages and tune SQL running against large inventory tables;\n- Expose and consume REST APIs through ORDS (JSON, OAuth2 client credentials);\n- Integrate APEX apps with customer ERP and merchandising systems;\n- Collaborate with product managers and QA in two-week sprints.\n\nRequirements\n- 7+ years of hands-on experience with Oracle Database and PL/SQL;\n- 5+ years building applications with Oracle APEX;\n- Strong experience with ORDS and RESTful integrations;\n- JavaScript/jQuery for APEX customizations;\n- Fluent English (daily meetings with US teammates);\n- Git-based workflow.\n\nNice to have\n- Retail domain knowledge (Oracle Retail RMS or similar merchandising systems);\n- Java/Spring Boot for integration services;\n- OCI experience;\n- Spanish.\n\nWhat we offer\n- Competitive USD-based compensation;\n- Flexible hours within the overlap window;\n- Annual learning budget;\n- Paid time off and local holidays.",
+   "judges": [
+    95,
+    95,
+    96
+   ],
+   "gold": 95
+  },
+  {
+   "id": "apex-10",
+   "profile": "apex",
+   "category": "curta",
+   "title": "Desenvolvedor PL/SQL",
+   "description": "Vaga: Desenvolvedor PL/SQL.\nContratação PJ, 100% remoto, projeto de 6 meses com possibilidade de extensão.\nExperiência com banco Oracle obrigatória.\nInteressados enviar CV com pretensão para vagas@exemplo.com.",
+   "judges": [
+    80,
+    80,
+    80
+   ],
+   "gold": 80
+  },
+  {
+   "id": "apex-11",
+   "profile": "apex",
+   "category": "longa-lista",
+   "title": "Engenheiro(a) de Software Full Stack Sênior",
+   "description": "Sobre a Epsilon\nA Epsilon Marketplace conecta mais de 8 mil lojistas a milhões de compradores. Nosso time de Engenharia tem cerca de 120 pessoas distribuídas pelo Brasil.\n\nA vaga\nBuscamos uma pessoa Engenheira de Software Full Stack Sênior para o squad de Experiência do Vendedor, responsável pelo painel do lojista, onboarding e gestão de catálogo.\n\nResponsabilidades\n- Desenvolver features de ponta a ponta, do front-end ao back-end;\n- Evoluir nossa arquitetura de microsserviços e micro front-ends;\n- Garantir qualidade com testes automatizados e observabilidade;\n- Colaborar com Produto e Design na definição de soluções.\n\nStack e requisitos\n- Front-end: React, Next.js, TypeScript, Redux Toolkit e Tailwind CSS;\n- Back-end: Node.js com NestJS, GraphQL (Apollo) e APIs REST;\n- Bancos de dados: PostgreSQL, MongoDB, Redis e Elasticsearch;\n- Mensageria: Kafka e RabbitMQ;\n- Infra: Docker, Kubernetes, AWS (Lambda, ECS, S3, CloudFront) e Terraform;\n- CI/CD com GitHub Actions; Git; Linux;\n- Testes: Jest, Testing Library e Cypress;\n- Observabilidade: Datadog e OpenTelemetry;\n- Autenticação com OAuth2 / OpenID Connect.\n\nDiferenciais\n- Experiência com marketplaces ou e-commerce;\n- Java ou Go (temos alguns serviços legados em Java/Spring);\n- Inglês para leitura técnica.\n\nBenefícios\n- Remoto de qualquer lugar do Brasil;\n- Plano de saúde e odontológico extensivo a dependentes;\n- Cartão multibenefícios, auxílio home office e PLR;\n- Orçamento anual para cursos e conferências.",
+   "judges": [
+    15,
+    15,
+    17
+   ],
+   "gold": 15
+  },
+  {
+   "id": "apex-12",
+   "profile": "apex",
+   "category": "outra-area",
+   "title": "Analista de Contas a Pagar Sênior",
+   "description": "Sobre a vaga\nO Atacadista Iota, uma das maiores redes de atacarejo do interior de São Paulo, busca Analista de Contas a Pagar Sênior para atuar no Centro de Serviços Compartilhados em Ribeirão Preto.\n\nResponsabilidades\n- Conferir e lançar notas fiscais de fornecedores no ERP Oracle;\n- Conciliar divergências de preço e quantidade entre pedido, recebimento e nota (three-way match);\n- Programar pagamentos, acompanhar o fluxo de caixa e fazer conciliações bancárias;\n- Elaborar relatórios e indicadores no Excel e no Power BI;\n- Atender fornecedores e áreas internas por e-mail, telefone e pelo CRM de atendimento;\n- Apoiar auditorias e o fechamento contábil mensal.\n\nRequisitos\n- Superior completo em Ciências Contábeis, Administração ou Economia;\n- 4+ anos de experiência em contas a pagar, preferencialmente no varejo;\n- Excel avançado (PROCV/PROCX, tabelas dinâmicas, macros básicas);\n- Vivência com ERP Oracle (desejável conhecimento do módulo de conciliação de notas, como o ReIM) ou SAP;\n- Conhecimento de legislação fiscal (ICMS, ST, retenções).\n\nDiferenciais\n- Power BI;\n- Inglês intermediário e espanhol para contato com fornecedores de importados;\n- Participação em projetos de melhoria de processos.\n\nBenefícios\n- Presencial, de segunda a sexta, das 8h às 17h48;\n- VR, VA, VT, plano de saúde e odontológico;\n- Cartão de desconto nas lojas;\n- PLR anual.",
+   "judges": [
+    6,
+    8,
+    10
+   ],
+   "gold": 8
+  },
+  {
+   "id": "front-01",
+   "profile": "front",
+   "category": "forte",
+   "title": "Desenvolvedor(a) Front-end Pleno - React/Next.js",
+   "description": "Sobre a vaga\nO time de Canais Digitais do Grupo Varejo Alfa está crescendo e procuramos uma pessoa desenvolvedora Front-end Pleno para evoluir nossa loja online e o programa de fidelidade web, que recebem mais de 2 milhões de visitas por mês. Você vai atuar em uma squad com produto, design, back-end e QA, com espaço para propor melhorias técnicas.\n\nResponsabilidades\n- Desenvolver e manter interfaces em React com TypeScript e Next.js (SSR e App Router);\n- Transformar protótipos do Figma em componentes reutilizáveis do nosso design system;\n- Integrar o front-end com APIs REST e GraphQL;\n- Escrever testes unitários e de integração com Jest e React Testing Library;\n- Participar de code reviews, refinamentos e cerimônias do Scrum;\n- Acompanhar métricas de performance (Core Web Vitals) e acessibilidade.\n\nRequisitos obrigatórios\n- 3+ anos de experiência com desenvolvimento front-end;\n- Experiência sólida com React, TypeScript e Next.js;\n- Tailwind CSS ou styled-components;\n- Testes automatizados com Jest e React Testing Library;\n- Consumo de APIs REST e GraphQL;\n- Git e vivência em times ágeis.\n\nDiferenciais\n- Node.js para BFFs;\n- Storybook;\n- Experiência com e-commerce.\n\nBenefícios\n- Modelo híbrido: 2 dias por semana no escritório (bairro Funcionários, BH);\n- Vale-refeição/alimentação flexível;\n- Plano de saúde e odontológico;\n- Auxílio home office;\n- Desconto em todas as lojas do grupo;\n- Day off no aniversário.",
+   "judges": [
+    93,
+    95,
+    95
+   ],
+   "gold": 95
+  },
+  {
+   "id": "front-02",
+   "profile": "front",
+   "category": "forte",
+   "title": "Pessoa Desenvolvedora Front-end Pleno (React + TypeScript)",
+   "description": "A Fintech Beta oferece conta digital e crédito para pequenas empresas. Nosso time de Experiência do Cliente é responsável pelo internet banking web e pelo fluxo de onboarding, e estamos buscando alguém para somar com a gente!\n\nO que você vai fazer\nVai construir novas funcionalidades no internet banking usando React, Next.js e TypeScript, trabalhando lado a lado com designers (handoff pelo Figma) e com o time de back-end na definição dos contratos das APIs REST e GraphQL. Também vai cuidar da qualidade do código com testes automatizados, revisões de PR e melhorias contínuas no nosso design system em styled-components.\n\nO que esperamos de você\n- Experiência profissional entre 3 e 5 anos como dev front-end;\n- React com hooks e TypeScript no dia a dia;\n- Next.js (SSR/SSG);\n- Testes com Jest e React Testing Library;\n- Integração com APIs REST e GraphQL (Apollo Client ou similar);\n- Boa comunicação e experiência com Scrum.\n\nSerá um diferencial\n- Experiência com produtos financeiros;\n- Conhecimento de Node.js;\n- Noções de acessibilidade (WCAG).\n\nO que oferecemos\n- Contratação CLT, 100% remoto;\n- Salário compatível com o mercado + PLR;\n- Plano de saúde sem coparticipação;\n- Auxílio home office de R$ 200/mês;\n- Vale-refeição e alimentação;\n- Verba anual para cursos e conferências.\n\nEtapas do processo: conversa com RH, case técnico, entrevista técnica com o time e conversa final com a liderança.",
+   "judges": [
+    95,
+    96,
+    96
+   ],
+   "gold": 96
+  },
+  {
+   "id": "front-03",
+   "profile": "front",
+   "category": "nucleo-ausente",
+   "title": "Desenvolvedor(a) Front-end Angular Pleno",
+   "description": "Sobre a vaga\nA Consultoria Nexo TI está contratando Desenvolvedor(a) Front-end Angular Pleno para atuar em projeto de longa duração em um cliente do setor de saúde. O projeto envolve a modernização de um sistema de gestão hospitalar, migrando telas legadas em AngularJS para Angular 16.\n\nResponsabilidades\n- Desenvolver novas funcionalidades em Angular com TypeScript, RxJS e NgRx;\n- Migrar módulos de AngularJS para Angular;\n- Integrar o front-end com APIs REST desenvolvidas em .NET;\n- Criar testes unitários com Jasmine e Karma;\n- Versionar código com Git e acompanhar demandas no Jira;\n- Participar das cerimônias Scrum com o cliente.\n\nRequisitos obrigatórios\n- Experiência mínima de 3 anos com Angular (versões 12 ou superiores);\n- Domínio de RxJS e gerenciamento de estado com NgRx;\n- TypeScript, HTML5, CSS3/SCSS e Angular Material;\n- Consumo de APIs REST;\n- Git, Jira e metodologias ágeis (Scrum);\n- Conhecimentos básicos de SQL e Linux;\n- Inglês intermediário para leitura de documentação.\n\nDesejável\n- Experiência com AngularJS;\n- Noções de C#/.NET;\n- Azure DevOps.\n\nBenefícios\n- Contratação CLT;\n- Vale-refeição de R$ 1.100/mês;\n- Plano de saúde e odontológico;\n- Seguro de vida;\n- Trabalho híbrido (3x por semana no cliente, região da Pampulha).",
+   "judges": [
+    38,
+    38,
+    38
+   ],
+   "gold": 38
+  },
+  {
+   "id": "front-04",
+   "profile": "front",
+   "category": "nucleo-ausente",
+   "title": "Desenvolvedor(a) Vue.js Pleno",
+   "description": "Somos a Plataforma Educa Mais, edtech que atende mais de 300 escolas particulares com um ambiente virtual de aprendizagem. Estamos procurando uma pessoa desenvolvedora Vue.js Pleno para o time de Produto Aluno.\n\nResponsabilidades:\n• Desenvolver e manter o portal do aluno em Vue 3 (Composition API) e Nuxt 3;\n• Gerenciar o estado da aplicação com Pinia;\n• Construir componentes com Vuetify seguindo os protótipos do Figma;\n• Consumir APIs REST e escrever testes com Vitest e Vue Test Utils;\n• Participar de code reviews no GitHub e das cerimônias Scrum (Jira).\n\nRequisitos obrigatórios:\n• Pelo menos 2 anos de experiência profissional com Vue.js (preferencialmente Vue 3);\n• Experiência com Nuxt e Pinia (ou Vuex);\n• JavaScript/TypeScript, HTML5 e CSS3;\n• Testes automatizados no front-end;\n• Git e trabalho em times ágeis;\n• Inglês técnico para leitura.\n\nDiferenciais:\n• Experiência com produtos educacionais;\n• Vite e Storybook;\n• Noções de Node.js.\n\nBenefícios:\n• 100% remoto, horário flexível;\n• Contrato CLT;\n• Plano de saúde;\n• Auxílio educação (bolsa de 50% em cursos parceiros);\n• Vale-alimentação.",
+   "judges": [
+    40,
+    40,
+    42
+   ],
+   "gold": 40
+  },
+  {
+   "id": "front-05",
+   "profile": "front",
+   "category": "generico-inflado",
+   "title": "Analista de Qualidade de Software (QA) Pleno",
+   "description": "Sobre a vaga\nBuscamos Analista de QA Pleno para garantir a qualidade das nossas aplicações de telemedicina. Você fará parte de uma squad com desenvolvedores front-end (React, Next.js e TypeScript), back-end (Node.js) e designers, atuando desde o refinamento das histórias até a validação em produção.\n\nResponsabilidades\n- Elaborar planos e casos de teste a partir das histórias de usuário e critérios de aceite;\n- Executar testes funcionais, exploratórios e de regressão em aplicações web e mobile;\n- Automatizar testes end-to-end com Cypress e testes de API com Postman/Newman;\n- Validar layouts implementados comparando com os protótipos do Figma;\n- Apoiar os devs na revisão dos testes unitários escritos em Jest e React Testing Library;\n- Registrar e acompanhar bugs no Jira;\n- Testar integrações via APIs REST e GraphQL.\n\nRequisitos obrigatórios\n- 3+ anos de experiência como Analista de QA/Testes;\n- Automação de testes E2E com Cypress ou Selenium;\n- Escrita de cenários em BDD (Gherkin);\n- Testes de API com Postman;\n- SQL para validação de dados;\n- Git básico e vivência com Scrum.\n\nDiferenciais\n- Certificação CTFL (ISTQB);\n- Testes de performance com JMeter ou k6;\n- Noções de JavaScript/TypeScript para leitura de código.\n\nBenefícios\n- Vale-refeição;\n- Plano de saúde e odontológico;\n- Telemedicina gratuita para dependentes;\n- Participação nos lucros.",
+   "judges": [
+    20,
+    22,
+    22
+   ],
+   "gold": 22
+  },
+  {
+   "id": "front-06",
+   "profile": "front",
+   "category": "diferencial",
+   "title": "Desenvolvedor(a) Back-end Java Pleno",
+   "description": "Sobre nós\nA Seguradora Horizonte Azul está transformando a jornada de contratação de seguros auto e residencial. Nosso time de Engenharia é responsável pelos sistemas de cotação, emissão de apólices e sinistros.\n\nSobre a vaga\nProcuramos pessoa Desenvolvedora Back-end Java Pleno para atuar na squad de Cotação, construindo e mantendo microsserviços de alta disponibilidade.\n\nResponsabilidades\n- Desenvolver microsserviços em Java 17 com Spring Boot;\n- Modelar e otimizar consultas em PostgreSQL e Oracle;\n- Implementar comunicação assíncrona com Kafka;\n- Garantir qualidade com testes em JUnit 5 e Mockito;\n- Publicar serviços em containers Docker no Kubernetes (EKS);\n- Apoiar pontualmente o time de front-end quando necessário.\n\nRequisitos obrigatórios\n- 3+ anos de experiência com Java e Spring Boot (Spring Data, Spring Security);\n- Arquitetura de microsserviços e APIs REST;\n- Bancos relacionais (PostgreSQL ou Oracle);\n- Mensageria (Kafka ou RabbitMQ);\n- Docker e pipelines de CI/CD;\n- Testes unitários e de integração.\n\nDiferenciais\n- Conhecimento em React e TypeScript;\n- Experiência com Next.js e Tailwind CSS;\n- Testes de front-end com Jest e React Testing Library;\n- Consumo e construção de APIs GraphQL;\n- Vivência com Figma e handoff de design.\n\nBenefícios\n- Híbrido: 3 dias por semana no escritório da Av. Paulista;\n- Plano de saúde e odontológico extensivo a dependentes;\n- Desconto no seguro auto;\n- Vale-refeição/alimentação;\n- PLR;\n- Previdência privada.",
+   "judges": [
+    13,
+    14,
+    15
+   ],
+   "gold": 14
+  },
+  {
+   "id": "front-07",
+   "profile": "front",
+   "category": "senioridade",
+   "title": "Head de Engenharia Front-end",
+   "description": "Sobre a vaga\nO Marketplace Ômega conecta mais de 15 mil vendedores a milhões de consumidores. Buscamos uma liderança sênior para assumir a área de Engenharia Front-end, hoje com 4 squads e 22 pessoas (engenheiros, tech leads e especialistas em design system), reportando diretamente ao CTO.\n\nResponsabilidades\n- Liderar, desenvolver e reter um time de 22 pessoas, incluindo 4 tech leads;\n- Conduzir processos de contratação, ciclos de avaliação de desempenho, PDIs e planos de carreira;\n- Definir a estratégia e a arquitetura de front-end da empresa (micro-frontends, design system, monorepo);\n- Gerir o orçamento da área, fornecedores e headcount;\n- Representar a engenharia front-end junto à diretoria de Produto e ao C-level;\n- Estabelecer métricas de qualidade, performance e produtividade dos times.\n\nRequisitos\n- 10+ anos de experiência em desenvolvimento de software, com forte base em front-end;\n- Pelo menos 5 anos em cargos de gestão de pessoas, liderando múltiplos times e outros líderes;\n- Vivência na definição de arquitetura em escala com React, TypeScript e Next.js;\n- Experiência com micro-frontends, monorepos e design systems;\n- Histórico comprovado de construção de times de alta performance;\n- Inglês avançado/fluente para interação com investidores e parceiros internacionais.\n\nDiferenciais\n- Experiência prévia como Head ou Engineering Manager em marketplace ou e-commerce;\n- Pós-graduação ou MBA em gestão.\n\nBenefícios\n- Remuneração executiva + bônus anual e stock options;\n- Plano de saúde premium para a família;\n- Previdência privada;\n- Auxílio educação para MBA e cursos executivos;\n- Modelo híbrido flexível.",
+   "judges": [
+    15,
+    15,
+    20
+   ],
+   "gold": 15
+  },
+  {
+   "id": "front-08",
+   "profile": "front",
+   "category": "parcial",
+   "title": "Desenvolvedor(a) Full Stack Pleno (React + Node.js)",
+   "description": "Quem somos\nA Rota Certa é uma logtech que otimiza rotas e entregas para transportadoras de médio porte em todo o Brasil.\n\nSobre a vaga\nBuscamos pessoa desenvolvedora Full Stack Pleno para atuar na squad de Rastreamento, responsável pelo painel de acompanhamento de entregas em tempo real e pelos serviços que processam os eventos enviados pelos motoristas.\n\nAtividades\n- Desenvolver features ponta a ponta, do banco de dados à interface;\n- Construir e manter APIs em Node.js com NestJS;\n- Desenvolver telas em React com TypeScript;\n- Modelar dados e escrever queries em PostgreSQL;\n- Implantar e monitorar serviços na AWS (Lambda, ECS, SQS, S3);\n- Escrever testes automatizados.\n\nRequisitos obrigatórios\n- 3 anos ou mais de experiência com desenvolvimento web;\n- React e TypeScript;\n- Node.js com NestJS em produção;\n- PostgreSQL (modelagem, índices, migrations);\n- Docker;\n- Serviços AWS em ambiente produtivo;\n- Testes com Jest;\n- Git.\n\nDiferenciais\n- Next.js;\n- GraphQL;\n- Terraform;\n- Experiência com mapas e geolocalização (Mapbox, Leaflet).\n\nBenefícios\n- PJ ou CLT (a combinar);\n- 100% remoto;\n- Plano de saúde;\n- Auxílio home office;\n- Horário flexível.",
+   "judges": [
+    40,
+    42,
+    42
+   ],
+   "gold": 42
+  },
+  {
+   "id": "front-09",
+   "profile": "front",
+   "category": "ingles",
+   "title": "Frontend Engineer (Mid-level) - React/TypeScript",
+   "description": "About us\nBrightpath Software builds scheduling and billing tools for independent clinics in North America. Our engineering hub in Brazil has 30 people and works closely with the product team in Toronto.\n\nAbout the role\nWe are looking for a mid-level Frontend Engineer to join the Patient Experience squad. You will own features end to end on our customer-facing web app, built with React, Next.js and TypeScript.\n\nWhat you'll do\n- Build new features and reusable UI components with React, TypeScript and Tailwind CSS;\n- Work with designers to turn Figma prototypes into accessible, responsive interfaces;\n- Consume REST and GraphQL APIs and help define contracts with backend engineers;\n- Write unit and integration tests with Jest and React Testing Library;\n- Take part in code reviews, sprint planning and retrospectives.\n\nWhat we're looking for\n- 3-5 years of professional experience in frontend development;\n- Strong knowledge of React and TypeScript;\n- Hands-on experience with Next.js;\n- Solid testing habits (Jest, React Testing Library);\n- Experience consuming REST and GraphQL APIs;\n- Intermediate English: you will read and write tickets, PR descriptions and documentation in English. Daily meetings are held in Portuguese.\n\nNice to have\n- Node.js experience (we have a small BFF layer in Express);\n- Healthcare or SaaS background;\n- Storybook.\n\nWhat we offer\n- Salary in BRL (CLT) with annual review;\n- Fully remote, with optional coworking access in Belo Horizonte and São Paulo;\n- Health and dental insurance;\n- Home office allowance;\n- Learning budget of USD 1,000 per year.",
+   "judges": [
+    90,
+    92,
+    92
+   ],
+   "gold": 92
+  },
+  {
+   "id": "front-10",
+   "profile": "front",
+   "category": "curta",
+   "title": "Desenvolvedor Front-end",
+   "description": "Contratamos Dev Front-end para projeto de 6 meses em cliente do setor financeiro.\nModelo PJ, 100% remoto.\nNecessário conhecimento em JavaScript e frameworks modernos.\nInteressados enviar currículo para vagas@exemplo.com.",
+   "judges": [
+    65,
+    70,
+    72
+   ],
+   "gold": 70
+  },
+  {
+   "id": "front-11",
+   "profile": "front",
+   "category": "longa-lista",
+   "title": "Desenvolvedor(a) de Software Pleno - Plataforma de Dados",
+   "description": "Sobre a vaga\nA Energia Vale Verde está estruturando sua nova Plataforma de Dados para monitoramento de usinas e previsão de geração de energia. Buscamos pessoa Desenvolvedora de Software Pleno para construir pipelines, serviços e ferramentas internas da plataforma.\n\nResponsabilidades\n- Desenvolver pipelines de ingestão e processamento de dados em streaming e batch;\n- Construir microsserviços e APIs para disponibilização dos dados;\n- Manter a infraestrutura como código e os ambientes em Kubernetes;\n- Criar dashboards de observabilidade;\n- Eventualmente, apoiar a construção de telas internas de administração.\n\nRequisitos obrigatórios\n- 3+ anos de experiência com Python ou Java em ambiente produtivo;\n- Processamento de dados em streaming (Kafka) e batch (Spark);\n- Orquestração de pipelines com Airflow;\n- Docker e Kubernetes;\n- Bancos relacionais e NoSQL.\n\nTecnologias do nosso ambiente\nPython, Java, Spring Boot, Kotlin, Apache Kafka, Apache Spark, Apache Airflow, Docker, Kubernetes, Terraform, AWS (EC2, S3, Glue, Lambda), PostgreSQL, MongoDB, Redis, Elasticsearch, Grafana, Prometheus, GitLab CI, Git, Linux, APIs REST, GraphQL, JavaScript, HTML, CSS, React (telas internas), Jira e Scrum.\n\nDiferenciais\n- Experiência no setor elétrico;\n- Certificação AWS;\n- Conhecimento de bancos de séries temporais (InfluxDB, TimescaleDB).\n\nBenefícios\n- Vale-refeição e vale-alimentação;\n- Plano de saúde e odontológico;\n- Previdência privada;\n- PLR;\n- Ônibus fretado até a sede.",
+   "judges": [
+    12,
+    12,
+    12
+   ],
+   "gold": 12
+  },
+  {
+   "id": "front-12",
+   "profile": "front",
+   "category": "outra-area",
+   "title": "Analista Comercial Pleno - Inside Sales",
+   "description": "Sobre a vaga\nA Distribuidora Atlântica de Insumos, referência na distribuição de insumos para indústrias alimentícias, busca Analista Comercial Pleno para atuar no time de Inside Sales, atendendo carteira de clientes B2B em Minas Gerais e no Centro-Oeste.\n\nResponsabilidades\n- Prospectar novos clientes por telefone, e-mail e redes profissionais;\n- Gerenciar o funil de vendas e registrar todas as interações no CRM;\n- Elaborar propostas comerciais e negociar condições de pagamento;\n- Acompanhar indicadores de vendas e montar relatórios semanais em Excel e Power BI;\n- Atender fornecedores internacionais em inglês por e-mail e videochamada;\n- Apoiar o time de marketing na criação de apresentações e materiais comerciais.\n\nRequisitos\n- Ensino superior completo em Administração, Engenharia, Marketing ou áreas afins;\n- 2+ anos de experiência com vendas B2B ou inside sales;\n- Excel avançado (tabelas dinâmicas, PROCV, gráficos);\n- Experiência com CRM (HubSpot, Pipedrive ou similar);\n- Power BI para acompanhamento de indicadores;\n- Inglês intermediário;\n- Boa comunicação e orientação para metas.\n\nDiferenciais\n- Conhecimento básico em Figma ou Canva para materiais comerciais;\n- Vivência com metodologias de vendas (SPIN, BANT);\n- Experiência no setor alimentício.\n\nBenefícios\n- Salário fixo + comissão;\n- Vale-refeição;\n- Plano de saúde;\n- Estacionamento no local.",
+   "judges": [
+    2,
+    3,
+    3
+   ],
+   "gold": 3
+  },
+  {
+   "id": "dados-01",
+   "profile": "dados",
+   "category": "forte",
+   "title": "Analista de Dados Pleno - Inteligência de Crédito",
+   "description": "Sobre a vaga\nA Fintech Gama está crescendo e procuramos uma pessoa Analista de Dados Pleno para o time de Inteligência de Crédito. Você vai transformar dados de concessão, carteira e cobrança em indicadores claros para as lideranças e apoiar decisões de política de crédito.\n\nResponsabilidades\n- Construir e manter dashboards no Power BI para acompanhamento de carteira, inadimplência e safras;\n- Escrever consultas SQL (PostgreSQL) para extração e tratamento de dados;\n- Desenvolver medidas DAX e modelos de dados performáticos;\n- Automatizar relatórios recorrentes que hoje são feitos em Excel;\n- Atender demandas de Crédito, Cobrança e Financeiro, traduzindo perguntas de negócio em análises;\n- Documentar indicadores e regras de negócio.\n\nRequisitos obrigatórios\n- 3+ anos de experiência com análise de dados, de preferência no mercado financeiro;\n- SQL avançado (joins, CTEs, funções de janela);\n- Power BI: DAX, Power Query e modelagem em estrela;\n- Excel avançado;\n- Boa comunicação com áreas de negócio.\n\nDiferenciais\n- Python (pandas) para análises exploratórias;\n- Experiência com rotinas de ETL (SSIS ou similar);\n- Vivência com indicadores de crédito (roll rate, PDD, safra).\n\nBenefícios\n- Modelo híbrido: 2 dias por semana no escritório (Batel)\n- VR/VA flexível de R$ 1.400\n- Plano de saúde e odontológico sem coparticipação\n- PLR semestral\n- Auxílio home office e auxílio academia",
+   "judges": [
+    95,
+    95,
+    96
+   ],
+   "gold": 95
+  },
+  {
+   "id": "dados-02",
+   "profile": "dados",
+   "category": "forte",
+   "title": "Analista de Business Intelligence Pleno/Sênior",
+   "description": "Quem somos\nA Cooperativa Delta Sul atende mais de 300 mil cooperados no Paraná e em Santa Catarina. Nossa área de Dados e Inteligência apoia as decisões das superintendências de Operações, Crédito e Finanças.\n\nDescrição da vaga\nBuscamos uma pessoa Analista de BI para evoluir nosso ambiente de relatórios gerenciais, hoje baseado em SQL Server e Power BI, e apoiar a área de back-office na automação de indicadores operacionais.\n\nO que você vai fazer\n- Desenvolver e sustentar painéis em Power BI (modelagem, DAX, RLS e publicação no Service);\n- Criar e manter pacotes SSIS de carga para o data warehouse em SQL Server;\n- Escrever procedures, views e consultas otimizadas em T-SQL;\n- Levantar requisitos com as áreas de negócio e definir KPIs junto com os gestores;\n- Garantir a qualidade e a consistência dos números apresentados às diretorias;\n- Orientar analistas mais novos em boas práticas de modelagem.\n\nRequisitos e qualificações\n- Experiência a partir de 4 anos em BI ou análise de dados;\n- T-SQL avançado e SQL Server;\n- Power BI avançado (DAX e modelagem dimensional);\n- ETL com SSIS;\n- Excel avançado;\n- Vivência em instituições financeiras (banco, cooperativa ou fintech).\n\nSerá um diferencial\n- Python para automação de análises;\n- Conhecimento dos relatórios gerenciais típicos de cooperativas de crédito;\n- Certificação PL-300.\n\nInformações adicionais\n- Híbrido: 3 dias presenciais na sede (Centro Cívico)\n- Plano de saúde e odontológico, vale-alimentação, previdência privada, PLR, auxílio-creche e day off no aniversário",
+   "judges": [
+    85,
+    87,
+    87
+   ],
+   "gold": 87
+  },
+  {
+   "id": "dados-03",
+   "profile": "dados",
+   "category": "nucleo-ausente",
+   "title": "Engenheiro(a) de Dados Pleno - Azure Databricks",
+   "description": "Sobre a vaga\nO time de Plataforma de Dados do Banco Digital Épsilon está procurando uma pessoa Engenheira de Dados Pleno para construir e evoluir nosso lakehouse em Azure. Você vai trabalhar em squads ágeis (Scrum) com analistas, cientistas de dados e times de produto.\n\nResponsabilidades\n- Desenvolver pipelines de dados em lote e streaming com Azure Databricks e PySpark;\n- Orquestrar fluxos no Azure Data Factory;\n- Modelar camadas bronze, silver e gold em Delta Lake;\n- Integrar fontes via APIs REST e bancos relacionais (SQL Server, PostgreSQL);\n- Implementar testes, monitoramento e boas práticas de CI/CD com Git e Azure DevOps;\n- Disponibilizar dados confiáveis para os times de BI que consomem em Power BI.\n\nRequisitos obrigatórios\n- Experiência comprovada com Databricks e Spark (PySpark) em produção;\n- Azure Data Factory, Azure Data Lake Storage Gen2 e Delta Lake;\n- Python avançado para engenharia de dados;\n- SQL avançado;\n- Git, Jira e metodologias ágeis (Scrum/Kanban);\n- Conhecimentos de Linux e linha de comando;\n- Inglês intermediário para leitura de documentação.\n\nDesejável\n- Unity Catalog e governança de dados;\n- Terraform;\n- Kafka ou Event Hubs;\n- Certificação Databricks Data Engineer Associate.\n\nBenefícios\n- Plano de saúde e odontológico\n- Vale-refeição/alimentação flexível\n- PLR\n- Auxílio educação e certificações\n- Horário flexível",
+   "judges": [
+    28,
+    30,
+    30
+   ],
+   "gold": 30
+  },
+  {
+   "id": "dados-04",
+   "profile": "dados",
+   "category": "generico-inflado",
+   "title": "DBA SQL Server Pleno",
+   "description": "Sobre a vaga\nEstamos ampliando nosso time de Infraestrutura de Banco de Dados e buscamos uma pessoa DBA SQL Server Pleno para garantir disponibilidade, performance e segurança dos ambientes críticos da seguradora (emissão, sinistros e financeiro).\n\nResponsabilidades\n- Administrar instâncias SQL Server 2017/2019/2022 em ambiente on-premises e Azure SQL Managed Instance;\n- Configurar e monitorar Always On Availability Groups, log shipping e rotinas de backup/restore;\n- Realizar tuning de consultas, análise de planos de execução, índices e estatísticas;\n- Gerenciar permissões, auditoria e políticas de segurança (LGPD);\n- Atuar em incidentes e participar da escala de sobreaviso;\n- Apoiar o time de BI na publicação de pacotes SSIS e na configuração do gateway do Power BI;\n- Dar suporte pontual a bases PostgreSQL de sistemas legados;\n- Automatizar rotinas com PowerShell e scripts Python;\n- Gerar relatórios de capacidade e crescimento das bases em Excel para a gestão.\n\nRequisitos\n- 3+ anos como DBA SQL Server;\n- Domínio de alta disponibilidade (Always On, cluster de failover);\n- Experiência com tuning e troubleshooting de performance;\n- Conhecimento de Windows Server e Active Directory;\n- Disponibilidade para sobreaviso e janelas de manutenção noturnas.\n\nDiferenciais\n- Certificação Microsoft Azure Database Administrator (DP-300);\n- Experiência com ferramentas de monitoramento (ex.: Zabbix, Grafana);\n- Noções de Oracle.\n\nBenefícios\n- Plano de saúde e odontológico, seguro de vida, VR/VA, PLR e adicional de sobreaviso",
+   "judges": [
+    15,
+    18,
+    18
+   ],
+   "gold": 18
+  },
+  {
+   "id": "dados-05",
+   "profile": "dados",
+   "category": "diferencial",
+   "title": "Analista de Web Analytics Pleno",
+   "description": "Sobre nós\nA Ômega Moda é um e-commerce de moda com mais de 2 milhões de visitas por mês. Nosso time de Growth busca uma pessoa Analista de Web Analytics para garantir a qualidade da coleta de dados e gerar insights sobre a jornada de compra.\n\nO que você vai fazer\n- Criar e manter o plano de tagueamento do site e do app;\n- Implementar e validar tags, eventos e conversões no Google Tag Manager e no GA4;\n- Configurar e analisar testes A/B na plataforma de experimentação;\n- Montar relatórios de funil, aquisição e retenção no Looker Studio;\n- Analisar campanhas de mídia paga (Google Ads e Meta Ads) junto ao time de performance;\n- Garantir conformidade com a LGPD na coleta de dados (consentimento de cookies).\n\nRequisitos obrigatórios\n- Experiência sólida com Google Analytics 4 e Google Tag Manager;\n- JavaScript básico e dataLayer;\n- Vivência com plataformas de mídia paga e modelos de atribuição;\n- Experiência com testes A/B e métricas de conversão em e-commerce;\n- Looker Studio.\n\nDesejável\n- SQL para consultas no BigQuery ou em bancos relacionais;\n- Power BI para construção de dashboards de KPIs;\n- Excel avançado;\n- Python (pandas) para análises ad hoc;\n- Experiência apresentando resultados para stakeholders.\n\nBenefícios\n- Desconto de 40% nos produtos da marca\n- Plano de saúde, VR/VA, auxílio home office e day off de aniversário",
+   "judges": [
+    20,
+    20,
+    20
+   ],
+   "gold": 20
+  },
+  {
+   "id": "dados-06",
+   "profile": "dados",
+   "category": "senioridade",
+   "title": "Gerente de Dados e Analytics",
+   "description": "Sobre a vaga\nO Banco Teta Investimentos está estruturando sua nova Diretoria de Dados e busca uma pessoa Gerente de Dados e Analytics para liderar a estratégia analítica da instituição. A posição reporta diretamente ao CDO.\n\nResponsabilidades\n- Liderar um time de 14 pessoas entre analistas de BI, engenheiros de dados e cientistas de dados, com 3 coordenações;\n- Definir o roadmap de dados e analytics alinhado ao planejamento estratégico do banco;\n- Gerir o orçamento anual da área (pessoas, licenças e cloud) e contratos com fornecedores;\n- Conduzir contratações, avaliações de desempenho, planos de carreira e desenvolvimento do time;\n- Implantar governança de dados, catálogo e políticas de qualidade;\n- Representar a área em comitês executivos e junto à auditoria e aos reguladores;\n- Garantir a evolução do ambiente de BI (SQL Server, SSIS e Power BI) e a migração para nuvem.\n\nRequisitos\n- 10+ anos de experiência em dados, sendo pelo menos 5 anos em cargos de liderança de equipes;\n- Experiência comprovada em gestão de orçamento e de fornecedores;\n- Vivência no setor financeiro;\n- Sólido conhecimento de arquitetura de dados, BI e governança (DAMA/DMBOK);\n- Conhecimento técnico em SQL, Power BI e ferramentas de ETL;\n- Inglês avançado/fluente;\n- Pós-graduação ou MBA em áreas correlatas.\n\nDiferenciais\n- Experiência liderando migração de plataformas de dados para cloud (Azure ou AWS);\n- Vivência com iniciativas de IA e machine learning em produção.\n\nBenefícios\n- Remuneração compatível com o mercado e bônus anual por resultados\n- Plano de saúde e odontológico, previdência privada, carro executivo e PLR",
+   "judges": [
+    14,
+    14,
+    15
+   ],
+   "gold": 14
+  },
+  {
+   "id": "dados-07",
+   "profile": "dados",
+   "category": "senioridade",
+   "title": "Estágio em Business Intelligence",
+   "description": "Sobre a vaga\nVenha começar sua carreira em dados na Corretora Iota! Nosso time de BI está com vaga de estágio para apoiar a criação de relatórios e dashboards para as áreas de Operações e Financeiro.\n\nAtividades\n- Apoiar a atualização de relatórios em Excel e Power BI;\n- Realizar consultas simples em SQL Server sob orientação do time;\n- Organizar e validar bases de dados;\n- Documentar indicadores e processos;\n- Participar das reuniões de alinhamento com as áreas de negócio.\n\nRequisitos\n- Cursando entre o 3º e o 6º semestre de Ciências Econômicas, Administração, Estatística, Sistemas de Informação ou cursos relacionados;\n- Disponibilidade para estagiar 6 horas por dia;\n- Excel intermediário (PROCV, tabelas dinâmicas);\n- Vontade de aprender e boa comunicação.\n\nDesejável\n- Noções de SQL;\n- Noções de Power BI ou outra ferramenta de visualização;\n- Python básico.\n\nBenefícios\n- Bolsa-auxílio de R$ 1.800,00\n- Vale-transporte e vale-refeição\n- Seguro de vida\n- Recesso remunerado\n- Possibilidade de efetivação",
+   "judges": [
+    10,
+    10,
+    10
+   ],
+   "gold": 10
+  },
+  {
+   "id": "dados-08",
+   "profile": "dados",
+   "category": "parcial",
+   "title": "Analista de Dados Pleno - Produto",
+   "description": "Sobre a Kappa\nSomos uma healthtech que conecta clínicas e pacientes por meio de um app de agendamento e telemedicina. Nosso time de Dados de Produto apoia as squads na tomada de decisão baseada em evidências.\n\nO desafio\nVocê vai trabalhar lado a lado com PMs e designers, medindo o impacto das funcionalidades, desenhando experimentos e criando métricas de produto confiáveis.\n\nResponsabilidades\n- Definir e acompanhar métricas de produto (ativação, retenção, conversão e engajamento);\n- Desenhar e analisar testes A/B, incluindo cálculo de tamanho de amostra e significância estatística;\n- Construir modelos de dados no dbt sobre o BigQuery;\n- Criar dashboards e explorações no Metabase;\n- Escrever análises em Python (pandas, SciPy, statsmodels) e apresentá-las às squads;\n- Comunicar recomendações de forma clara para as lideranças.\n\nRequisitos obrigatórios\n- 3+ anos em análise de dados;\n- SQL avançado;\n- Python intermediário/avançado para análise estatística;\n- Experiência com BigQuery ou outro data warehouse em nuvem;\n- dbt;\n- Experiência com dashboards e definição de KPIs;\n- Boa comunicação com stakeholders não técnicos.\n\nDiferenciais\n- Experiência em produtos digitais B2C;\n- Ferramentas de product analytics (Amplitude, Mixpanel);\n- Power BI ou Looker.\n\nBenefícios\n- 100% remoto, com encontros trimestrais em São Paulo\n- Plano de saúde e odontológico, auxílio home office de R$ 200, VR/VA flexível, terapia online e licença parental estendida",
+   "judges": [
+    42,
+    42,
+    45
+   ],
+   "gold": 42
+  },
+  {
+   "id": "dados-09",
+   "profile": "dados",
+   "category": "ingles",
+   "title": "Data Analyst - Finance & Operations (Mid-level)",
+   "description": "About Lambda Payments\nLambda Payments is a payment processing company serving more than 40,000 merchants across Latin America. Our Curitiba hub hosts the Finance & Operations Analytics team, which supports reconciliation, settlement and treasury.\n\nAbout the role\nWe are looking for a Data Analyst to own the reporting layer for Finance and Operations. You will build reliable dashboards, maintain data loads and partner with finance stakeholders to define the KPIs that run the business.\n\nWhat you'll do\n- Build and maintain Power BI dashboards for settlement, chargebacks, reconciliation and cash position;\n- Write and optimize SQL queries in SQL Server and PostgreSQL;\n- Maintain ETL jobs (SSIS) feeding our reporting database;\n- Model data (star schema) and write DAX measures;\n- Work with Finance, Treasury and Back-office teams to translate requirements into reports;\n- Run ad hoc analyses to investigate discrepancies and operational issues.\n\nWhat we're looking for\n- 3+ years of experience as a data or BI analyst, ideally in banking, payments or fintech;\n- Strong SQL skills;\n- Solid Power BI experience (DAX, Power Query, data modeling);\n- Advanced Excel;\n- Experience with ETL tools such as SSIS;\n- Intermediate English (you will read documentation and write async updates to our global team); Portuguese is required.\n\nNice to have\n- Python (pandas) for data wrangling;\n- Knowledge of payment flows (acquiring, settlement, chargebacks).\n\nPerks\n- Hybrid model: 2 days a week at our Curitiba office\n- Health and dental insurance, meal allowance, annual bonus, learning budget and birthday day off",
+   "judges": [
+    94,
+    94,
+    95
+   ],
+   "gold": 94
+  },
+  {
+   "id": "dados-10",
+   "profile": "dados",
+   "category": "curta",
+   "title": "Analista de Dados",
+   "description": "Buscamos analista de dados para atuar com indicadores da operação logística.\nNecessário conhecimento em SQL e Power BI.\nCLT, modelo híbrido. Interessados, candidatar-se pela plataforma.",
+   "judges": [
+    70,
+    76,
+    76
+   ],
+   "gold": 76
+  },
+  {
+   "id": "dados-11",
+   "profile": "dados",
+   "category": "longa-lista",
+   "title": "Analytics Engineer Sênior",
+   "description": "Sobre a vaga\nO Marketplace Sigma está reconstruindo sua stack de dados moderna e procura uma pessoa Analytics Engineer Sênior para ser referência técnica em modelagem e qualidade de dados, atuando entre a engenharia de dados e os times de análise.\n\nResponsabilidades\n- Projetar e manter a camada de transformação em dbt sobre o Snowflake, com testes, documentação e versionamento;\n- Definir padrões de modelagem (Kimball e data vault quando aplicável) e camadas semânticas;\n- Construir ingestões com Fivetran e Airbyte e orquestração no Airflow;\n- Implementar CI/CD para modelos de dados com GitHub Actions;\n- Garantir qualidade de dados com Great Expectations e contratos de dados;\n- Apoiar os times de BI na camada semântica para Looker, Tableau e Power BI;\n- Mentorar analistas e engenheiros em boas práticas de SQL e versionamento.\n\nStack que usamos\nSQL, Python, dbt, Snowflake, Airflow, Fivetran, Airbyte, Kafka, Spark, AWS (S3, Glue, Lambda, Redshift), Terraform, Docker, Git, GitHub Actions, Great Expectations, Looker (LookML), Tableau, Power BI, Excel, Jira, Confluence.\n\nRequisitos obrigatórios\n- 5+ anos com dados, sendo 2+ como Analytics Engineer ou Engenheiro de Dados;\n- dbt em produção (macros, testes, snapshots, modelos incrementais);\n- Snowflake ou outro data warehouse em nuvem (BigQuery, Redshift);\n- SQL avançado e Python;\n- Airflow ou orquestrador equivalente;\n- Git e práticas de CI/CD;\n- Modelagem dimensional.\n\nDiferenciais\n- Terraform e Docker;\n- Kafka e Spark;\n- Experiência com ferramentas de BI (Looker, Tableau, Power BI);\n- Inglês avançado.\n\nBenefícios\n- Remoto, com flexibilidade de horário\n- Faixa salarial competitiva, stock options, plano de saúde, auxílio home office e budget de educação",
+   "judges": [
+    22,
+    24,
+    27
+   ],
+   "gold": 24
+  },
+  {
+   "id": "dados-12",
+   "profile": "dados",
+   "category": "outra-area",
+   "title": "Analista Financeiro Pleno - Contas a Receber e Cobrança",
+   "description": "Sobre a vaga\nA Distribuidora Rho Alimentos, com atuação em todo o Sul do país, busca Analista Financeiro Pleno para a área de Contas a Receber e Cobrança.\n\nPrincipais atividades\n- Realizar a conciliação bancária diária e a baixa de títulos no ERP (TOTVS Protheus);\n- Acompanhar a carteira de clientes, aging e títulos vencidos;\n- Negociar com clientes inadimplentes e registrar os contatos no CRM;\n- Analisar limites de crédito de clientes junto ao comercial;\n- Emitir boletos e cartas de cobrança e controlar protestos;\n- Elaborar relatórios de recebimentos, inadimplência e fluxo de caixa em Excel e Power BI;\n- Apoiar o fechamento contábil mensal e atender auditorias.\n\nRequisitos\n- Formação em Administração, Ciências Contábeis, Economia ou áreas afins;\n- 3+ anos de experiência em contas a receber, crédito e cobrança;\n- Excel avançado (PROCV, tabelas dinâmicas, fórmulas condicionais);\n- Vivência com ERP (TOTVS ou SAP);\n- Boa comunicação e habilidade de negociação.\n\nDiferenciais\n- Power BI para acompanhamento de indicadores;\n- Inglês intermediário para contato com fornecedores internacionais;\n- Experiência no setor de distribuição.\n\nBenefícios\n- Vale-alimentação, plano de saúde, seguro de vida, cesta de produtos mensal e participação nos lucros",
+   "judges": [
+    25,
+    28,
+    30
+   ],
+   "gold": 28
+  }
+ ]
+}

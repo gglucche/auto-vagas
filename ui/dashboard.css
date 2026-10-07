@@ -119,6 +119,12 @@ svg { width: 17px; height: 17px; flex: none; }
 .match { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); font-size: 13.5px; }
 .match h4 { margin: 0 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
 .match ul { margin: 0 0 8px; padding-left: 18px; }
+.match ul.reqs { list-style: none; padding-left: 0; }
+.match ul.reqs li { margin: 3px 0; }
+.match ul.reqs li b { display: inline-block; width: 16px; }
+.match ul.reqs li.ok b { color: var(--ok); }
+.match ul.reqs li.part b { color: var(--warn, #b7791f); }
+.match ul.reqs li.no b { color: var(--bad); }
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .tabs { display: flex; gap: 2px; margin-top: 18px; border-bottom: 1px solid var(--line); }
 .tabs button { border: 0; background: none; border-radius: 0; padding: 8px 12px; color: var(--muted); margin-bottom: -1px; border-bottom: 2px solid transparent; }

@@ -70,10 +70,36 @@ const authErrorPage = (code) =>
   '&client_id=x';
 
 // ---------- mocked network ----------
-const net = { gmail: [], ai: [], li: [], boards: [], gmailOff: false, aiOff: false, liLimited: false };
+const net = { gmail: [], ai: [], li: [], boards: [], gmailOff: false, aiOff: false, liLimited: false, aiDirty: false, onEval: null };
+// The AI's answers, one per task. The evaluation lists requirements with evidence; one of them ("Kubernetes")
+// claims a quote that is not in the resume, which must count only in part.
+const req = (requisito, tipo, evidencia, atende) => ({ requisito, tipo, evidencia, atende });
+const aiEval = {
+  is_job_posting: true,
+  requisitos: [
+    req('Oracle APEX', 'obrigatorio', 'Desenvolvedor Oracle APEX com experiência em PL/SQL', 'sim'),
+    req('PL/SQL', 'obrigatorio', 'experiência em PL/SQL', 'sim'),
+    req('JavaScript', 'obrigatorio', 'JavaScript, jQuery', 'sim'),
+    req('Kubernetes', 'obrigatorio', 'Kubernetes em produção', 'sim'),
+    req('Delphi', 'desejavel', '', 'nao'),
+  ],
+  area: 'mesma', nivel: 'compativel', resumo: 'Boa aderência.',
+};
+const aiEvalLow = { ...aiEval, requisitos: [req('Spark', 'obrigatorio', '', 'nao'), req('Hadoop', 'obrigatorio', '', 'nao'), req('Oracle APEX', 'desejavel', 'Oracle APEX', 'sim')], area: 'outra', resumo: 'Outra área.' };
 const aiAnswer = {
-  is_job_posting: true, fit: 83, reason: 'Boa aderência.', strengths: ['Oracle APEX'], gaps: ['Delphi'],
-  subject: 'Assunto escrito pela IA', body: 'Corpo escrito pela IA', resume: 'Fulano de Tal\nfulano@exemplo.com\n# Experiência\n- Oracle APEX e PL/SQL',
+  subject: 'Assunto escrito pela IA',
+  body: 'Olá,\n\nTenho interesse na vaga de desenvolvedor Oracle APEX e acredito que posso contribuir com o time. Trabalho com Oracle APEX e PL/SQL há alguns anos, além de JavaScript e jQuery nas telas, e faço integrações com APIs REST no dia a dia. Também participo de times que usam Scrum e gosto de entender o negócio antes de propor uma solução. Fico à disposição para conversar sobre a vaga e sobre como posso ajudar.\n\nAtenciosamente,',
+  resume: 'Fulano de Tal\neu@meu-email.example\n# Resumo\nDesenvolvedor Oracle APEX com experiência em PL/SQL, JavaScript, jQuery, REST e integrações.\n# Experiência\n- Oracle APEX e PL/SQL\n- JavaScript e jQuery nas telas',
+};
+// what a weak model writes first: markdown, a placeholder and a technology the resume doesn't have
+const aiAnswerDirty = {
+  subject: '**Candidatura – [Nome da vaga]**',
+  body: aiAnswer.body.replace('Olá,', 'Olá [Nome do Recrutador],'),
+  resume: 'Aqui está o currículo adaptado:\n```\n**Fulano de Tal**\n## Resumo\nDesenvolvedor Oracle APEX com experiência em PL/SQL e Kubernetes.\n## Experiência\n• Oracle APEX e PL/SQL 🚀\n```',
+};
+const aiTask = (body) => {
+  const system = body.messages[0].content;
+  return /recrutador experiente/.test(system) ? 'eval' : /escreve a candidatura/.test(system) ? 'write' : /extrai dados/.test(system) ? 'profile' : 'probe';
 };
 // The AI provider's catalog as the free key sees it: not everything listed can be used.
 const catalog = [
@@ -157,15 +183,26 @@ globalThis.fetch = async (url, init) => {
   }
   if (url.endsWith('/models')) return reply(200, { data: catalog });
   if (url.includes('/chat/completions')) {
-    const model = JSON.parse(init.body).model;
-    net.ai.push({ url, init, model });
+    const body = JSON.parse(init.body);
+    const model = body.model;
+    const task = aiTask(body);
+    net.ai.push({ url, init, model, task });
     if (net.aiOff) return reply(500, { error: { message: 'Internal error' } });
     if (/whisper|guard/.test(model)) throw new Error('modelo que não é de conversa foi testado: ' + model);
     if (model === 'llama-3.3-70b-versatile')
       return reply(404, { error: { message: 'The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.', code: 'model_not_found' } });
     if (model === 'openai/gpt-oss-20b') return reply(429, { error: { message: 'Rate limit reached' } });
     if (model === 'modelo-tagarela-40b') return reply(200, { choices: [{ message: { content: 'Claro! Segue a resposta em texto corrido.' } }] });
-    return reply(200, { choices: [{ message: { content: '```json\n' + JSON.stringify(aiAnswer) + '\n```' } }] });
+    const ad = body.messages[1].content;
+    if (task === 'eval') {
+      await net.onEval?.(ad);
+      return reply(200, { choices: [{ message: { content: '```json\n' + JSON.stringify(/Spark/.test(ad) ? aiEvalLow : aiEval) + '\n```' } }] });
+    }
+    if (task === 'write') {
+      const fixing = body.messages.length > 2; // the correction round
+      return reply(200, { choices: [{ message: { content: JSON.stringify(net.aiDirty && !fixing ? aiAnswerDirty : aiAnswer) } }] });
+    }
+    return reply(200, { choices: [{ message: { content: JSON.stringify({ ok: true, palavra: 'casa' }) } }] });
   }
   throw new Error('rede não esperada no teste: ' + url);
 };
@@ -277,9 +314,16 @@ check('vaga sem e-mail entra em revisão quando recebe um endereço', jobs().fin
 data.settings = { ...data.settings, provider: 'groq', groqKey: 'chave' };
 r = await send({ type: 'job:regen', id: g1.id });
 const ai = jobs().find((j) => j.id === g1.id);
-check('IA preenche assunto, corpo, aderência e currículo adaptado', r?.ok && ai.subject === aiAnswer.subject && ai.fit === 83 && ai.resumeText === aiAnswer.resume && ai.strengths[0] === 'Oracle APEX', JSON.stringify([r, ai.subject, ai.fit]));
-const asked = net.ai.find((c) => JSON.parse(c.init.body).messages[1].content.includes(resumeText));
+check('IA preenche assunto, corpo, currículo adaptado e assina o e-mail', r?.ok && ai.subject === aiAnswer.subject && ai.resumeText === aiAnswer.resume && ai.body.startsWith('Olá,') && ai.body.trim().endsWith('eu@meu-email.example'), JSON.stringify([r, ai.subject, ai.body.slice(-60)]));
+check('aderência calculada requisito por requisito: o que a IA diz ter, sem trecho do currículo que prove, conta menos',
+  ai.fit === 76 && ai.strengths.join() === 'Oracle APEX,PL/SQL,JavaScript' && ai.gaps.join() === 'Kubernetes (em parte),Delphi' && ai.requirements.find((x) => x.requisito === 'Kubernetes')?.atende === 'parcial',
+  JSON.stringify([ai.fit, ai.strengths, ai.gaps]));
+const asked = net.ai.find((c) => c.task === 'eval' && JSON.parse(c.init.body).messages[1].content.includes(resumeText));
 check('pedido à IA leva o texto do currículo e o anúncio', !!asked && JSON.parse(asked.init.body).messages[1].content.includes('Delphi'));
+const askedBody = JSON.parse(asked.init.body);
+check('Groq: resposta no formato estrito (json_schema), temperatura baixa e limite de tokens',
+  askedBody.response_format?.type === 'json_schema' && askedBody.response_format.json_schema.strict === true && askedBody.temperature === 0.2 && askedBody.max_completion_tokens > 0 && askedBody.include_reasoning === false,
+  JSON.stringify({ ...askedBody, messages: undefined }));
 const tested = data.aiModels?.groq;
 check('sem modelo escolhido: testa os modelos de conversa e usa o melhor que responde',
   asked?.model === 'openai/gpt-oss-120b' && tested?.working.map((w) => w.id).join() === 'openai/gpt-oss-120b,qwen/qwen3.8-27b,openai/gpt-oss-20b',
@@ -301,15 +345,52 @@ check('modelo indisponível em tempo de execução: troca pelo melhor e conclui'
 check('a escolha volta para o automático e o registro explica a troca',
   data.settings.groqModel === '' && /llama-3\.3-70b-versatile não está disponível.*gpt-oss-120b/.test(data.log?.[0]?.msg || ''), JSON.stringify([data.settings.groqModel, data.log?.[0]?.msg]));
 
+// 7c) a weak model's first answer (markdown, placeholder, invented technology): one correction round fixes it
+net.aiDirty = true;
+const writesBefore = net.ai.filter((c) => c.task === 'write').length;
+r = await send({ type: 'job:regen', id: g2.id });
+const fixed = jobs().find((j) => j.id === g2.id);
+const writes = net.ai.filter((c) => c.task === 'write').slice(writesBefore);
+check('resposta com markdown, campo a preencher e tecnologia inventada: a IA recebe os problemas e corrige',
+  r?.ok && writes.length === 2 && /\[Nome do Recrutador\]/.test(JSON.parse(writes[1].init.body).messages.at(-1).content) && /Kubernetes/.test(JSON.parse(writes[1].init.body).messages.at(-1).content) && fixed.subject === aiAnswer.subject && !/[[*]/.test(fixed.body),
+  JSON.stringify([writes.length, fixed.subject]));
+net.aiDirty = false;
+
+// 7d) AI on for every job
+data.settings = { ...data.settings, mode: 'ai', aiScoreSite: true };
+const aiBefore = net.ai.length;
+net.onEval = async (ad) => {
+  // the user discards this one while the AI is still working on it
+  const j = ad.includes('dev APEX 8') && jobs().find((x) => x.title.endsWith('dev APEX 8'));
+  if (j) await send({ type: 'job:patch', id: j.id, patch: { status: 'descartado' } });
+};
+await send({ type: 'jobsFound', jobs: [{ ...postJob(6, 'rh@sexta.example'), description: 'Vaga de Oracle APEX com Spark e Hadoop. Envie para rh@sexta.example' }, googleJob(7), postJob(8, 'rh@oitava.example')] });
+await until(() => jobs().find((j) => j.title.endsWith('dev APEX 6'))?.status === 'pronto' && jobs().find((j) => j.title.endsWith('Oracle APEX 7'))?.aiDone, 15000);
+await sleep(200);
+net.onEval = null;
+const lowAi = jobs().find((j) => j.title.endsWith('dev APEX 6'));
+const siteJob = jobs().find((j) => j.title.endsWith('Oracle APEX 7'));
+const gone = jobs().find((j) => j.title.endsWith('dev APEX 8'));
+const tasks = net.ai.slice(aiBefore).map((c) => c.task);
+check('IA ligada, vaga de baixa aderência: a IA avalia mas não escreve; fica o modelo de e-mail e o PDF original',
+  lowAi?.fit === 14 && lowAi.subject === 'Candidatura – Estamos contratando dev APEX 6' && !lowAi.resumeText && /Aderência 14/.test(lowAi.aiWarnings?.[0] || ''),
+  JSON.stringify([lowAi?.fit, lowAi?.subject, lowAi?.aiWarnings]));
+check('vaga para candidatar no site também recebe a avaliação da IA, sem gastar com textos', siteJob?.fit === 76 && siteJob.status === 'sem_email' && !siteJob.subject && tasks.filter((t) => t === 'eval').length >= 2,
+  JSON.stringify([siteJob?.fit, siteJob?.status, tasks]));
+check('vaga descartada enquanto a IA trabalhava continua descartada', gone?.status === 'descartado' && !gone.subject, JSON.stringify([gone?.status, gone?.subject]));
+data.settings = { ...data.settings, mode: 'template' };
+
 // 8) autopilot with a minimum fit
 data.settings = { ...data.settings, provider: 'anthropic', autoSend: true, minFit: 50 };
 const before = net.gmail.length;
-await send({ type: 'jobsFound', jobs: [postJob(3, 'talentos@terceira.example'), { ...postJob(4, 'rh@quarta.example'), description: 'Vaga de Spark, Hadoop, Kafka e Airflow. Envie para rh@quarta.example' }] });
+await send({ type: 'jobsFound', jobs: [postJob(3, 'talentos@terceira.example'), { ...postJob(4, 'rh@quarta.example'), description: 'Vaga de Spark, Hadoop, Kafka e Airflow. Envie para rh@quarta.example' }, { ...postJob(10, 'rh@decima.example'), title: 'Oportunidade em aberto', description: 'Envie seu currículo para rh@decima.example' }] });
 await until(() => net.gmail.length > before && !jobs().some((j) => ['novo', 'fila'].includes(j.status)), 30000);
 const auto = jobs().find((j) => j.title.endsWith('APEX 3'));
 const low = jobs().find((j) => j.title.endsWith('APEX 4'));
+const unknown = jobs().find((j) => j.title === 'Oportunidade em aberto');
 check('piloto automático envia a vaga aderente', auto?.status === 'enviado' && decodeMime(net.gmail.at(-1)).to === 'talentos@terceira.example', JSON.stringify([auto?.status, auto?.fit]));
 check('piloto automático segura a vaga de baixa aderência', low?.status === 'pronto' && low.fit < 50, JSON.stringify([low?.status, low?.fit]));
+check('piloto automático não envia vaga sem aderência conhecida (anúncio sem nenhum requisito)', unknown?.status === 'pronto' && unknown.fit == null, JSON.stringify([unknown?.status, unknown?.fit]));
 
 // 9) daily limit
 data.settings = { ...data.settings, dailyLimit: data.sentLog.count };

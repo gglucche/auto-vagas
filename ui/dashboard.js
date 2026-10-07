@@ -238,15 +238,19 @@ function renderDetail() {
     ${j.status === 'novo' ? `<div class="banner info">Preparando a candidatura…</div>` : ''}
     ${j.applyState === 'revisar' ? `<div class="banner info">Formulário preenchido. Confira na janela do LinkedIn e clique em “Enviar candidatura”.</div>` : ''}
     ${j.status === 'ignorado' || j.status === 'descartado' ? (j.note ? `<div class="banner info">${esc(j.note)}</div>` : '') : ''}
+    ${j.aiWarnings?.length && !sent ? `<div class="banner info">${j.aiWarnings.map(esc).join('<br>')}</div>` : ''}
     ${
-      hasAi
-        ? `<div class="match">${j.note ? `<p style="margin-bottom:10px">${esc(j.note)}</p>` : ''}<div class="cols">
-            <div><h4>Pontos fortes</h4><ul>${j.strengths.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
-            <div><h4>Lacunas</h4><ul>${j.gaps.map((x) => `<li>${esc(x)}</li>`).join('') || '<li>Nenhuma relevante</li>'}</ul></div></div></div>`
-        : j.matched
-          ? `<div class="match"><h4>Requisitos encontrados no anúncio</h4><div class="tags" style="margin:0">
-              ${j.matched.map((t) => `<span class="tag has">✓ ${esc(t)}</span>`).join('')}${j.missing.map((t) => `<span class="tag miss">${esc(t)}</span>`).join('')}</div></div>`
-          : ''
+      j.requirements?.length
+        ? `<div class="match">${j.note ? `<p style="margin-bottom:8px">${esc(j.note)}</p>` : ''}${j.fitWhy ? `<p class="muted" style="margin-bottom:8px">Nota limitada: ${esc(j.fitWhy)}.</p>` : ''}
+            <h4>Requisitos da vaga, avaliados pela IA</h4><ul class="reqs">${j.requirements.map(reqHtml).join('')}</ul></div>`
+        : hasAi
+          ? `<div class="match">${j.note ? `<p style="margin-bottom:10px">${esc(j.note)}</p>` : ''}<div class="cols">
+              <div><h4>Pontos fortes</h4><ul>${j.strengths.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
+              <div><h4>Lacunas</h4><ul>${j.gaps.map((x) => `<li>${esc(x)}</li>`).join('') || '<li>Nenhuma relevante</li>'}</ul></div></div></div>`
+          : j.matched
+            ? `<div class="match">${j.fitWhy ? `<p class="muted" style="margin-bottom:8px">Nota limitada: ${esc(j.fitWhy)}.</p>` : ''}<h4>Requisitos encontrados no anúncio</h4><div class="tags" style="margin:0">
+                ${j.matched.map((t) => `<span class="tag has">✓ ${esc(t)}</span>`).join('')}${j.missing.map((t) => `<span class="tag miss">${esc(t)}</span>`).join('')}</div></div>`
+            : ''
     }
     ${sent ? `<div style="margin-top:14px" class="row"><div class="stages">${Object.entries(STAGES).map(([k, l]) => `<button data-stage="${k}" class="${(j.stage || 'aguardando') === k ? 'active' : ''}">${l}</button>`).join('')}</div>
         <span class="muted">Enviada ${ago(j.sentAt)}${j.followUpAt ? ` · follow-up ${ago(j.followUpAt)}` : ''}</span></div>` : ''}
@@ -254,6 +258,13 @@ function renderDetail() {
     <div class="pane">${pane}</div>
     <div class="d-foot">${footHtml(j, busy)}</div>`;
 }
+
+// One requirement from the AI's evaluation: met (✓), partly (~) or not (✗), with the resume excerpt that proves it.
+const REQ_MARK = { sim: ['✓', 'ok'], parcial: ['~', 'part'], nao: ['✗', 'no'] };
+const reqHtml = (r) =>
+  `<li class="${REQ_MARK[r.atende][1]}"><b>${REQ_MARK[r.atende][0]}</b> ${esc(r.requisito)}${r.tipo === 'desejavel' ? ' <span class="muted">(desejável)</span>' : ''}${
+    r.evidencia ? `<span class="muted"> — “${esc(r.evidencia)}”</span>` : ''
+  }</li>`;
 
 function followUpHtml(j) {
   if (j.followUpAt) return `<p class="muted">Follow-up enviado ${ago(j.followUpAt)}.</p>`;
@@ -787,7 +798,12 @@ $('#analyzeBtn').addEventListener('click', (e) =>
     if (!res?.ok) return toast(res?.error || 'A IA falhou.', { bad: true, ms: 7000 });
     S.settings = await getSettings();
     fillSettings();
-    toast('Pronto: preenchi nome, habilidades e sugestões de busca. Confira abaixo.', { ms: 6000 });
+    toast(
+      res.keptOwnText
+        ? 'Pronto: preenchi habilidades e sugestões de busca. Mantive o texto do currículo lido do PDF: a versão da IA perdia informações dele.'
+        : 'Pronto: preenchi nome, habilidades e sugestões de busca. Confira abaixo.',
+      { ms: 8000 }
+    );
   })
 );
 // A connection error is fixed in Google Cloud, in another tab: the warning stays on screen until the next attempt.
