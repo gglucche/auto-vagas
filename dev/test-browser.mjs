@@ -107,19 +107,129 @@ function advance() {
 }
 document.querySelector('.jobs-apply-button')?.addEventListener('click', () => ${JSON.stringify(kind !== 'externa')} && setTimeout(render, 300));
 </script></body></html>`;
-const KINDS = { 1: 'simples', 2: 'pergunta', 3: 'externa', 4: 'ja', 5: 'simples' };
+// The window LinkedIn shows since 2026, as measured on the real page: a native <dialog> with no role and no <form>,
+// progress as an svg role="progressbar", buttons known only by their text, "Avaliar" (Review) before submitting,
+// the resume picked from a list (the file input only exists after "Carregar currículo" (Upload resume) is clicked,
+// and the page opens the file picker on it right away), errors written in the text each field points to with
+// aria-describedby, a "Salvar esta candidatura?" (Save this application?) window on close, and an open messaging
+// window with its own file attachment and Enviar (Send) button, which must be left alone.
+// confirm: 'janela' (a confirmation window after sending) | 'pagina' (the window just closes; only the job page says so)
+const newApplyPage = (kind, confirm) => `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Vaga de teste</title>
+<style>dialog{max-width:560px}</style></head>
+<body><div id="root"><h1>Desenvolvedor Oracle APEX</h1><p>Empresa X · Remoto</p><p id="estado"></p>
+<button type="button" id="easy" aria-label="Usar a candidatura simplificada para esta vaga"><span>Candidatura simplificada</span></button></div>
+<aside><div role="dialog" aria-label="Conversa com Fulana"><form id="chat"><input type="file" id="chat-file"><div contenteditable="true">Oi, tudo bem?</div><button type="submit"><span>Enviar</span></button></form></div></aside>
+<script>
+const root = document.getElementById('root');
+const touchChat = () => fetch('/chat', { method: 'POST' });
+document.getElementById('chat').onsubmit = (e) => { e.preventDefault(); touchChat(); };
+document.getElementById('chat-file').onchange = touchChat;
+const resumes = ['Profile.pdf', 'CV antigo.pdf'];
+let chosen = 0;
+const helper = (id) => '<div id="' + id + '-info"><p aria-live="polite"><span aria-hidden="true">0/20</span><span>0 de 20 caracteres</span></p></div>';
+const text = (id, q) => '<p>' + q + '*</p><input id="' + id + '" type="text" aria-label="' + q + '" aria-describedby="' + id + '-info" required>' + helper(id);
+const select = (id, q, options) => '<label for="' + id + '"><div>' + q + '*</div></label><select id="' + id + '" aria-describedby="' + id + '-info" required><option disabled selected value="">Selecionar opção</option>' + options.map((o) => '<option>' + o + '</option>').join('') + '</select><div id="' + id + '-info"></div>';
+const radios = (name, q, options) => '<fieldset role="radiogroup" aria-describedby="' + name + '-info"><legend><span>' + q + '*</span></legend>' + options.map((o, i) => '<div><input type="radio" id="' + name + i + '" name="' + name + '" value="' + o + '"><label for="' + name + i + '">' + o + '</label></div>').join('') + '</fieldset><div id="' + name + '-info"></div>';
+const steps = [
+  () => '<p>Informações de contato</p>' + select('email', 'E-mail', ['eu@gmail.example']) + select('cc', 'Código do país', ['Brasil (+55)', 'Estados Unidos (+1)']) +
+    '<label for="phone"><div>Número de celular*</div></label><input id="phone" type="tel" aria-describedby="phone-info" required><div id="phone-info"></div>',
+  () => '<p>Currículo*</p><p>Selecione ou carregue um currículo no formato DOC, DOCX ou PDF com menos de 2 MB</p><fieldset role="radiogroup" aria-describedby="error-message-cv">' +
+    resumes.map((r, i) => '<div role="button"><p>PDF</p><span>' + r + '</span><p>26/06/2026</p></div><div aria-label="' + r + '"><input type="radio" id="cv' + i + '" name="cv" value="' + r + '" aria-label="' + r + '" style="opacity:0;width:0;height:0"' + (i === chosen ? ' checked' : '') + '><label for="cv' + i + '"></label></div>').join('') +
+    '</fieldset><div id="error-message-cv"></div><button type="button" id="carregar"><span>Carregar currículo</span></button>',
+  () => '<p>Perguntas adicionais</p>' + text('anos', 'Há quantos anos você já usa Oracle APEX no trabalho?') + radios('plsql', 'Você tem experiência com PL/SQL?', ['Yes', 'No']) +
+    select('ingles', 'Qual é o seu nível de proficiência em inglês?', ['Nenhum', 'Básico', 'Conversação', 'Profissional', 'Nativo ou bilíngue']) +
+    (${JSON.stringify(kind === 'pergunta')} ? radios('cert', 'Você possui certificação Oracle Cloud?', ['Sim', 'Não']) : ''),
+  () => '<p>Revise sua candidatura</p><p>Confira os dados antes de enviar.</p><div><input type="checkbox" id="follow-company-checkbox" checked><label for="follow-company-checkbox">Seguir a Empresa X para ficar por dentro das novidades da página.</label></div>',
+];
+const buttons = ['Avançar', 'Avançar', 'Avaliar', 'Enviar candidatura'];
+let step = 0;
+const values = {};
+const modal = (html) => {
+  const d = document.createElement('dialog');
+  d.setAttribute('data-testid', 'dialog');
+  d.innerHTML = html;
+  root.append(d);
+  d.showModal();
+  return d;
+};
+let dlg = null;
+function render() {
+  dlg = dlg || modal('');
+  dlg.innerHTML = '<button type="button" aria-label="Fechar" id="fechar">×</button><header id="dialog-header"><h2>Candidate-se à empresa Empresa X</h2></header><div data-testid="dialog-content">' +
+    '<div id="pct">' + (step + 1) * 25 + ' por cento concluído</div><svg role="progressbar" aria-labelledby="pct" aria-valuenow="' + (step + 1) * 25 + '" width="100" height="4"></svg><p>' + (step + 1) + ' de 4 páginas</p>' +
+    '<div data-testid="lazy-column">' + steps[step]() + '</div><hr role="presentation">' +
+    (step ? '<button type="button"><span>Voltar</span></button>' : '') + '<button type="button" id="ir"><span>' + buttons[step] + '</span></button></div>';
+  document.getElementById('ir').onclick = advance;
+  dlg.querySelectorAll('input[name=cv]').forEach((r, i) => (r.onchange = () => (chosen = i)));
+  const upload = document.getElementById('carregar');
+  if (upload) upload.onclick = () => {
+    // like the real page: a new input at the end of <body>, and the file picker opened on it
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.accept = 'application/pdf';
+    input.onchange = () => {
+      const f = input.files[0];
+      if (!f) return;
+      values.file = { name: f.name, size: f.size, type: f.type };
+      setTimeout(() => { resumes.unshift(f.name); chosen = 0; if (step === 1) render(); }, 600); // the upload
+    };
+    document.body.append(input);
+    input.click();
+  };
+  document.getElementById('fechar').onclick = () => {
+    const ask = modal('<button type="button" aria-label="Fechar">×</button><h2>Salvar esta candidatura?</h2><p>Salve para voltar a esta candidatura mais tarde.</p><button type="button" id="descartar"><span>Descartar</span></button><button type="button"><span>Salvar</span></button>');
+    document.getElementById('descartar').onclick = () => { ask.remove(); dlg.remove(); dlg = null; fetch('/discarded' + location.pathname, { method: 'POST' }); };
+  };
+}
+function advance() {
+  dlg.querySelectorAll('[data-erro]').forEach((e) => e.remove());
+  let ok = true;
+  const refuse = (el, msg) => { ok = false; document.getElementById(el.getAttribute('aria-describedby')).insertAdjacentHTML('afterbegin', '<p data-erro>' + msg + '</p>'); };
+  for (const el of dlg.querySelectorAll('input, select')) {
+    if (el.type === 'checkbox') values[el.id] = el.checked;
+    else if (el.type === 'radio') { if (el.checked) values[el.name] = el.value; }
+    else if (el.required && !el.value) refuse(el, el.tagName === 'SELECT' ? 'Este campo é obrigatório' : 'Valor inválido');
+    else values[el.id] = el.tagName === 'SELECT' ? el.selectedOptions[0].textContent : el.value;
+  }
+  for (const group of dlg.querySelectorAll('fieldset[role=radiogroup]')) if (!group.querySelector('input:checked')) refuse(group, 'Faça uma seleção');
+  if (!ok) return;
+  if (step < steps.length - 1) {
+    step++;
+    return setTimeout(render, 250); // the real page moves to the next step after a network call
+  }
+  fetch('/submitted', { method: 'POST', body: JSON.stringify({ job: location.pathname, ...values }) });
+  dlg.remove();
+  dlg = null;
+  if (${JSON.stringify(confirm === 'pagina')}) {
+    document.getElementById('easy').remove();
+    document.getElementById('estado').textContent = 'Candidatura enviada agora';
+    return;
+  }
+  const end = modal('<button type="button" aria-label="Fechar">×</button><h2>Candidatura enviada</h2><p>Sua candidatura foi enviada para Empresa X.</p><button type="button" id="fim"><span>Concluído</span></button>');
+  document.getElementById('fim').onclick = () => end.remove();
+}
+document.getElementById('easy').addEventListener('click', () => setTimeout(render, 300));
+</script></body></html>`;
+// job number -> [kind, window, confirmation]: 'nova' is the window LinkedIn shows today, 'antiga' the older one
+const KINDS = { 1: ['simples', 'nova'], 2: ['pergunta', 'nova'], 3: ['externa', 'antiga'], 4: ['ja', 'antiga'], 5: ['simples', 'nova'], 6: ['simples', 'antiga'], 7: ['simples', 'nova', 'pagina'] };
 const submitted = []; // what the replica received for each submitted application
+let chatTouched = 0; // times the messaging window got a file or a send
 
 // Local server: a fake login provider (to exercise chrome.identity without needing an account) and the test job.
 let back = '';
 const provider = http.createServer((req, res) => {
   const view = /^\/jobs\/view\/(\d+)/.exec(req.url);
-  if (view) return res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }).end(easyApplyPage(KINDS[view[1]]));
+  if (view) {
+    const [kind, ui, confirm] = KINDS[view[1]];
+    return res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }).end(ui === 'nova' ? newApplyPage(kind, confirm) : easyApplyPage(kind));
+  }
   if (req.method === 'POST') {
     let body = '';
     req.on('data', (chunk) => (body += chunk));
     req.on('end', () => {
       if (req.url === '/submitted') submitted.push(JSON.parse(body));
+      if (req.url === '/chat') chatTouched++;
       res.writeHead(204).end();
     });
     return;
@@ -279,7 +389,7 @@ try {
     await chrome.storage.local.set({
       settings: { name: 'Fulano de Tal', email: 'eu@gmail.example', keywords: 'Oracle APEX', phone: '+55 (19) 99999-8888', city: 'Campinas', skills: 'oracle apex, pl/sql', skillYears: 'oracle apex: 8\\npl/sql: 10', englishLevel: 'Avançado', applyReview: false },
       resumePdf: { name: 'CV de teste.pdf', b64: pdfToB64(textToPdf('Fulano de Tal\\nfulano@exemplo.com\\n# Experiência\\n- Oracle APEX e PL/SQL')) },
-      'job:e1': job(1), 'job:e2': job(2), 'job:e3': job(3), 'job:e4': job(4), 'job:e5': job(5),
+      'job:e1': job(1), 'job:e2': job(2), 'job:e3': job(3), 'job:e4': job(4), 'job:e5': job(5), 'job:e6': job(6), 'job:e7': job(7),
     });
   })()`);
   const jobState = (id) => dash.evaluate(`chrome.storage.local.get('job:${id}').then((x) => x['job:${id}'])`);
@@ -296,7 +406,17 @@ try {
   check('cada campo recebe a resposta certa (lista, texto, número, sim/não com opções em inglês, nível de inglês) e a empresa não é seguida',
     sentFor(1)?.email === 'eu@gmail.example' && sentFor(1).cc === 'Brasil (+55)' && sentFor(1).phone === '19999998888' && sentFor(1).anos === '8' && sentFor(1).plsql === 'Yes' && sentFor(1).ingles === 'Profissional' && sentFor(1)['follow-company-checkbox'] === false,
     JSON.stringify(sentFor(1)));
-  check('o arquivo anexado é o currículo salvo na extensão', sentFor(1)?.file?.name === 'CV de teste.pdf' && sentFor(1).file.size > 300 && sentFor(1).file.type === 'application/pdf', JSON.stringify(sentFor(1)?.file));
+  check('o arquivo anexado é o currículo salvo na extensão, carregado pelo botão sem abrir o seletor de arquivos, e fica escolhido na lista',
+    sentFor(1)?.file?.name === 'CV de teste.pdf' && sentFor(1).file.size > 300 && sentFor(1).file.type === 'application/pdf' && sentFor(1).cv === 'CV de teste.pdf', JSON.stringify([sentFor(1)?.file, sentFor(1)?.cv]));
+  check('a janela de mensagens aberta ao lado não recebe nada', chatTouched === 0, `mexeu ${chatTouched} vez(es)`);
+
+  await applyTo(['e6']);
+  job = await waitJob('e6', (x) => x.status === 'enviado' || !!x.error);
+  check('janela antiga (role="dialog", com <form>) continua funcionando, com o currículo anexado', job.status === 'enviado' && sentFor(6)?.file?.name === 'CV de teste.pdf' && sentFor(6).phone === '19999998888', JSON.stringify([job.status, job.error, sentFor(6)]));
+
+  await applyTo(['e7']);
+  job = await waitJob('e7', (x) => x.status === 'enviado' || !!x.error);
+  check('sem janela de confirmação depois de Enviar: o envio é reconhecido pelo aviso na página da vaga', job.status === 'enviado' && !!sentFor(7), JSON.stringify([job.status, job.error]));
 
   await applyTo(['e2']);
   job = await waitJob('e2', (x) => x.applyState === 'pendente' || x.status === 'enviado');

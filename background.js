@@ -601,7 +601,28 @@ async function openApplyTab(url) {
   return applying.tabId;
 }
 
+// Runs in the page's own world. The newer Easy Apply window only creates the file input when "Carregar currículo"
+// (Upload resume) is clicked, and opens the file picker on it right away. While content/apply.js is attaching the
+// resume (an attribute on <html>), that picker is held back and the input is marked for it to fill in instead.
+function holdFilePicker() {
+  const html = document.documentElement;
+  if (html.hasAttribute('data-auto-vagas-picker')) return;
+  const hold = (open) =>
+    function (...args) {
+      if (this.type !== 'file' || !html.hasAttribute('data-auto-vagas-upload')) return open.apply(this, args);
+      this.setAttribute('data-auto-vagas-upload', '');
+      if (!this.isConnected) {
+        this.hidden = true;
+        document.body.append(this);
+      }
+    };
+  HTMLInputElement.prototype.click = hold(HTMLInputElement.prototype.click);
+  if (HTMLInputElement.prototype.showPicker) HTMLInputElement.prototype.showPicker = hold(HTMLInputElement.prototype.showPicker);
+  html.setAttribute('data-auto-vagas-picker', '');
+}
+
 async function runInPage(tabId, msg) {
+  await chrome.scripting.executeScript({ target: { tabId }, world: 'MAIN', func: holdFilePicker }).catch(() => {});
   await chrome.scripting.executeScript({ target: { tabId }, files: ['content/apply.js'] });
   return Promise.race([chrome.tabs.sendMessage(tabId, msg), sleep(5 * 60_000).then(() => ({ status: 'erro', error: 'tempo esgotado' }))]);
 }

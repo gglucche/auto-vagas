@@ -16,7 +16,7 @@
     easy: /candidatura simplificada|easy apply|solicitud sencilla/,
     resume: /continuar candidatura|continue applying/,
     next: /^(avancar|proxim[oa]|continuar|next|continue)\b|avancar para|continue to next/,
-    review: /^(revisar|review)\b|revise sua candidatura|review your application/,
+    review: /^(revisar|avaliar|review)\b|revise sua candidatura|review your application/,
     submit: /enviar candidatura|submit application|^enviar$|^submit$/,
     done: /^(concluido|done|pronto|ok)\b/,
     close: /^(fechar|dismiss|close)\b/,
@@ -24,6 +24,9 @@
     sent: /candidatura (foi )?enviada|application (was )?(sent|submitted)|sua candidatura foi|your application was sent/,
     applied: /candidatou-se|candidatura enviada|voce se candidatou|\bapplied\b/,
     closed: /nao aceita mais candidaturas|no longer accepting applications|vaga encerrada/,
+    upload: /^(carregar|anexar|upload|attach)\b.*\b(curriculo|resume|cv)\b/,
+    // what a page writes under a field it rejected (the helper text under it also says "1 de 20 caracteres")
+    error: /invalid|obrigatori|required|insira|faca uma selecao|selecione uma|enter a valid|please (enter|select|make)|\berro\b|\berror\b/,
     // data that is never stored or learned
     secret: /senha|password|cpf|\brg\b|passaporte|passport|cartao|card|cvv|social security|\bssn\b/,
   };
@@ -84,7 +87,8 @@
         fields.push({ kind, label, els: [el], required: isRequired(el, label), empty: !el.value.trim(), combo: el.getAttribute('role') === 'combobox' || el.hasAttribute('aria-autocomplete') });
       }
     }
-    return fields.filter((f) => f.label);
+    // the asterisk only marks a required field ("E-mail*"): it stays out of the question
+    return fields.map((f) => ({ ...f, label: f.label.replace(/\s*\*\s*$/, '') })).filter((f) => f.label);
   }
 
   // Writes to fields controlled by React and the like: value via the native setter, plus the events they listen for.
@@ -148,23 +152,48 @@
 
   // ---------- LinkedIn Easy Apply ----------
 
-  const dialogs = () => [...document.querySelectorAll('[role="dialog"]')].filter(visible);
-  const applyDialog = () => dialogs().reverse().find((d) => find(d, RE.submit) || find(d, RE.review) || find(d, RE.next) || d.querySelector('form'));
+  // The older window is a div with role="dialog"; the newer one is a native <dialog>, with no role and no <form>.
+  // Messaging windows (a text box, a file attachment and an Enviar (Send) button of their own) are left out.
+  const dialogs = () => [...document.querySelectorAll('[role="dialog"], [role="alertdialog"], dialog[open]')].filter((d) => visible(d) && !d.querySelector('[contenteditable="true"]'));
+  const applyDialog = () => dialogs().reverse().find((d) => find(d, RE.submit) || find(d, RE.review) || find(d, RE.next));
   const wasSent = () => dialogs().some((d) => RE.sent.test(norm(d.innerText)));
   const signature = (d) => [d.querySelector('progress')?.value ?? d.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow') ?? '', collect(d).map((f) => f.label).join('|'), norm(find(d, RE.submit)?.innerText || find(d, RE.review)?.innerText || find(d, RE.next)?.innerText)].join('#');
-  const invalid = (d, fields) => fields.filter((f) => f.els.some((el) => el.getAttribute('aria-invalid') === 'true' || el.closest('[data-test-form-element], fieldset, div')?.querySelector('[role="alert"], [class*="error"]')));
+  // The error under a field: an alert next to it (older window) or the text the field points to with aria-describedby (newer one).
+  const describedBy = (el) => [el, el.closest('fieldset, [role="radiogroup"]')].flatMap((x) => (x?.getAttribute('aria-describedby') || '').split(/\s+/)).filter(Boolean).map((id) => norm(document.getElementById(id)?.textContent));
+  const invalid = (d, fields) => fields.filter((f) => f.els.some((el) => el.getAttribute('aria-invalid') === 'true' || describedBy(el).some((text) => RE.error.test(text)) || el.closest('[data-test-form-element], fieldset, div')?.querySelector('[role="alert"], [class*="error"]')));
 
-  async function uploadResume(dlg, resume, state) {
+  // The resume list in the newer window: how many there are and which one is selected.
+  const resumeChoice = (root) => {
+    const radios = [...root.querySelectorAll('input[type="radio"]')];
+    return `${radios.length}:${radios.filter((r) => r.checked).map(labelOf).join('|')}`;
+  };
+
+  async function uploadResume(root, resume, state) {
     if (state.uploaded || !resume?.b64) return;
-    const inputs = [...dlg.querySelectorAll('input[type="file"]')];
-    const input = inputs.find((i) => /curr[ií]culo|resume|\bcv\b/i.test(`${i.id} ${i.name} ${labelOf(i)} ${i.closest('div')?.innerText || ''}`)) || (inputs.length === 1 ? inputs[0] : null);
+    const inputs = [...root.querySelectorAll('input[type="file"]')];
+    let input = inputs.find((i) => /curr[ií]culo|resume|\bcv\b/i.test(`${i.id} ${i.name} ${labelOf(i)} ${i.closest('div')?.innerText || ''}`)) || (inputs.length === 1 ? inputs[0] : null);
+    const before = resumeChoice(root);
+    const html = document.documentElement;
+    const button = !input && html.hasAttribute('data-auto-vagas-picker') && find(root, RE.upload);
+    if (button) {
+      // Newer window: the file input only exists once "Carregar currículo" (Upload resume) is clicked, and the page
+      // opens the file picker right away. In the page's own world that picker is held back (holdFilePicker, in the
+      // background) while this attribute is set, and the input is marked for us to fill in.
+      html.setAttribute('data-auto-vagas-upload', '');
+      button.click();
+      input = await waitFor(() => document.querySelector('input[type="file"][data-auto-vagas-upload]'), 3000, 100);
+      html.removeAttribute('data-auto-vagas-upload');
+      input?.removeAttribute('data-auto-vagas-upload');
+    }
     if (!input) return;
     const data = new DataTransfer();
     data.items.add(new File([Uint8Array.from(atob(resume.b64), (c) => c.charCodeAt(0))], resume.name, { type: 'application/pdf' }));
     input.files = data.files;
     input.dispatchEvent(new Event('change', { bubbles: true }));
     state.uploaded = true;
-    await sleep(2500); // the page uploads the file in the background
+    // the page uploads the file in the background; the newer window then adds it to the list, already selected
+    if (button && (await waitFor(() => resumeChoice(root) !== before, 15000))) await pause();
+    else await sleep(2500);
   }
 
   async function closeDialog() {
@@ -199,12 +228,13 @@
     button.click();
     const state = { uploaded: false };
     let stuck = 0;
+    let sent = false;
     for (let step = 0; step < 20; step++) {
       const dlg = await waitFor(() => (wasSent() ? document.body : applyDialog()), step ? 6000 : 12000);
       if (wasSent()) break;
       if (!dlg) return { status: 'erro', error: 'a janela da candidatura não abriu' };
       const more = find(dlg, RE.resume); // safety notice before the form
-      if (more && !dlg.querySelector('form')) {
+      if (more && !collect(dlg).length) {
         more.click();
         continue;
       }
@@ -231,6 +261,11 @@
       action.click();
       await waitFor(() => wasSent() || !applyDialog() || signature(applyDialog()) !== before, 8000);
       if (wasSent()) break;
+      // the window closed after Enviar (Submit) without a confirmation window: the job page says it was sent
+      if (sending && !applyDialog()) {
+        sent = !!(await waitFor(() => wasSent() || otherState() === 'ja', 6000));
+        break;
+      }
       const now = applyDialog();
       if (now && signature(now) === before) {
         // didn't advance: the page rejected some field
@@ -239,7 +274,7 @@
         if (++stuck > 1 || bad.length || unknown.length) return stop('pendente', bad.length ? bad : unknown.length ? unknown : fields.filter((f) => f.empty));
       } else stuck = 0;
     }
-    if (!wasSent()) return { status: 'erro', error: 'a candidatura não chegou ao fim' };
+    if (!sent && !wasSent()) return { status: 'erro', error: 'a candidatura não chegou ao fim' };
     await pause();
     const end = dialogs().find((d) => RE.sent.test(norm(d.innerText)));
     (end && (find(end, RE.done) || find(end, RE.close)))?.click();
