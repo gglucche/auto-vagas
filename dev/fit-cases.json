@@ -15,6 +15,21 @@
    "resumeText": "Mariana Kowalski Tavares\nmariana.tavares@exemplo.com | (41) 90000-4821 | Curitiba, PR | linkedin.example/in/mariana-tavares\n\n# Resumo profissional\nAnalista de Dados com 5 anos de experiência no setor financeiro, em back-office bancário e fintech de crédito. Atuo com SQL (PostgreSQL e SQL Server), Power BI (DAX, Power Query e modelagem dimensional), Excel avançado e rotinas de ETL com SSIS. Construo dashboards de KPIs, automatizo relatórios gerenciais e trabalho próxima das áreas de negócio (operações, crédito, cobrança e financeiro) para transformar perguntas em indicadores confiáveis. Uso Python com pandas em análises ad hoc e tratamento de bases. Busco posição de Analista de Dados ou de BI (pleno/sênior) em modelo híbrido em Curitiba.\n\n# Experiência profissional\nAnalista de Dados Pleno | Fintech Beta Crédito Digital | Curitiba, PR | mar/2023 - atual\n- Desenvolvo e mantenho mais de 20 dashboards no Power BI para Crédito, Cobrança e Produto (inadimplência, taxa de aprovação, ticket médio, safras e roll rate).\n- Modelei o dataset corporativo de crédito em esquema estrela, com medidas DAX para safra e PDD gerencial; o tempo de atualização caiu de 40 para 12 minutos.\n- Escrevo consultas, views e CTEs em PostgreSQL sobre a base transacional, em parceria com a engenharia para criação de índices e réplicas de leitura.\n- Faço análises ad hoc em Python (pandas, Jupyter) para conciliação de bases e investigação de desvios em indicadores.\n- Conduzo reuniões quinzenais com gestores para definir KPIs e documento regras de negócio e dicionário de dados no Confluence.\n- Substituí 15 planilhas manuais de fechamento mensal por relatórios automatizados, economizando cerca de 30 horas por mês da equipe financeira.\n\nAnalista de Dados Júnior | Banco Araucária Alfa S.A. | Curitiba, PR | jul/2022 - fev/2023\n- Desenvolvi e mantive pacotes SSIS para carga diária de dados de operações de back-office (TED, boletos, conciliação bancária) no SQL Server.\n- Migrei 30 relatórios de Excel para Power BI, com segurança em nível de linha (RLS) por área.\n- Criei procedures e consultas em SQL Server para relatórios internos de SLA operacional e volumetria.\n- Apoiei Operações e Tesouraria com indicadores diários de produtividade e pendências.\n\nAnalista de Back-office | Banco Araucária Alfa S.A. | Curitiba, PR | set/2021 - jun/2022\n- Conciliação de lançamentos e controle de pendências operacionais com Excel avançado (tabelas dinâmicas, PROCX, Power Query e macros VBA simples).\n- Elaborei o relatório diário de pendências da coordenação, depois automatizado na transição para a área de dados.\n\n# Formação acadêmica\n- Bacharelado em Ciências Econômicas | Universidade Exemplo do Paraná | 2016 - 2020\n- MBA em Business Intelligence e Analytics | Faculdade Exemplo Digital (EAD) | 2022 - 2023\n\n# Competências técnicas\n- SQL: PostgreSQL e SQL Server (CTEs, window functions, views, procedures, otimização básica de consultas)\n- Power BI: DAX, Power Query (M), modelagem dimensional, RLS, Power BI Service e gateway\n- Excel avançado: tabelas dinâmicas, PROCX, Power Query, VBA básico\n- ETL: SSIS (SQL Server Integration Services)\n- Python básico: pandas e Jupyter para análises ad hoc\n- Ferramentas: Git (básico), Jira, Confluence\n- Negócio: indicadores financeiros, crédito e cobrança (safra, inadimplência, roll rate), conciliação bancária\n\n# Certificações e cursos\n- Microsoft Certified: Power BI Data Analyst Associate (PL-300) | 2023\n- Curso de SQL para Análise de Dados | plataforma online | 2021\n- Curso de Python para Análise de Dados (pandas) | plataforma online | 2024\n\n# Idiomas\n- Português: nativo\n- Inglês: intermediário (leitura técnica fluente, conversação intermediária)\n\n# Informações adicionais\n- Disponível para modelo híbrido em Curitiba e região metropolitana.",
    "skills": "SQL, PostgreSQL, SQL Server, T-SQL, Power BI, DAX, Power Query, Modelagem dimensional, Excel avançado, VBA, SSIS, ETL, Python, pandas, Dashboards, KPIs, Relatórios gerenciais, Análise de dados, Git, Jira, Confluence, Crédito e cobrança, Conciliação bancária",
    "keywords": "Analista de Dados\nAnalista de BI\nAnalista de Business Intelligence\nAnalista de Dados Power BI\nAnalista de Dados Pleno"
+  },
+  "devops": {
+   "resumeText": "Rafael Duarte Menezes\nrafael.menezes@exemplo.com | (48) 99812-0457 | Florianópolis - SC | linkedin.example/in/rafaelmenezes\n\n# Resumo\nEngenheiro DevOps/SRE pleno com cerca de 5 anos de experiência em infraestrutura em nuvem AWS, infraestrutura como código com Terraform e orquestração de contêineres com Kubernetes (EKS). Construo e mantenho pipelines de CI/CD em GitHub Actions e GitLab CI, cuido da observabilidade com Prometheus e Grafana e participo de escalas de plantão e resposta a incidentes. Busco posição remota em time de Plataforma ou SRE.\n\n# Experiência\nEngenheiro DevOps Pleno | Andorinha Pagamentos | 03/2024 - atual\n- Mantenho a infraestrutura AWS de uma plataforma de pagamentos com cerca de 40 microsserviços em EKS, provisionada com Terraform em módulos reutilizáveis e state remoto em S3 com lock em DynamoDB.\n- Migrei 18 serviços de ECS para EKS com Helm, reduzindo o custo mensal de computação em 22%.\n- Padronizei pipelines em GitHub Actions com workflows reutilizáveis: build de imagens Docker, scan de vulnerabilidades e deploy automatizado por ambiente.\n- Implantei alertas no Prometheus/Alertmanager e dashboards no Grafana orientados a SLOs, reduzindo alertas ruidosos em 60%.\n- Participo da escala de plantão 24x7 e conduzo post-mortems sem culpados; o MTTR médio caiu de 52 para 19 minutos.\n- Revisei políticas IAM aplicando menor privilégio e roles por serviço (IRSA) nos clusters EKS.\n\nAnalista DevOps Júnior | Ipê Logística Digital | 06/2022 - 02/2024\n- Provisionei ambientes de homologação e produção na AWS (EC2, ECS Fargate, RDS PostgreSQL, ALB, Route 53) com Terraform.\n- Migrei pipelines do Jenkins para GitLab CI, com testes, build de imagens e deploy em ECS.\n- Criei scripts em Bash e Python para backup de RDS, rotação de logs e limpeza de recursos ociosos.\n- Configurei coleta de métricas de hosts Linux com node_exporter e Prometheus e os primeiros dashboards no Grafana.\n- Atendi chamados de sustentação e participei da escala de sobreaviso.\n\nAnalista de Infraestrutura Linux | Graúna Sistemas | 09/2021 - 05/2022\n- Administração de servidores Linux (Ubuntu e CentOS): usuários, permissões, systemd, Nginx, firewall e atualizações.\n- Conteinerização de aplicações legadas com Docker e docker-compose.\n- Monitoramento de disponibilidade e atendimento a incidentes de primeiro e segundo nível.\n\n# Formação\n- Bacharelado em Sistemas de Informação | Faculdade Tecnológica da Ilha | 2017 - 2021\n\n# Certificações\n- AWS Certified Solutions Architect - Associate (2023)\n- HashiCorp Certified: Terraform Associate (2024)\n\n# Habilidades técnicas\n- Cloud: AWS (EC2, ECS, EKS, RDS, IAM, S3, VPC, Route 53, CloudWatch)\n- Infraestrutura como código: Terraform\n- Contêineres e orquestração: Docker, Kubernetes, Helm\n- CI/CD: GitHub Actions, GitLab CI\n- Observabilidade: Prometheus, Alertmanager, Grafana\n- Sistemas operacionais: Linux (Ubuntu, CentOS, Amazon Linux)\n- Scripting: Bash, Python básico\n- Práticas: SRE, SLOs, plantão e resposta a incidentes, post-mortem\n\n# Idiomas\n- Português: nativo\n- Inglês: intermediário-avançado (leitura técnica fluente, reuniões com times internacionais)\n\n# Preferências\n- Trabalho 100% remoto",
+   "skills": "AWS, EC2, ECS, EKS, RDS, IAM, Terraform, Kubernetes, Helm, Docker, GitHub Actions, GitLab CI, CI/CD, Prometheus, Grafana, Linux, Bash, Python, SRE, Observabilidade, Resposta a incidentes, Infraestrutura como código",
+   "keywords": "DevOps\nSRE\nEngenheiro de Plataforma\nEngenheiro Cloud AWS"
+  },
+  "java": {
+   "resumeText": "Rafael Tavares Cavalcanti\nrafael.cavalcanti@exemplo.com | (81) 99876-5412 | Recife - PE | Disponível para trabalho remoto\n\n# Resumo profissional\nDesenvolvedor back-end sênior com 9 anos de experiência em Java. Construo e mantenho microsserviços com Spring Boot e Spring Cloud em sistemas de alto volume nos setores de pagamentos, seguros e logística. Tenho experiência com mensageria (Kafka e RabbitMQ), bancos relacionais (PostgreSQL e Oracle Database), testes automatizados, containers Docker e serviços básicos da AWS. Faço code review com frequência e mentoria de desenvolvedores juniores. Inglês avançado. Prefiro trabalho remoto.\n\n# Experiência profissional\nDesenvolvedor Back-end Sênior | Veredas Pay | 03/2022 - atual\n- Desenvolvimento e manutenção de microsserviços em Java 17 e 21 com Spring Boot 3 para o processamento de transações de cartão, com cerca de 2 milhões de eventos por dia.\n- Modelagem de tópicos e consumidores Kafka, com tratamento de reprocessamento, idempotência e dead letter topics.\n- Migração de 5 serviços de Java 11 para Java 17 e de 2 serviços para Java 21, sem indisponibilidade.\n- Integração com a AWS: S3 para arquivos de conciliação, SQS para filas de notificação e deploy dos containers em ECS.\n- Construção de APIs REST documentadas com OpenAPI e de dois serviços internos com gRPC para comunicação de baixa latência.\n- Redução de 35% no tempo médio de resposta da API de autorização com ajustes em consultas JPA/Hibernate e criação de índices no PostgreSQL.\n- Code review diário e mentoria de 3 desenvolvedores juniores, com plano de estudos e sessões semanais de pareamento.\n\nDesenvolvedor Java Pleno | Nautilo Seguros | 01/2019 - 02/2022\n- Manutenção e evolução do sistema de emissão de apólices em Java 8 e 11, Spring Boot e Oracle Database.\n- Participação na divisão do módulo monolítico de cotação em quatro microsserviços com Spring Cloud (Config Server, Gateway e OpenFeign).\n- Integração assíncrona com corretoras parceiras via RabbitMQ, no lugar das rotinas batch noturnas.\n- Otimização de consultas SQL no Oracle para relatórios regulatórios.\n- Aumento da cobertura de testes de 30% para 75% com JUnit 5 e Mockito.\n- Containerização das aplicações com Docker e Docker Compose para padronizar os ambientes de desenvolvimento.\n\nDesenvolvedor Java Júnior | Pontal Logística | 03/2017 - 12/2018\n- Desenvolvimento de funcionalidades no sistema de rastreamento de cargas em Java 8, Spring Boot, JPA/Hibernate e PostgreSQL.\n- Criação de endpoints REST consumidos pelo aplicativo dos motoristas.\n- Correção de bugs e suporte de terceiro nível ao time de operações.\n\n# Formação acadêmica\n- Bacharelado em Sistemas de Informação | Faculdade Capibaribe de Tecnologia | 2013 - 2016\n\n# Competências técnicas\n- Linguagens: Java (8, 11, 17, 21), SQL\n- Frameworks: Spring Boot, Spring Cloud, Spring Data JPA, Hibernate\n- Mensageria: Apache Kafka, RabbitMQ\n- Bancos de dados: PostgreSQL, Oracle Database\n- Cloud e infraestrutura: Docker, Docker Compose, AWS (S3, SQS, ECS)\n- APIs: REST, OpenAPI, gRPC\n- Testes: JUnit 5, Mockito\n- Ferramentas: Git, Maven, GitLab CI\n- Práticas: code review, mentoria, Scrum\n\n# Idiomas\n- Português: nativo\n- Inglês: avançado (leitura, escrita e conversação)\n\n# Cursos\n- Arquitetura de Microsserviços com Spring Cloud (curso online, 40h)\n- Apache Kafka para Desenvolvedores (curso online, 24h)",
+   "skills": "Java, Spring Boot, Spring Cloud, Microsserviços, Kafka, RabbitMQ, PostgreSQL, Oracle Database, JPA, Hibernate, Docker, AWS, AWS S3, AWS SQS, AWS ECS, JUnit, Mockito, APIs REST, gRPC, Maven, Git, Code Review, Mentoria, Inglês avançado",
+   "keywords": "desenvolvedor java sênior\ndesenvolvedor back-end java remoto\nengenheiro de software java spring boot\njava microsserviços kafka"
+  },
+  "suporte": {
+   "resumeText": "Rafael Moretti Andrade\nrafael.andrade@exemplo.com | (19) 99812-0457 | Campinas - SP\n\n# Resumo\nAnalista de Suporte N2 e Infraestrutura com 6 anos de experiência em ambientes Microsoft corporativos de 300 a 1.200 usuários. Atuação em administração de Windows Server, Active Directory e GPO, gestão de Microsoft 365 e Exchange Online, redes locais (TCP/IP, VLAN, VPN) e operação básica de firewall Fortinet. Experiência com processos ITIL (incidente, requisição, problema e mudança) usando GLPI e ServiceNow, automação de rotinas com PowerShell e acompanhamento de backups com Veeam. Busco posição pleno em suporte ou infraestrutura em Campinas e região, em modelo híbrido ou presencial.\n\n# Experiência Profissional\nAnalista de Suporte N2 / Infraestrutura | Vale Capivari Metalúrgica | 03/2023 - atual\n- Atendimento de chamados N2 no ServiceNow para cerca de 1.200 usuários em 3 plantas, com cumprimento médio de 94% dos SLAs\n- Administração do Active Directory (usuários, grupos, OUs, delegação de permissões) e criação e manutenção de GPOs de segurança, mapeamento de unidades e impressoras\n- Gestão do Microsoft 365 e Exchange Online: licenciamento, caixas compartilhadas, grupos de distribuição, regras de fluxo de e-mail e migração das 180 caixas restantes do Exchange on-premises\n- Scripts PowerShell para onboarding e offboarding de colaboradores, reduzindo o tempo de liberação de acessos de 40 para 10 minutos\n- Suporte a servidores Windows Server 2016/2019 (DNS, DHCP, file server, servidor de impressão) e a máquinas virtuais em VMware vSphere (criação de VMs, snapshots, acompanhamento de recursos)\n- Monitoramento diário dos jobs de backup no Veeam Backup & Replication e testes mensais de restore\n- Configuração de VLANs em switches gerenciáveis, acompanhamento das VPNs site-to-site entre plantas e ajustes básicos de políticas no FortiGate junto ao time de segurança\n- Participação no comitê de mudanças (CAB) e redação de artigos para a base de conhecimento\n\nTécnico de Suporte N1/N2 | Prisma BPO Serviços | 08/2021 - 02/2023\n- Atendimento N1 e N2 via GLPI para 400 usuários, presencial e remoto\n- Criação, desbloqueio e manutenção de contas no Active Directory e permissões em pastas compartilhadas\n- Suporte a Microsoft 365 (Outlook, Teams, OneDrive, SharePoint) e implantação de MFA para todos os usuários\n- Instalação e padronização de estações Windows 10/11 e controle do inventário de ativos no GLPI\n- Consultas SQL básicas em SQL Server para apoiar o time de sistemas na conferência de dados\n- Estruturação do catálogo de serviços e das categorias de chamados no GLPI, alinhados ao ITIL\n\nAssistente de Help Desk | Rede de Ensino Horizonte Azul | 02/2020 - 07/2021\n- Atendimento telefônico e presencial a professores e à área administrativa\n- Manutenção de hardware, cabeamento estruturado e configuração de impressoras de rede\n- Configuração de roteadores e access points e suporte às aulas remotas durante a pandemia\n- Registro de chamados com classificação de prioridade e acompanhamento até o encerramento\n\n# Formação Acadêmica\n- Tecnólogo em Redes de Computadores | Faculdade de Tecnologia Ipê Roxo | 2018 - 2020\n\n# Certificações e Cursos\n- ITIL 4 Foundation (2022)\n- Fortinet NSE 1 e NSE 2 - Fundamentos de Segurança de Rede (2023)\n- PowerShell para Administradores de Sistemas - curso livre (2022)\n- VMware vSphere - Introdução - curso livre (2023)\n- Veeam Backup & Replication - Fundamentos (2024)\n\n# Competências Técnicas\n- Sistemas operacionais: Windows Server 2012 R2/2016/2019/2022, Windows 10/11, noções de Linux (Ubuntu)\n- Diretório e colaboração: Active Directory, GPO, DNS, DHCP, Microsoft 365, Exchange Online, Teams, SharePoint\n- Redes: TCP/IP, VLAN, VPN site-to-site e client-to-site, switches gerenciáveis, FortiGate (nível básico)\n- Ferramentas ITSM: ServiceNow, GLPI\n- Virtualização e backup: VMware vSphere/ESXi (básico), Veeam Backup & Replication\n- Automação e dados: PowerShell, SQL (consultas básicas em SQL Server)\n\n# Idiomas\n- Português: nativo\n- Inglês: básico-intermediário (leitura de documentação técnica)",
+   "skills": "Windows Server, Active Directory, GPO, Microsoft 365, Exchange Online, DNS, DHCP, Redes TCP/IP, VLAN, VPN, Firewall Fortinet, ITIL, GLPI, ServiceNow, PowerShell, VMware, Veeam Backup, SQL, Suporte N2, Service Desk, Atendimento a usuários, Inventário de ativos",
+   "keywords": "Analista de Suporte N2\nAnalista de Infraestrutura\nAnalista de Suporte Técnico\nAnalista de Service Desk\nSuporte de TI Pleno"
   }
  },
  "cases": [
@@ -485,6 +500,474 @@
     30
    ],
    "gold": 28
+  },
+  {
+   "id": "devops-01",
+   "profile": "devops",
+   "category": "forte",
+   "title": "Engenheiro(a) DevOps Pleno",
+   "description": "Sobre a vaga\nA Cajuí é uma fintech de crédito consignado que atende mais de 800 mil clientes. Nosso time de Plataforma cuida de toda a infraestrutura em AWS que sustenta os produtos de crédito, e buscamos uma pessoa DevOps pleno para fortalecer o squad.\n\nResponsabilidades\n- Evoluir e manter nossa infraestrutura em AWS (EKS, EC2, RDS, IAM, VPC), totalmente provisionada via Terraform;\n- Manter os clusters Kubernetes (EKS) e os charts Helm das aplicações;\n- Criar e melhorar pipelines de CI/CD em GitHub Actions;\n- Cuidar da observabilidade com Prometheus, Alertmanager e Grafana, definindo alertas e SLOs junto aos squads;\n- Participar da escala de plantão e da resposta a incidentes, conduzindo post-mortems;\n- Automatizar tarefas operacionais com Bash ou Python.\n\nRequisitos\n- 3 anos ou mais de experiência com DevOps/SRE;\n- Vivência sólida com AWS em produção;\n- Terraform (módulos, state remoto, workspaces);\n- Kubernetes e Docker em produção;\n- Pipelines de CI/CD (GitHub Actions ou GitLab CI);\n- Linux no dia a dia;\n- Prometheus e Grafana.\n\nDiferenciais\n- Certificação AWS;\n- Experiência no setor financeiro;\n- ArgoCD ou outra ferramenta de GitOps.\n\nBenefícios\n- 100% remoto, com auxílio home office de R$ 250/mês;\n- Plano de saúde e odontológico sem coparticipação;\n- Vale-refeição/alimentação flexível;\n- PLR anual;\n- Day off no aniversário.",
+   "judges": [
+    95,
+    95,
+    95
+   ],
+   "gold": 95
+  },
+  {
+   "id": "devops-02",
+   "profile": "devops",
+   "category": "forte",
+   "title": "SRE Pleno - Time de Plataforma",
+   "description": "Descrição da vaga\nA Marupá é uma edtech com mais de 2 milhões de alunos em nossa plataforma de cursos online. Os picos de acesso em época de provas exigem uma infraestrutura confiável, e é aí que entra o nosso time de SRE.\n\nResponsabilidades e atribuições\n- Garantir disponibilidade, performance e escalabilidade dos serviços que rodam em Kubernetes na AWS;\n- Definir e acompanhar SLIs, SLOs e error budgets com os times de produto;\n- Manter a infraestrutura como código em Terraform;\n- Evoluir os pipelines no GitLab CI, com deploys canário e rollback automatizado;\n- Atuar no plantão (sobreaviso remunerado) e liderar a resposta a incidentes;\n- Melhorar dashboards e alertas no Grafana e Prometheus;\n- Planejar capacidade para os picos sazonais.\n\nRequisitos e qualificações\n- Experiência como SRE, DevOps ou Infraestrutura em nuvem em nível pleno;\n- AWS: EC2, EKS ou ECS, RDS e IAM;\n- Kubernetes e Docker;\n- Terraform;\n- GitLab CI ou ferramenta similar;\n- Monitoramento com Prometheus e Grafana;\n- Administração de Linux e scripting em Bash ou Python;\n- Inglês para leitura de documentação técnica.\n\nInformações adicionais\n- Contratação CLT, 100% remoto;\n- Plano de saúde e odontológico;\n- Gympass;\n- Vale-alimentação;\n- Sobreaviso remunerado;\n- Acesso gratuito a todos os cursos da plataforma.\n\nEtapas do processo\n1. Inscrição\n2. Conversa com RH\n3. Case técnico\n4. Entrevista com o time\n5. Contratação",
+   "judges": [
+    92,
+    92,
+    93
+   ],
+   "gold": 92
+  },
+  {
+   "id": "devops-03",
+   "profile": "devops",
+   "category": "nucleo-ausente",
+   "title": "Engenheiro(a) DevOps Azure Pleno",
+   "description": "Sobre nós\nA Pitangal é uma rede de varejo com 120 lojas físicas e um e-commerce em forte crescimento. Estamos consolidando toda a nossa infraestrutura no Microsoft Azure e buscamos uma pessoa DevOps para acelerar essa jornada.\n\nO que você vai fazer\n- Construir e manter pipelines no Azure DevOps (Azure Pipelines, Repos, Boards e Artifacts);\n- Administrar clusters AKS e o Azure Container Registry;\n- Provisionar recursos com Bicep e templates ARM;\n- Gerenciar identidades e acessos com Microsoft Entra ID e Azure Key Vault;\n- Monitorar aplicações com Azure Monitor, Application Insights e Log Analytics;\n- Apoiar a migração de aplicações .NET legadas para App Service e Azure Functions;\n- Disseminar a cultura DevOps: CI/CD, automação, infraestrutura como código e boas práticas de observabilidade.\n\nO que buscamos\n- Experiência comprovada de pelo menos 3 anos com Microsoft Azure (obrigatório);\n- Azure Pipelines com YAML multi-stage;\n- AKS, Docker e Kubernetes;\n- Bicep ou ARM templates;\n- PowerShell e Azure CLI;\n- Redes no Azure (VNet, NSG, Application Gateway, Front Door);\n- Linux e Windows Server;\n- Git e boas práticas de versionamento;\n- Vivência com monitoramento e resposta a incidentes.\n\nDiferenciais\n- Certificações AZ-104 ou AZ-400;\n- Experiência com aplicações .NET;\n- Terraform.\n\nBenefícios\n- Trabalho remoto com encontros trimestrais em São Paulo;\n- Plano de saúde e odontológico;\n- Vale-refeição;\n- 20% de desconto nas lojas da rede;\n- Bônus anual por resultado.",
+   "judges": [
+    40,
+    40,
+    40
+   ],
+   "gold": 40
+  },
+  {
+   "id": "devops-04",
+   "profile": "devops",
+   "category": "nucleo-ausente",
+   "title": "Engenheiro(a) de Automação de Infraestrutura - Ansible",
+   "description": "Sobre a vaga\nSomos uma operadora regional de fibra óptica com datacenter próprio: mais de 1.500 VMs em VMware vSphere e servidores Red Hat Enterprise Linux. Buscamos uma pessoa para liderar a automação da configuração desses ambientes com Ansible. Modelo híbrido, 3 dias por semana no escritório de Campinas.\n\nResponsabilidades\n- Desenvolver e manter playbooks, roles e collections Ansible para provisionamento e hardening de servidores RHEL;\n- Administrar o Ansible Automation Platform (AWX/Tower), inventários dinâmicos e credenciais;\n- Automatizar a criação e o ciclo de vida de VMs no VMware vSphere;\n- Integrar as automações com pipelines de CI/CD e com o ServiceNow;\n- Padronizar patching e compliance (CIS Benchmarks) via Red Hat Satellite;\n- Documentar procedimentos e apoiar os times de operação de rede e sistemas.\n\nRequisitos\n- Experiência sólida (3+ anos) com Ansible em ambiente corporativo - obrigatório;\n- Administração avançada de Red Hat Enterprise Linux;\n- VMware vSphere/vCenter;\n- Scripting em Bash e Python;\n- Git, CI/CD e noções de Docker;\n- Monitoramento de infraestrutura (Zabbix ou similar);\n- Conhecimentos de redes (TCP/IP, DNS, VLAN, roteamento).\n\nDiferenciais\n- Certificação RHCE (EX294);\n- Experiência em empresas de telecom;\n- Jinja2 e desenvolvimento de módulos Ansible customizados.\n\nOferecemos\n- CLT;\n- Plano de saúde e odontológico;\n- PLR;\n- Vale-refeição;\n- Estacionamento no escritório;\n- Internet fibra gratuita em casa.",
+   "judges": [
+    30,
+    30,
+    32
+   ],
+   "gold": 30
+  },
+  {
+   "id": "devops-05",
+   "profile": "devops",
+   "category": "generico-inflado",
+   "title": "Desenvolvedor(a) Backend Java Pleno",
+   "description": "Sobre a vaga\nNa Orbelia desenvolvemos um ERP em nuvem para indústrias de médio porte. Buscamos uma pessoa desenvolvedora backend para o squad de Faturamento, construindo novos microsserviços e evoluindo as APIs existentes.\n\nNosso ambiente\nSomos um time que respira cultura DevOps: as aplicações rodam em Kubernetes na AWS, cada squad é dono do próprio deploy via GitHub Actions, usamos Docker no desenvolvimento local e todo serviço novo já nasce com métricas no Prometheus e dashboards no Grafana. A infraestrutura é mantida em Terraform pelo time de Plataforma, e você terá liberdade para abrir PRs nos módulos quando precisar.\n\nResponsabilidades\n- Desenvolver microsserviços em Java 17 com Spring Boot;\n- Modelar e otimizar consultas em PostgreSQL com JPA/Hibernate;\n- Implementar integrações assíncronas com Kafka;\n- Escrever testes unitários e de integração (JUnit 5, Mockito, Testcontainers);\n- Participar de code reviews e discussões de arquitetura;\n- Instrumentar os serviços com métricas e logs estruturados.\n\nRequisitos\n- 3+ anos de experiência com desenvolvimento backend em Java;\n- Spring Boot, Spring Data e Spring Security;\n- Design de APIs REST;\n- SQL e bancos relacionais;\n- Mensageria (Kafka ou RabbitMQ);\n- Testes automatizados;\n- Noções de Docker e CI/CD.\n\nDiferenciais\n- Kotlin;\n- Experiência com ERPs ou domínio fiscal brasileiro (NF-e, SPED);\n- Conhecimento de Kubernetes e AWS.\n\nBenefícios\n- CLT, 100% remoto;\n- Plano de saúde Bradesco-like nacional;\n- Vale-alimentação de R$ 1.200;\n- Auxílio educação;\n- Horário flexível.",
+   "judges": [
+    17,
+    18,
+    18
+   ],
+   "gold": 18
+  },
+  {
+   "id": "devops-06",
+   "profile": "devops",
+   "category": "diferencial",
+   "title": "Analista de Suporte Técnico N2 - Infraestrutura",
+   "description": "Descrição da vaga\nBuscamos Analista de Suporte Técnico N2 para atender cerca de 600 colaboradores da nossa matriz em Florianópolis e das filiais no Sul do país.\n\nAtividades\n- Atendimento de chamados N2 via GLPI, dentro dos SLAs acordados;\n- Administração de Active Directory, GPOs, DNS e DHCP em Windows Server 2019/2022;\n- Gestão de contas e licenças Microsoft 365, Exchange Online e Teams;\n- Manutenção de estações de trabalho, impressoras e telefonia IP;\n- Suporte às redes locais (switches, Wi-Fi corporativo, VPN FortiClient);\n- Controle de inventário de hardware e software;\n- Elaboração de documentação e base de conhecimento.\n\nRequisitos\n- Experiência mínima de 2 anos com suporte técnico N2;\n- Windows Server e Active Directory;\n- Microsoft 365;\n- Redes TCP/IP;\n- ITIL (desejável certificação Foundation);\n- Disponibilidade para trabalho presencial e eventuais plantões aos fins de semana.\n\nDiferenciais\n- Conhecimento em AWS (EC2, IAM, RDS);\n- Terraform e infraestrutura como código;\n- Docker e Kubernetes;\n- Administração de Linux;\n- Monitoramento com Prometheus e Grafana;\n- Scripts em PowerShell, Bash ou Python.\n\nBenefícios\n- Vale-refeição e vale-transporte;\n- Plano de saúde e odontológico;\n- Seguro de vida;\n- Desconto em produtos da seguradora;\n- Horário: segunda a sexta, das 8h às 17h.",
+   "judges": [
+    20,
+    20,
+    20
+   ],
+   "gold": 20
+  },
+  {
+   "id": "devops-07",
+   "profile": "devops",
+   "category": "senioridade",
+   "title": "Estágio em DevOps / Cloud",
+   "description": "Sobre o programa\nO Programa de Estágio Pinhão Cloud 2027 é para estudantes que querem dar os primeiros passos em infraestrutura em nuvem. Você terá mentoria de pessoas engenheiras seniores e uma trilha de estudos com certificação paga pela empresa.\n\nO que você vai aprender e fazer\n- Apoiar o time na criação de ambientes na AWS (EC2, S3, IAM);\n- Escrever seus primeiros módulos Terraform, sempre com revisão do time;\n- Criar Dockerfiles e entender o básico de Kubernetes;\n- Acompanhar dashboards no Grafana e alertas de monitoramento;\n- Ajudar na manutenção de pipelines no GitHub Actions;\n- Documentar procedimentos no Confluence.\n\nRequisitos\n- Estar cursando a partir do 3º semestre de Ciência da Computação, Sistemas de Informação, ADS, Engenharia de Computação ou áreas afins, com formatura prevista entre 12/2027 e 12/2028;\n- Noções de Linux e linha de comando;\n- Lógica de programação;\n- Muita vontade de aprender.\n\nDiferenciais\n- Projetos pessoais com Docker ou cloud;\n- Certificação AWS Cloud Practitioner;\n- Inglês intermediário.\n\nBenefícios\n- Bolsa-auxílio de R$ 1.800,00 (30 horas semanais);\n- Auxílio home office;\n- Recesso remunerado;\n- Acesso a plataforma de cursos e voucher para certificação AWS.",
+   "judges": [
+    6,
+    8,
+    10
+   ],
+   "gold": 8
+  },
+  {
+   "id": "devops-08",
+   "profile": "devops",
+   "category": "parcial",
+   "title": "SRE Pleno",
+   "description": "Sobre a vaga\nSomos uma healthtech de telemedicina e prontuário eletrônico. Nossa plataforma roda em Google Cloud (GKE) e estamos construindo uma camada de ferramentas internas em Go para automatizar a operação dos clusters. Ainda temos um parque de VMs legadas configuradas com Ansible.\n\nResponsabilidades\n- Desenvolver e manter operators e controllers Kubernetes escritos em Go;\n- Operar clusters GKE multi-região;\n- Gerenciar a configuração das VMs legadas com Ansible;\n- Evoluir nossa stack de observabilidade (Prometheus, Grafana, Loki e Tempo);\n- Participar da escala de plantão e da gestão de incidentes;\n- Apoiar os times de produto em boas práticas de confiabilidade.\n\nRequisitos obrigatórios\n- Kubernetes em produção (nível intermediário ou avançado);\n- Programação em Go: buscamos quem já tenha escrito serviços ou CLIs em Go, não apenas scripts;\n- Experiência com Google Cloud Platform (GKE, Cloud SQL, Pub/Sub, IAM);\n- Prometheus e Grafana;\n- Ansible;\n- Experiência com plantão e resposta a incidentes;\n- Linux.\n\nDiferenciais\n- Terraform;\n- Service mesh (Istio ou Linkerd);\n- Experiência em ambientes regulados (LGPD, saúde);\n- Certificações CKA ou CKAD.\n\nBenefícios\n- CLT, remoto;\n- Plano de saúde e odontológico extensivo a dependentes;\n- Consultas de telemedicina ilimitadas;\n- Vale-alimentação;\n- Auxílio home office.",
+   "judges": [
+    38,
+    38,
+    40
+   ],
+   "gold": 38
+  },
+  {
+   "id": "devops-09",
+   "profile": "devops",
+   "category": "ingles",
+   "title": "Site Reliability Engineer (Mid-level)",
+   "description": "About us\nQuillon builds scheduling and dispatch software for field-service companies in North America. Our engineering team is distributed across the US, Canada and Latin America, and we are growing our Platform team in Brazil.\n\nWhat you'll do\n- Own and evolve our AWS infrastructure (EKS, EC2, RDS, IAM, VPC), all defined in Terraform;\n- Operate our Kubernetes clusters and Helm-based deployments;\n- Maintain and improve CI/CD pipelines in GitHub Actions;\n- Build alerting and dashboards with Prometheus and Grafana, and help product teams define SLOs;\n- Join a follow-the-sun on-call rotation (one week every six) and lead incident response and blameless postmortems;\n- Write automation in Bash and Python.\n\nWhat we're looking for\n- 4+ years in DevOps, SRE or infrastructure roles;\n- Strong hands-on AWS experience in production;\n- Terraform at scale (modules, remote state);\n- Kubernetes and Docker in production;\n- CI/CD with GitHub Actions or GitLab CI;\n- Solid Linux fundamentals;\n- Working proficiency in English (daily standups and written communication with US-based teammates).\n\nNice to have\n- AWS certifications;\n- Experience with ArgoCD or Flux;\n- Cost optimization (FinOps) experience.\n\nWhat we offer\n- Compensation in USD (contractor agreement);\n- Fully remote, flexible hours with overlap 10am-4pm ET;\n- Annual learning budget of USD 1,500;\n- 20 business days of paid time off plus local holidays.",
+   "judges": [
+    88,
+    90,
+    91
+   ],
+   "gold": 90
+  },
+  {
+   "id": "devops-10",
+   "profile": "devops",
+   "category": "curta",
+   "title": "Analista DevOps",
+   "description": "Estamos contratando Analista DevOps para atuar com cloud, automação de deploys e sustentação dos ambientes dos nossos clientes de software de gestão industrial. Experiência prévia na área é desejável.\nModelo híbrido, com 2 dias por semana no escritório de Joinville. Contratação CLT.\nBenefícios: vale-refeição, vale-alimentação, plano de saúde e convênio com academias.\nInteressados podem se candidatar por aqui ou enviar currículo para vagas@exemplo.com com o assunto \"DevOps\".",
+   "judges": [
+    50,
+    55,
+    55
+   ],
+   "gold": 55
+  },
+  {
+   "id": "devops-11",
+   "profile": "devops",
+   "category": "longa-lista",
+   "title": "Desenvolvedor(a) Full Stack Pleno",
+   "description": "Sobre a vaga\nA Acaraú desenvolve uma plataforma de gestão para clínicas veterinárias usada por mais de 3 mil clínicas no Brasil. Buscamos uma pessoa desenvolvedora full stack para atuar no squad de Agendamentos.\n\nResponsabilidades\n- Desenvolver features ponta a ponta, do banco de dados à interface;\n- Criar componentes React reutilizáveis e telas responsivas a partir dos protótipos no Figma;\n- Construir APIs REST e GraphQL em Node.js (NestJS);\n- Manter serviços auxiliares em Python (Django);\n- Escrever testes automatizados;\n- Participar dos rituais ágeis e das decisões técnicas do squad.\n\nStack (requisitos)\n- TypeScript e JavaScript (ES2022+)\n- React e Next.js\n- Node.js com NestJS\n- Python e Django\n- PostgreSQL e MongoDB\n- Redis\n- RabbitMQ e Kafka\n- GraphQL e REST\n- Docker e docker-compose\n- Linux (linha de comando)\n- Git e GitHub Actions\n- Bash para scripts simples\n- Jest, Testing Library e Cypress\n- Grafana e Sentry para acompanhar erros em produção\n- Tailwind CSS\n- Jira e Figma\n\nDiferenciais\n- React Native\n- Storybook\n- Experiência com SaaS B2B\n\nBenefícios\n- PJ ou CLT, à escolha;\n- 100% remoto;\n- Plano de saúde (CLT) ou auxílio saúde (PJ);\n- Notebook fornecido pela empresa;\n- 30 dias de descanso remunerado por ano.",
+   "judges": [
+    15,
+    15,
+    15
+   ],
+   "gold": 15
+  },
+  {
+   "id": "devops-12",
+   "profile": "devops",
+   "category": "outra-area",
+   "title": "Analista Comercial Pleno (Inside Sales)",
+   "description": "Sobre a vaga\nSomos uma consultoria parceira de provedores de nuvem que ajuda empresas a migrar e modernizar sua infraestrutura. Buscamos Analista Comercial para prospectar e conduzir oportunidades com médias empresas.\n\nResponsabilidades\n- Prospecção ativa (outbound) por telefone, e-mail e LinkedIn;\n- Qualificar leads e agendar reuniões para o time de pré-vendas técnico;\n- Conduzir o pipeline no CRM (HubSpot), mantendo atividades e previsões sempre atualizadas;\n- Elaborar propostas comerciais e apresentações;\n- Acompanhar metas mensais e indicadores em planilhas e dashboards;\n- Participar de eventos e feiras do setor.\n\nRequisitos\n- Experiência mínima de 2 anos com vendas B2B, preferencialmente em tecnologia;\n- Excel avançado (PROCV, tabelas dinâmicas, gráficos);\n- Domínio de CRM (HubSpot, Salesforce ou Pipedrive);\n- Inglês intermediário para reuniões com parceiros;\n- Excelente comunicação oral e escrita;\n- Orientação a metas.\n\nDiferenciais\n- Noções de cloud computing (AWS, migração para nuvem, DevOps) para conversar com clientes técnicos;\n- Experiência com metodologias SPIN Selling ou BANT;\n- Formação em Administração, Marketing ou áreas correlatas.\n\nRemuneração e benefícios\n- Salário fixo + comissão sem teto;\n- CLT, 100% remoto;\n- Plano de saúde e odontológico;\n- Vale-refeição;\n- Viagens para eventos custeadas pela empresa.",
+   "judges": [
+    5,
+    5,
+    5
+   ],
+   "gold": 5
+  },
+  {
+   "id": "java-01",
+   "profile": "java",
+   "category": "forte",
+   "title": "Desenvolvedor(a) Back-end Java Sênior",
+   "description": "Sobre a vaga\nA Ipê Crédito é uma fintech de crédito consignado com mais de 800 mil clientes. Estamos ampliando o squad de Contratos, que cuida do ciclo de vida das operações de crédito, da simulação até a liquidação.\n\nResponsabilidades\n- Projetar, desenvolver e manter microsserviços em Java 17+ com Spring Boot\n- Construir integrações assíncronas orientadas a eventos com Apache Kafka\n- Modelar dados e otimizar consultas em PostgreSQL\n- Escrever testes unitários e de integração (JUnit, Mockito)\n- Participar de code reviews e apoiar o desenvolvimento das pessoas mais juniores do time\n- Colaborar com Produto na definição técnica das entregas\n\nRequisitos\n- Experiência sólida com Java e com o ecossistema Spring (Boot, Data JPA, Cloud)\n- Vivência com arquitetura de microsserviços em produção\n- Experiência com mensageria (Kafka ou RabbitMQ)\n- Conhecimento em bancos relacionais, de preferência PostgreSQL\n- Experiência com Docker\n- Boas práticas de testes automatizados\n\nDiferenciais\n- Conhecimento em AWS (SQS, S3, ECS)\n- Experiência no mercado financeiro ou de meios de pagamento\n- gRPC\n\nBenefícios\n- 100% remoto, com auxílio home office de R$ 200/mês\n- Plano de saúde e odontológico\n- Vale-refeição/alimentação flexível\n- PLR anual\n- Auxílio educação",
+   "judges": [
+    95,
+    95,
+    96
+   ],
+   "gold": 95
+  },
+  {
+   "id": "java-02",
+   "profile": "java",
+   "category": "forte",
+   "title": "Pessoa Engenheira de Software Sênior - Back-end Java",
+   "description": "Quem somos\nA Orvalho Saúde é uma healthtech que conecta operadoras de planos de saúde, clínicas e laboratórios. Processamos diariamente milhões de autorizações de exames e consultas.\n\nSobre a vaga\nBuscamos uma pessoa engenheira sênior para o time de Autorizações, que mantém os serviços críticos de elegibilidade e regras de cobertura. O time hoje tem 6 pessoas desenvolvedoras, 1 QA e 1 PM.\n\nResponsabilidades\n- Evoluir microsserviços em Java 21 e Spring Boot 3, com Spring Cloud Gateway e Config Server\n- Desenhar fluxos assíncronos com RabbitMQ e Kafka\n- Trabalhar com bases Oracle (legado de regras de cobertura) e PostgreSQL (serviços novos)\n- Garantir a qualidade com testes automatizados (JUnit 5, Mockito)\n- Revisar código e atuar como referência técnica para pessoas desenvolvedoras júnior e pleno\n- Apoiar a migração gradual de serviços on-premise para a AWS (ECS, SQS)\n\nRequisitos\n- Pelo menos 6 anos de experiência profissional com desenvolvimento Java\n- Domínio de Spring Boot, JPA/Hibernate e construção de APIs REST\n- Experiência com arquitetura de microsserviços e mensageria\n- Experiência com Oracle Database e/ou PostgreSQL, incluindo otimização de consultas\n- Docker no dia a dia de desenvolvimento\n- Comunicação clara e gosto por compartilhar conhecimento\n\nDiferenciais\n- Experiência em saúde suplementar\n- Conhecimento de AWS\n- Inglês para leitura de documentação\n\nBenefícios\n- Trabalho remoto, com encontros trimestrais no escritório de Recife (despesas pagas)\n- Plano de saúde sem coparticipação, extensivo a dependentes\n- Vale-alimentação de R$ 1.100\n- Seguro de vida\n- Day off no aniversário\n- Regime CLT",
+   "judges": [
+    93,
+    93,
+    94
+   ],
+   "gold": 93
+  },
+  {
+   "id": "java-03",
+   "profile": "java",
+   "category": "nucleo-ausente",
+   "title": "Desenvolvedor(a) Back-end Sênior - Golang",
+   "description": "Sobre a vaga\nNa Cajuína Labs construímos a plataforma de pagamentos instantâneos usada por mais de 3 mil lojistas. O time de Core Banking está crescendo e procuramos uma pessoa desenvolvedora sênior para escrever serviços em Go de alta performance.\n\nResponsabilidades\n- Desenvolver e manter microsserviços em Go (Golang) com foco em baixa latência\n- Expor APIs REST e gRPC para outros times internos\n- Publicar e consumir eventos no Kafka\n- Trabalhar com PostgreSQL e Redis\n- Fazer deploy de containers Docker na AWS\n- Participar ativamente de code reviews e da mentoria de pessoas mais juniores\n- Escrever testes automatizados e contribuir com a observabilidade dos serviços\n\nRequisitos\n- Pelo menos 3 anos de experiência com Go em ambiente de produção (obrigatório)\n- Conhecimento profundo de concorrência em Go (goroutines, channels, context)\n- Experiência com arquitetura de microsserviços e sistemas distribuídos\n- Experiência com mensageria (Kafka, RabbitMQ ou NATS)\n- Bancos relacionais (PostgreSQL)\n- Docker e conceitos de cloud (AWS)\n\nDiferenciais\n- Experiência com Kubernetes\n- Vivência com sistemas de pagamento ou Pix\n- Experiência anterior em outras linguagens back-end, como Java ou C#\n\nObservação: esta vaga não é de transição de stack. Precisamos de alguém que já escreva Go com fluência no dia a dia.\n\nBenefícios\n- Remuneração compatível com o mercado + stock options\n- Plano de saúde e odontológico\n- Auxílio home office\n- Auxílio academia\n- Horário flexível",
+   "judges": [
+    35,
+    35,
+    36
+   ],
+   "gold": 35
+  },
+  {
+   "id": "java-04",
+   "profile": "java",
+   "category": "senioridade",
+   "title": "Estágio em Desenvolvimento Back-end (Java)",
+   "description": "Sobre a vaga\nVenha fazer parte do programa de estágio da Trilhar Educação! Durante 12 meses, você vai aprender na prática como construímos a plataforma de ensino usada por escolas de todo o Nordeste, com acompanhamento de uma pessoa mentora.\n\nO que você vai fazer\n- Apoiar o time no desenvolvimento de funcionalidades simples em Java e Spring Boot\n- Criar e ajustar endpoints REST sob supervisão\n- Escrever testes unitários com JUnit\n- Corrigir pequenos bugs e documentar as entregas\n- Participar das cerimônias ágeis do squad\n\nRequisitos\n- Estar cursando Ciência da Computação, Sistemas de Informação, Engenharia da Computação ou cursos correlatos, entre o 3º e o 6º período\n- Previsão de formatura entre julho de 2027 e dezembro de 2028\n- Conhecimentos básicos de Java e orientação a objetos\n- Noções de SQL e Git\n- Disponibilidade para estagiar 6 horas por dia\n\nDiferenciais\n- Projetos pessoais ou acadêmicos com Spring Boot\n- Noções de Docker\n- Participação em maratonas de programação ou grupos de estudo\n\nBenefícios\n- Bolsa-auxílio de R$ 1.600\n- Auxílio transporte\n- Recesso remunerado\n- Plano de saúde após 3 meses\n- Trilha de cursos internos e mentoria individual",
+   "judges": [
+    8,
+    15,
+    15
+   ],
+   "gold": 15
+  },
+  {
+   "id": "java-05",
+   "profile": "java",
+   "category": "generico-inflado",
+   "title": "Engenheiro(a) de Dados Sênior",
+   "description": "Sobre a vaga\nA Brumado Energia é uma comercializadora de energia renovável em plena expansão. O time de Dados é responsável por toda a plataforma analítica da empresa, da ingestão até os modelos de previsão de consumo usados pelas áreas de trading e regulatório.\n\nResponsabilidades\n- Projetar e manter pipelines de dados em lote e streaming com Python, PySpark e Airflow\n- Modelar as camadas do data lakehouse (bronze, silver, gold) no Databricks com Delta Lake\n- Desenvolver transformações com dbt e garantir a qualidade dos dados com testes automatizados\n- Ingerir eventos publicados em tópicos Kafka pelos microsserviços Java e Spring Boot do time de Plataforma\n- Extrair dados das bases transacionais em PostgreSQL e Oracle via CDC\n- Armazenar arquivos brutos no AWS S3 e orquestrar cargas em containers Docker\n- Fazer code review e apoiar analistas de dados na adoção de boas práticas\n\nRequisitos\n- Experiência sólida com Python para engenharia de dados\n- Domínio de Spark/PySpark e SQL avançado\n- Experiência com orquestração (Airflow ou similar)\n- Experiência com modelagem dimensional e data lakes\n- Conhecimento de cloud (AWS ou Azure)\n\nDiferenciais\n- dbt e Databricks\n- Conhecimento do setor elétrico (CCEE, PLD)\n- Noções de streaming com Kafka ou Kinesis\n\nBenefícios\n- PLR de até 3 salários\n- Plano de saúde e odontológico\n- Vale-refeição de R$ 1.500\n- Previdência privada\n- Auxílio creche",
+   "judges": [
+    20,
+    22,
+    22
+   ],
+   "gold": 22
+  },
+  {
+   "id": "java-06",
+   "profile": "java",
+   "category": "diferencial",
+   "title": "Desenvolvedor(a) Front-end Sênior - React",
+   "description": "Sobre a vaga\nEstamos reconstruindo o checkout e a área logada do e-commerce da Candeeiro, que recebe 4 milhões de visitas por mês. Procuramos uma pessoa front-end sênior apaixonada por performance e experiência do usuário.\n\nResponsabilidades\n- Desenvolver interfaces em React e Next.js com TypeScript\n- Criar e manter componentes do nosso design system\n- Garantir acessibilidade (WCAG) e boas métricas de Core Web Vitals\n- Escrever testes com Jest, Testing Library e Playwright\n- Trabalhar com os times de back-end na definição de contratos de API\n\nRequisitos\n- 5+ anos de experiência com desenvolvimento front-end\n- Domínio de React, hooks e gerenciamento de estado (Redux, Zustand ou similar)\n- TypeScript avançado\n- HTML semântico, CSS moderno e responsividade\n- Experiência com SSR/SSG no Next.js\n- Testes automatizados de front-end\n\nDiferenciais\n- Conhecimento em Java e Spring Boot, para colaborar com os BFFs mantidos pelo time\n- Noções de microsserviços, Kafka e PostgreSQL\n- Docker e AWS (S3, CloudFront)\n- Experiência com code review e mentoria\n- Inglês avançado\n\nBenefícios\n- 100% remoto\n- Desconto de 30% nas lojas Candeeiro\n- Plano de saúde\n- Vale-refeição flexível\n- Auxílio home office",
+   "judges": [
+    12,
+    12,
+    15
+   ],
+   "gold": 12
+  },
+  {
+   "id": "java-07",
+   "profile": "java",
+   "category": "parcial",
+   "title": "Desenvolvedor(a) Back-end Sênior - Kotlin/Java",
+   "description": "Sobre a vaga\nO Quintal Digital é um marketplace de serviços para a casa. O time de Agendamentos está migrando a stack legada em Java para Kotlin e para uma arquitetura serverless na AWS.\n\nO que você vai fazer\n- Desenvolver serviços novos em Kotlin com Spring Boot\n- Manter e migrar serviços legados em Java\n- Implementar funções AWS Lambda orquestradas por Step Functions\n- Modelar tabelas no DynamoDB\n- Gerenciar a infraestrutura como código com Terraform\n- Publicar aplicações no Kubernetes (EKS) usando Helm\n\nRequisitos obrigatórios\n- Experiência com Kotlin em produção\n- Experiência com Java e Spring Boot\n- AWS avançado: Lambda, Step Functions, DynamoDB, EKS\n- Terraform\n- Kubernetes\n- Microsserviços e mensageria (Kafka ou SQS)\n\nDiferenciais\n- Coroutines em Kotlin\n- Observabilidade com OpenTelemetry\n- Experiência com marketplaces\n\nBenefícios\n- Remoto, com horário flexível\n- Plano de saúde e odontológico\n- Vale-refeição/alimentação de R$ 1.200\n- Auxílio educação de R$ 300/mês\n- Regime CLT",
+   "judges": [
+    38,
+    40,
+    42
+   ],
+   "gold": 40
+  },
+  {
+   "id": "java-08",
+   "profile": "java",
+   "category": "ingles",
+   "title": "Senior Backend Engineer (Java / Spring)",
+   "description": "About the role\nTidewell Commerce builds order management software for mid-sized retailers in North America and Europe. We are hiring a Senior Backend Engineer for our Fulfillment team, an English-speaking, fully distributed team across the Americas.\n\nWhat you'll do\n- Design, build and operate Java microservices with Spring Boot and Spring Cloud\n- Own event-driven flows on Apache Kafka (producers, consumers, retries, schema evolution)\n- Design relational schemas and tune queries on PostgreSQL\n- Deploy containerized services to AWS (ECS, SQS, S3)\n- Write high-quality tests with JUnit and Mockito\n- Review pull requests and mentor less experienced engineers\n\nWhat we're looking for\n- 6+ years of professional backend development with Java (11+)\n- Strong experience with Spring Boot and JPA/Hibernate\n- Hands-on experience with Kafka or RabbitMQ in production\n- Solid SQL and relational database skills\n- Experience with Docker and at least one cloud provider (AWS preferred)\n- Advanced English, both written and spoken\n\nNice to have\n- gRPC\n- Kubernetes\n- Experience in e-commerce or logistics\n\nBenefits\n- Competitive salary in USD (contractor)\n- 100% remote, flexible hours with a 4-hour overlap with US Eastern Time\n- 25 paid days off per year\n- Home office and learning budget\n- Annual team offsite",
+   "judges": [
+    95,
+    95,
+    96
+   ],
+   "gold": 95
+  },
+  {
+   "id": "java-09",
+   "profile": "java",
+   "category": "curta",
+   "title": "Dev Java Sênior",
+   "description": "Dev Java Sênior - PJ - 100% remoto\nAlocação em cliente do setor bancário, projeto de 6 meses com possibilidade de renovação.\nStack: Java, Spring, microsserviços.\nInteressados: enviar CV para vagas@exemplo.com",
+   "judges": [
+    80,
+    85,
+    85
+   ],
+   "gold": 85
+  },
+  {
+   "id": "java-10",
+   "profile": "java",
+   "category": "longa-lista",
+   "title": "Desenvolvedor(a) Full Stack Pleno/Sênior",
+   "description": "Sobre a vaga\nA Maré Alta Software desenvolve soluções sob medida para clientes de turismo e hotelaria. Buscamos pessoas full stack versáteis para atuar em diferentes projetos ao longo do ano.\n\nStack que usamos\nNode.js, TypeScript, NestJS, Express, React, Next.js, Angular, React Native, Python, FastAPI, GraphQL, PostgreSQL, MongoDB, Redis, Elasticsearch, RabbitMQ, Docker, Kubernetes, Terraform, Google Cloud (GKE, Cloud Run, Pub/Sub), GitHub Actions, Jest, Cypress, Storybook.\n\nResponsabilidades\n- Desenvolver features de ponta a ponta, do banco de dados à interface\n- Construir APIs REST e GraphQL em Node.js/NestJS\n- Desenvolver telas em React ou Angular, conforme o projeto\n- Escrever testes unitários (Jest) e end-to-end (Cypress)\n- Participar de code reviews e estimativas\n\nRequisitos\n- 4+ anos de experiência com desenvolvimento web full stack\n- Experiência sólida com Node.js e TypeScript\n- Experiência com React ou Angular\n- Bancos relacionais e não relacionais (PostgreSQL e MongoDB)\n- Docker e Git\n\nDiferenciais\n- Python/FastAPI\n- Kubernetes e Terraform\n- Google Cloud\n- Mensageria com RabbitMQ\n- React Native\n\nBenefícios\n- Modelo híbrido (3 dias no escritório)\n- Plano de saúde\n- Vale-refeição\n- Auxílio idiomas",
+   "judges": [
+    18,
+    18,
+    20
+   ],
+   "gold": 18
+  },
+  {
+   "id": "java-11",
+   "profile": "java",
+   "category": "senioridade",
+   "title": "Head de Engenharia de Software",
+   "description": "Sobre a vaga\nA Baraúna Logística está crescendo rápido e busca uma liderança executiva para a área de Engenharia, com reporte direto ao CTO. Você será responsável por uma organização de cerca de 45 pessoas, distribuídas em 7 squads, com 5 Engineering Managers como liderados diretos.\n\nResponsabilidades\n- Definir a estratégia de engenharia, alinhada aos objetivos de negócio e aos OKRs da empresa\n- Liderar, desenvolver e avaliar Engineering Managers e Tech Leads\n- Conduzir o planejamento de headcount, as contratações e o plano de carreira\n- Gerir o orçamento da área, incluindo custos de cloud e fornecedores\n- Garantir a evolução da arquitetura de microsserviços (Java, Spring Boot, Kafka, AWS)\n- Representar a engenharia em fóruns executivos e junto ao board\n\nRequisitos\n- Mínimo de 5 anos em cargos formais de gestão de pessoas em engenharia, sendo pelo menos 2 anos gerindo outros gestores\n- Histórico comprovado liderando organizações de 30+ engenheiros\n- Experiência com gestão de orçamento e planejamento estratégico\n- Background técnico em desenvolvimento back-end, de preferência Java e arquitetura distribuída\n- Inglês avançado\n\nDiferenciais\n- Experiência em empresas de logística ou supply chain\n- Vivência em processos de M&A ou rodadas de investimento\n- MBA ou pós-graduação em gestão\n\nBenefícios\n- Remuneração executiva com bônus anual e plano de incentivo de longo prazo (ILP)\n- Plano de saúde premium\n- Previdência privada\n- Seguro de vida",
+   "judges": [
+    15,
+    18,
+    18
+   ],
+   "gold": 18
+  },
+  {
+   "id": "java-12",
+   "profile": "java",
+   "category": "outra-area",
+   "title": "Analista de Customer Success Pleno",
+   "description": "Sobre a vaga\nA Sabiá Gestão desenvolve software de gestão para clínicas veterinárias e tem mais de 4 mil clientes no Brasil e em Portugal. Buscamos uma pessoa analista de Customer Success para acompanhar uma carteira de clientes de médio porte.\n\nResponsabilidades\n- Conduzir o onboarding de novos clientes e os treinamentos na plataforma\n- Acompanhar os indicadores de saúde da carteira (NPS, churn, adoção)\n- Registrar interações e oportunidades no CRM\n- Elaborar relatórios e apresentações para as reuniões de resultado\n- Identificar oportunidades de upsell junto ao time comercial\n- Apoiar clientes em dúvidas sobre integrações via API, encaminhando os casos técnicos ao time de suporte\n\nRequisitos\n- 2+ anos de experiência em Customer Success, atendimento B2B ou Account Management\n- Excel avançado (PROCV, tabelas dinâmicas, gráficos)\n- Experiência com CRM (HubSpot, Salesforce ou similar)\n- Inglês avançado para atender clientes internacionais\n- Ótima comunicação oral e escrita\n\nDiferenciais\n- Conhecimento básico de SQL\n- Familiaridade com conceitos de APIs REST e integrações entre sistemas\n- Vivência em empresas SaaS\n- Espanhol\n\nBenefícios\n- Remuneração fixa + variável por metas de retenção\n- Plano de saúde e odontológico\n- Vale-refeição\n- Day off no aniversário",
+   "judges": [
+    5,
+    5,
+    5
+   ],
+   "gold": 5
+  },
+  {
+   "id": "suporte-01",
+   "profile": "suporte",
+   "category": "forte",
+   "title": "Analista de Suporte N2 Pleno",
+   "description": "Sobre a vaga\nO Grupo Tessaro Alimentos, indústria com 3 fábricas no interior de São Paulo e cerca de 1.200 colaboradores, busca Analista de Suporte N2 para o time de Infraestrutura e Operações de TI, baseado na matriz em Campinas.\n\nResponsabilidades\n- Atender chamados de segundo nível escalados pelo Service Desk via GLPI, respeitando os SLAs acordados\n- Administrar o Active Directory: criação e manutenção de usuários, grupos, OUs e políticas de grupo (GPO)\n- Administrar Microsoft 365 e Exchange Online: licenças, caixas compartilhadas, regras de transporte e grupos de distribuição\n- Apoiar a manutenção de servidores Windows Server 2016/2019/2022 (DNS, DHCP, file server e impressão)\n- Acompanhar as rotinas de backup no Veeam e realizar testes periódicos de restore\n- Atuar em incidentes de rede local: VLANs, switches gerenciáveis e VPN das filiais\n- Automatizar tarefas repetitivas com PowerShell\n- Documentar procedimentos na base de conhecimento\n\nRequisitos\n- 4 anos ou mais de experiência em suporte de TI, sendo pelo menos 2 em N2\n- Conhecimento sólido de Windows Server e Active Directory\n- Microsoft 365 / Exchange Online\n- Redes TCP/IP, VLAN e VPN\n- Vivência com processos ITIL (incidente, requisição e mudança)\n- Formação superior em TI, completa ou em andamento\n- Disponibilidade para modelo híbrido (3 dias presenciais) e plantões eventuais\n\nDiferenciais\n- Firewall Fortinet\n- VMware vSphere\n- Certificação ITIL 4 Foundation\n\nBenefícios\nVR/VA de R$ 1.100, plano de saúde e odontológico, PLR, seguro de vida, auxílio academia e estacionamento gratuito.",
+   "judges": [
+    95,
+    95,
+    96
+   ],
+   "gold": 95
+  },
+  {
+   "id": "suporte-02",
+   "profile": "suporte",
+   "category": "forte",
+   "title": "Analista de Infraestrutura Pleno",
+   "description": "A Rede Hospitalar Santa Lívia tem 4 unidades na Região Metropolitana de Campinas e cerca de 2.000 colaboradores. Nosso time de Infraestrutura sustenta um ambiente majoritariamente Microsoft que funciona 24x7, e estamos crescendo.\n\nO que você vai fazer\n• Atender chamados N2 no ServiceNow escalados pelo Service Desk e tratar incidentes críticos com prioridade\n• Administrar Active Directory, GPOs, DNS e DHCP\n• Gerenciar o Microsoft 365: Exchange Online, Teams, licenciamento e políticas básicas de segurança\n• Operar servidores Windows Server e máquinas virtuais no VMware vSphere\n• Garantir a execução dos backups no Veeam e os testes de restore\n• Apoiar a manutenção da rede: VLANs, switches, VPN entre unidades e regras básicas no FortiGate\n• Automatizar rotinas de onboarding e offboarding com PowerShell\n• Participar das reuniões de gestão de mudanças (ITIL) e manter a documentação atualizada\n• Apoiar o time de sistemas com consultas SQL simples para diagnóstico\n\nO que esperamos de você\n• A partir de 4 anos de experiência com suporte e infraestrutura Microsoft\n• Domínio de Windows Server, Active Directory e GPO\n• Experiência com Microsoft 365 / Exchange Online\n• Conhecimentos de redes (TCP/IP, VLAN, VPN)\n• Vivência com ferramenta de ITSM (ServiceNow, GLPI ou similar) e práticas ITIL\n• Disponibilidade para escala de sobreaviso mensal\n\nSerá um diferencial\n• Experiência em ambiente hospitalar\n• ITIL 4 Foundation\n• Fortinet NSE\n\nBenefícios\nPlano de saúde e odontológico, refeitório, vale-alimentação, estacionamento, desconto em exames na rede e auxílio-creche.",
+   "judges": [
+    91,
+    91,
+    92
+   ],
+   "gold": 91
+  },
+  {
+   "id": "suporte-03",
+   "profile": "suporte",
+   "category": "nucleo-ausente",
+   "title": "Analista de Infraestrutura Linux Pleno",
+   "description": "Sobre a vaga\nA Orbitel opera dois data centers no interior paulista e atende mais de 300 clientes de hospedagem e colocation. Buscamos Analista de Infraestrutura Linux Pleno para sustentar ambientes críticos de clientes.\n\nResponsabilidades\n- Administrar servidores Linux em produção (Red Hat Enterprise Linux, Rocky Linux e Ubuntu Server): instalação, hardening, atualização e troubleshooting\n- Configurar e manter serviços como Apache, Nginx, Postfix, BIND e HAProxy\n- Automatizar provisionamento e configuração com Ansible e shell script (Bash)\n- Gerenciar virtualização KVM/Proxmox e storage com LVM e ZFS\n- Atender chamados de clientes e incidentes seguindo os processos ITIL de incidente e mudança\n- Apoiar o time de redes em questões de TCP/IP, VLAN, VPN e regras de firewall\n- Acompanhar rotinas de backup e monitoramento (Zabbix)\n- Documentar procedimentos e participar da escala de sobreaviso\n\nRequisitos\n- Mínimo de 3 anos administrando servidores Linux em produção\n- Domínio de linha de comando, systemd, permissões, SELinux e análise de performance\n- Bash avançado e Ansible\n- Redes TCP/IP, DNS e firewall (iptables/nftables)\n- Vivência com atendimento de chamados e SLA\n\nDiferenciais\n- Certificação RHCSA ou LPIC-1/2\n- Docker e Kubernetes\n- Python para automação\n- Experiência com data center ou hosting\n\nBenefícios\nVale-refeição, plano de saúde nacional, auxílio home office de R$ 150, day off no aniversário e PLR.",
+   "judges": [
+    30,
+    33,
+    36
+   ],
+   "gold": 33
+  },
+  {
+   "id": "suporte-04",
+   "profile": "suporte",
+   "category": "generico-inflado",
+   "title": "Desenvolvedor(a) .NET Pleno - Integrações Corporativas",
+   "description": "Sobre nós\nA Lumio desenvolve soluções de gestão de identidades e workflow para médias empresas. Nosso produto se integra ao ecossistema Microsoft dos clientes (Active Directory, Microsoft 365, Exchange Online) e a ferramentas de ITSM como ServiceNow e GLPI.\n\nO que você vai fazer\n- Desenvolver e manter APIs REST em C# / .NET 8 e ASP.NET Core\n- Construir conectores de sincronização com Active Directory (LDAP) e Microsoft Graph API para provisionamento de usuários e grupos\n- Criar integrações bidirecionais com ServiceNow e GLPI via API para abertura e atualização de chamados\n- Modelar e otimizar consultas e procedures em SQL Server com Entity Framework Core e Dapper\n- Escrever testes unitários e de integração (xUnit)\n- Apoiar o deploy em servidores Windows Server/IIS dos clientes on-premises, inclusive com scripts PowerShell\n- Participar das cerimônias ágeis (Scrum) e de code review\n\nRequisitos\n- 3 anos ou mais de experiência com desenvolvimento em C# e .NET\n- ASP.NET Core, Entity Framework, injeção de dependência e princípios SOLID\n- SQL Server (T-SQL intermediário)\n- Git e fluxo de pull requests\n- Desenho e consumo de APIs REST\n\nDiferenciais\n- Conhecimento de Active Directory, GPO e Microsoft 365 do ponto de vista de administração\n- Vivência com processos ITIL\n- Azure DevOps e Docker\n- Experiência prévia com suporte ou infraestrutura\n\nBenefícios\nSalário compatível com o mercado, VR flexível, plano de saúde, auxílio educação e horário flexível.",
+   "judges": [
+    17,
+    17,
+    17
+   ],
+   "gold": 17
+  },
+  {
+   "id": "suporte-05",
+   "profile": "suporte",
+   "category": "diferencial",
+   "title": "Analista de Sistemas ERP Pleno - TOTVS Protheus",
+   "description": "Sobre a vaga\nIndústria cerâmica com 900 colaboradores busca Analista de Sistemas ERP para a sustentação e evolução do TOTVS Protheus.\n\nResponsabilidades\n- Prestar suporte funcional aos usuários dos módulos Compras, Estoque/Custos, Faturamento, Livros Fiscais e Financeiro\n- Levantar requisitos com as áreas de negócio e especificar customizações\n- Desenvolver fontes, pontos de entrada e relatórios em AdvPL/TLPP\n- Acompanhar atualizações de release e pacotes de legislação fiscal (SPED, Reinf)\n- Interagir com a consultoria TOTVS e com fornecedores de integrações\n- Treinar usuários-chave e manter a documentação de processos\n\nRequisitos\n- Mínimo de 3 anos com Protheus (suporte funcional e/ou técnico)\n- AdvPL/TLPP\n- Conhecimento de processos fiscais e contábeis de indústria\n- SQL para consultas e análise das tabelas do ERP\n- Ensino superior completo em Sistemas de Informação, Ciência da Computação ou áreas afins\n\nDiferenciais\n- Conhecimentos em Windows Server e Active Directory\n- Administração de Microsoft 365 e Exchange Online\n- Vivência com GLPI e processos ITIL\n- Scripts PowerShell\n- Noções de redes e VPN para suporte às filiais\n- Backup com Veeam\n\nBenefícios\nRefeitório no local, transporte fretado, plano de saúde e odontológico, PLR anual e convênio farmácia.",
+   "judges": [
+    14,
+    15,
+    16
+   ],
+   "gold": 15
+  },
+  {
+   "id": "suporte-06",
+   "profile": "suporte",
+   "category": "senioridade",
+   "title": "Estágio em Suporte de TI",
+   "description": "Venha fazer parte do time de TI da Serra Clara!\n\nEstamos buscando estudantes para estágio na área de Suporte Técnico, com atuação na sede administrativa em Campinas.\n\nAtividades\n- Atendimento de primeiro nível a usuários (telefone, Teams e presencial)\n- Formatação e configuração de notebooks e desktops Windows 11\n- Apoio na criação de usuários no Active Directory e no Microsoft 365, sob supervisão do analista responsável\n- Registro e acompanhamento de chamados no GLPI\n- Organização do inventário de equipamentos e periféricos\n- Suporte a impressoras, Wi-Fi e salas de reunião\n\nRequisitos\n- Cursando Análise e Desenvolvimento de Sistemas, Redes de Computadores, Ciência da Computação ou afins, do 1º ao 4º semestre\n- Previsão de formatura a partir de dezembro/2028\n- Conhecimentos básicos de hardware e Windows\n- Disponibilidade para estagiar 6 horas por dia (período da manhã)\n\nDiferenciais\n- Curso técnico em informática\n- Noções de redes\n\nOferecemos\nBolsa-auxílio de R$ 1.500, auxílio-transporte, refeição no local, seguro de vida e possibilidade de efetivação.",
+   "judges": [
+    10,
+    14,
+    18
+   ],
+   "gold": 14
+  },
+  {
+   "id": "suporte-07",
+   "profile": "suporte",
+   "category": "senioridade",
+   "title": "Gerente de TI",
+   "description": "A Translumi Logística, operadora com 14 centros de distribuição no Brasil e faturamento anual acima de R$ 900 milhões, busca Gerente de TI para liderar a área de tecnologia, reportando diretamente ao CFO.\n\nPrincipais desafios:\n• Definir e executar o plano diretor de TI alinhado à estratégia de crescimento da companhia\n• Liderar equipe de 18 profissionais (infraestrutura, service desk, sistemas e dados) e gerir fornecedores e contratos de outsourcing\n• Gerir o orçamento anual de CAPEX e OPEX de TI\n• Conduzir projetos de modernização: migração de ERP, adoção de nuvem, renovação do parque de redes e segurança (Fortinet)\n• Garantir governança, conformidade com a LGPD e indicadores de nível de serviço (ITIL/COBIT)\n• Apresentar resultados e roadmap para a diretoria e o conselho\n\nO que buscamos:\n• Mínimo de 12 anos de experiência em TI, sendo pelo menos 5 em posições de gestão de equipes\n• Vivência em ambientes Microsoft (Windows Server, Active Directory, Microsoft 365) e na gestão de infraestrutura híbrida\n• Histórico de negociação com fornecedores e gestão de contratos\n• Pós-graduação ou MBA em Gestão de TI, Gestão de Projetos ou similar\n• Inglês avançado\n\nDesejável: experiência no setor logístico, certificação PMP e ITIL Managing Professional.\n\nPacote: salário + bônus de até 4 salários, carro executivo, plano de saúde diferenciado e previdência privada.",
+   "judges": [
+    15,
+    15,
+    18
+   ],
+   "gold": 15
+  },
+  {
+   "id": "suporte-08",
+   "profile": "suporte",
+   "category": "parcial",
+   "title": "Analista de Infraestrutura Pleno - Microsoft e Azure",
+   "description": "Sobre a vaga\nEstamos em plena jornada de migração para a nuvem e buscamos Analista de Infraestrutura Pleno para atuar na sustentação do ambiente on-premises e na operação dos workloads já migrados para o Azure.\n\nResponsabilidades\n- Administrar o Active Directory e a sincronização com o Microsoft Entra ID (Entra Connect)\n- Gerenciar Microsoft 365 e Exchange Online\n- Provisionar e operar recursos no Azure: máquinas virtuais, VNets, NSGs, Azure Backup e Storage Accounts\n- Gerenciar dispositivos com Microsoft Intune (políticas de conformidade, Autopilot e distribuição de aplicativos)\n- Administrar servidores Windows Server e alguns servidores Linux (Ubuntu/CentOS)\n- Monitorar o ambiente com Zabbix e dashboards no Grafana\n- Atender chamados N2/N3 no ServiceNow\n- Atuar com o time de redes em VPN, VLANs e firewall FortiGate\n\nRequisitos obrigatórios\n- Windows Server e Active Directory\n- Microsoft 365 / Exchange Online\n- Azure IaaS (VMs, redes virtuais, NSG) em ambiente produtivo\n- Microsoft Intune\n- Linux em nível intermediário\n- Monitoramento com Zabbix\n- Redes TCP/IP e VPN\n\nDiferenciais\n- Certificações AZ-104 ou MD-102\n- Infraestrutura como código (Terraform ou Bicep)\n- PowerShell para automação\n- Experiência no setor de seguros ou financeiro\n\nBenefícios\nVR + VA de R$ 1.400, plano de saúde sem coparticipação, PLR, bolsa para certificações e auxílio home office.",
+   "judges": [
+    42,
+    44,
+    45
+   ],
+   "gold": 44
+  },
+  {
+   "id": "suporte-09",
+   "profile": "suporte",
+   "category": "ingles",
+   "title": "IT Support Analyst - L2",
+   "description": "About the role\nKestrel Components is a US-based manufacturer of precision automotive parts with a plant in Hortolândia (650 employees). We are looking for an IT Support Analyst L2 to join our Global IT Operations team, working closely with colleagues in Ohio and Monterrey.\n\nWhat you will do\n- Resolve L2 incidents and service requests in ServiceNow, meeting global SLAs\n- Administer Active Directory accounts, groups and Group Policies for the Brazilian site\n- Support Microsoft 365 and Exchange Online (mailboxes, distribution lists, Teams, OneDrive)\n- Maintain the local Windows Server infrastructure (file/print, DNS, DHCP) and VMware ESXi hosts\n- Monitor Veeam backup jobs and perform restore tests\n- Troubleshoot LAN/WLAN issues, VLANs and site-to-site VPN together with the global network team (FortiGate)\n- Write and update knowledge base articles in English\n- Join daily stand-ups and weekly calls with the US team\n\nWhat we are looking for\n- 4+ years in IT support or infrastructure, with at least 2 years in an L2 role\n- Solid knowledge of Windows Server, Active Directory and GPO\n- Hands-on experience with Microsoft 365 administration\n- Familiarity with ITIL processes\n- Fluent English (spoken and written) - mandatory, as most daily communication is in English\n- PowerShell scripting is a plus\n\nNice to have\n- ITIL 4 Foundation\n- Experience in manufacturing environments (OT network, shop-floor devices)\n- Spanish\n\nBenefits\nHealth and dental insurance, meal allowance, profit sharing, chartered transportation, English and Spanish classes.",
+   "judges": [
+    55,
+    55,
+    57
+   ],
+   "gold": 55
+  },
+  {
+   "id": "suporte-10",
+   "profile": "suporte",
+   "category": "curta",
+   "title": "Analista de Suporte Técnico",
+   "description": "Empresa de tecnologia em Campinas contrata Analista de Suporte Técnico com experiência em atendimento a usuários, Windows e redes.\nRegime CLT, presencial, salário a combinar.\nCandidate-se pela plataforma ou envie o currículo para selecao@exemplo.com.",
+   "judges": [
+    72,
+    76,
+    80
+   ],
+   "gold": 76
+  },
+  {
+   "id": "suporte-11",
+   "profile": "suporte",
+   "category": "longa-lista",
+   "title": "Engenheiro(a) DevOps / SRE Pleno",
+   "description": "Quem somos\nA Quantiva é uma plataforma de dados para o varejo que processa mais de 2 bilhões de eventos por mês. Nosso time de Plataforma cuida da confiabilidade, do custo e da velocidade de entrega de mais de 40 squads.\n\nResponsabilidades\n- Projetar, provisionar e manter infraestrutura em AWS e Azure como código\n- Operar clusters Kubernetes (EKS e AKS) e pipelines de CI/CD\n- Definir SLOs, alertas e observabilidade de ponta a ponta\n- Participar da escala de on-call e conduzir post-mortems\n- Automatizar tudo o que for repetitivo\n- Apoiar a migração das cargas legadas que ainda rodam em VMware e Windows Server\n\nStack (requisitos)\n- AWS (EC2, EKS, S3, RDS, IAM, VPC, CloudWatch)\n- Azure (AKS, VNets, Entra ID)\n- Kubernetes, Helm e Docker\n- Terraform e Terragrunt\n- Ansible\n- GitHub Actions, Jenkins e Argo CD\n- Prometheus, Grafana, Loki e ELK Stack\n- Python e Go\n- Bash e PowerShell\n- Linux (Ubuntu, Amazon Linux)\n- Nginx e Istio\n- PostgreSQL, Redis e Kafka\n- SQL\n- VMware vSphere (legado)\n- Windows Server (legado)\n- ServiceNow (integração de alertas)\n\nDiferenciais\n- Certificações AWS Solutions Architect e CKA\n- Experiência com FinOps\n\nBenefícios\n100% remoto, contratação CLT ou PJ, stock options, auxílio home office, plano de saúde e budget anual para cursos.",
+   "judges": [
+    17,
+    20,
+    20
+   ],
+   "gold": 20
+  },
+  {
+   "id": "suporte-12",
+   "profile": "suporte",
+   "category": "outra-area",
+   "title": "Analista Comercial Interno (Inside Sales) Pleno",
+   "description": "Sobre a vaga\nA Hidrovalle, distribuidora de bombas e equipamentos hidráulicos para indústria e agronegócio, busca Analista Comercial Interno para atender carteira de clientes B2B no interior de São Paulo e no Sul de Minas.\n\nResponsabilidades\n- Prospectar e qualificar leads por telefone, e-mail e WhatsApp\n- Elaborar propostas comerciais e acompanhar as negociações até o fechamento\n- Registrar todas as interações e oportunidades no CRM (Salesforce)\n- Prestar suporte ao cliente no pós-venda, acompanhando entregas e abrindo chamados com a assistência técnica\n- Elaborar relatórios de vendas e indicadores em Excel avançado (tabelas dinâmicas, PROCV, gráficos)\n- Atender fornecedores internacionais e participar de treinamentos de produto em inglês\n\nRequisitos\n- Mínimo de 3 anos em vendas internas B2B ou atendimento comercial\n- Excel avançado\n- Vivência com CRM (Salesforce, HubSpot ou similar)\n- Inglês intermediário\n- Boa comunicação e organização\n- Ensino superior completo ou em andamento em Administração, Engenharia ou áreas afins\n\nDiferenciais\n- Conhecimento técnico de produtos industriais\n- Power BI\n- CNH categoria B\n\nBenefícios\nSalário fixo + comissão, VR, plano de saúde, seguro de vida e convênio com academias.",
+   "judges": [
+    3,
+    3,
+    4
+   ],
+   "gold": 3
   }
  ]
 }

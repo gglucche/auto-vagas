@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Auto Vagas",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Busca vagas no LinkedIn, Gupy, InfoJobs e outros sites, calcula a aderência ao seu currículo, prepara a candidatura (currículo padrão ou adaptado por IA) e envia por e-mail.",
   "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" },
   "permissions": ["storage", "unlimitedStorage", "alarms", "tabs", "identity", "notifications", "scripting", "activeTab"],

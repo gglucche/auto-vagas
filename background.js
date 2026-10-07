@@ -40,7 +40,18 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   // autoReload: the dashboard asked for the extension update (ui/fresh.js) and was closed by it
   const { autoReload } = await chrome.storage.local.get('autoReload');
   if (reason === 'install' || Date.now() - (autoReload?.at || 0) < 60_000) openDashboard();
-  if (reason === 'update') retryFailed(true);
+  if (reason === 'update') {
+    // 0.8.0: a new way to compute the fit. The AI's old scores (one number, no requirements) of open jobs give way
+    // to it: the local fit is recomputed, and the jobs for the website get evaluated again by the AI.
+    const { migrated: done = {} } = await chrome.storage.local.get('migrated');
+    if (!done.fit08) {
+      for (const j of await getJobs())
+        if (j.aiDone && !j.requirements && !['enviado', 'descartado', 'ignorado'].includes(j.status)) await patchJob(j.id, { aiDone: false });
+      await chrome.storage.local.set({ migrated: { ...done, fit08: true } });
+    }
+    recalcFit();
+    retryFailed(true);
+  }
 });
 chrome.runtime.onStartup.addListener(setupAlarms);
 chrome.notifications.onClicked.addListener(openDashboard);
@@ -370,13 +381,16 @@ async function storeJobs(found, keyword) {
 let fitBasis = null;
 async function recalcFit() {
   const s = await getSettings();
-  const basis = hashId(`${s.resumeText}|${s.skills}|${s.keywords}|${s.yearsExperience}`);
+  const basis = hashId(`${s.resumeText}|${s.skills}|${s.keywords}|${s.yearsExperience}|${s.englishLevel}`);
   if (basis === fitBasis) return;
   fitBasis = basis;
   for (const j of await getJobs()) {
     if (j.aiDone || ['enviado', 'descartado', 'ignorado'].includes(j.status)) continue;
     const m = localFit(j, s) || { fit: null, matched: null, missing: null, fitWhy: '' };
-    if ((j.fit ?? null) !== m.fit || (j.matched || []).join() !== (m.matched || []).join() || (j.fitWhy || '') !== m.fitWhy) await patchJob(j.id, m);
+    if ((j.fit ?? null) === m.fit && (j.matched || []).join() === (m.matched || []).join() && (j.fitWhy || '') === m.fitWhy) continue;
+    // the AI may have scored it in the meantime: its score stays
+    const now = await getJob(j.id);
+    if (now && !now.aiDone) await patchJob(j.id, m);
   }
 }
 
@@ -431,9 +445,8 @@ const getResumePdf = async () => (await chrome.storage.local.get('resumePdf')).r
 // What the AI's evaluation gives a job: the fit, the requirements one by one, strengths and gaps.
 // With no requirement listed, the local fit stays.
 const evalPatch = (sc) => ({
-  ...(sc.fit != null && { fit: sc.fit, aiDone: true }),
+  ...(sc.fit != null && { fit: sc.fit, aiDone: true, fitWhy: sc.why || '' }),
   note: sc.reason || '',
-  fitWhy: sc.why || '',
   requirements: sc.requirements,
   strengths: sc.strengths,
   gaps: sc.gaps,
@@ -451,6 +464,7 @@ async function prepare(id, { forceAi = false } = {}) {
   const sent = job.status === 'enviado';
   let patch;
   if (s.mode === 'ai' || forceAi) {
+    let scored = null;
     try {
       patch = await withAi(async (ai) => {
         const pdf = await getResumePdf();
@@ -458,7 +472,7 @@ async function prepare(id, { forceAi = false } = {}) {
         if (!sc.isPosting)
           // only a job still being prepared is put aside; on a manual request the job stays where it is
           return job.status === 'novo' ? { status: 'ignorado', note: sc.reason || 'A IA avaliou que não é um anúncio de vaga.', error: '' } : { error: 'A IA avaliou que este texto não é um anúncio de vaga.' };
-        const scored = { ...evalPatch(sc), error: '' };
+        scored = { ...evalPatch(sc), error: '' };
         if (sent) return scored; // the email and the resume that went out stay as they were
         const fit = sc.fit ?? job.fit;
         if (!forceAi && fit != null && fit < writeMin(s))
@@ -466,41 +480,55 @@ async function prepare(id, { forceAi = false } = {}) {
         const w = await writeApplication(ai, job, pdf, sc);
         return { ...scored, subject: w.subject || template.subject, body: w.body || template.body, resumeText: w.resume, aiWarnings: w.warnings };
       });
-      if (!patch.status && !sent && !patch.error) patch.status = job.email ? 'pronto' : 'sem_email';
     } catch (e) {
-      // A manual "Adaptar com IA" (Tailor with AI) leaves the job where it is; it only shows the error.
-      patch = forceAi && job.status !== 'novo' ? { error: e.message } : { status: 'erro', error: e.message, errorBasis: aiBasis(s) };
+      // A manual "Adaptar com IA" (Tailor with AI) leaves the job where it is; it only shows the error. Out of quota,
+      // the job waits a little and goes again. What the evaluation found stays, even when only the writing failed.
+      const failed = forceAi && job.status !== 'novo' ? { error: e.message }
+        : e.status === 429 ? { status: 'novo', error: e.message, retryAt: Date.now() + 15 * 60e3 }
+        : { status: 'erro', error: e.message, errorBasis: aiBasis(s) };
+      patch = { ...(scored || {}), ...failed };
     }
   } else {
-    patch = { ...template, status: job.email ? 'pronto' : 'sem_email', error: '' };
+    patch = { ...template, error: '' };
   }
   // the user may have discarded (or sent) the job while the AI was working: that decision stands
   const now = await getJob(id);
   if (!now) return;
   if (now.status !== job.status && ['descartado', 'ignorado', 'enviado'].includes(now.status)) return;
+  // a status the user changed meanwhile ("Enviar todas" put it in the queue, an email came in) stands; otherwise the
+  // status follows the job as it is now, and a discarded or sent job stays as it is ("Adaptar com IA" never puts
+  // it back in the queue)
+  if (now.status !== job.status) delete patch.status;
+  else if (!('status' in patch) && !patch.error && !['enviado', 'descartado'].includes(now.status)) patch.status = now.email ? 'pronto' : 'sem_email';
   await patchJob(id, patch);
 }
 
 // With the AI on, the jobs to apply for on the website (no email: most of them) get its evaluation too, a few per
-// round and the best local fit first, so the list is ranked by the AI and not only by keywords. A job that fails
-// is not tried again until the AI settings change; running out of quota ends the round.
+// round and the best local fit first, so the list is ranked by the AI and not only by keywords. A daily cap keeps
+// a free quota for the jobs with an email; running out of quota ends the round; a job that failed is tried again
+// some hours later, or as soon as the AI settings change.
+const SCORE_PER_DAY = (s) => (providerOf(s).serial ? 30 : 100);
 async function scoreSiteJobs(s) {
   const basis = aiBasis(s);
+  const { aiScoreLog } = await chrome.storage.local.get('aiScoreLog');
+  let count = aiScoreLog?.date === today() ? aiScoreLog.count : 0;
+  const recent = (j) => j.aiTried === basis && Date.now() - (j.aiTriedAt || 0) < 6 * 3600e3;
   const pending = (await getJobs())
-    .filter((j) => j.status === 'sem_email' && !j.aiDone && j.aiTried !== basis && (j.fit == null || j.fit >= 35))
+    .filter((j) => j.status === 'sem_email' && !j.aiDone && !recent(j) && (j.fit == null || j.fit >= 35))
     .sort((a, b) => (b.fit ?? 50) - (a.fit ?? 50))
     .slice(0, 5);
   for (const j of pending) {
-    let patch;
+    if (count >= SCORE_PER_DAY(s)) return;
+    let patch = {};
     try {
       const sc = await withAi(async (ai) => evaluate(ai, j, await getResumePdf(), { patient: false }));
       patch = sc.isPosting ? evalPatch(sc) : { status: 'ignorado', note: sc.reason || 'A IA avaliou que não é um anúncio de vaga.' };
+      await chrome.storage.local.set({ aiScoreLog: { date: today(), count: ++count } });
     } catch (e) {
       if (e.status === 429) return;
-      patch = {};
     }
     const now = await getJob(j.id);
-    if (now?.status === 'sem_email' && !now.aiDone) await patchJob(j.id, { ...patch, aiTried: basis });
+    if (now?.status === 'sem_email' && !now.aiDone) await patchJob(j.id, { ...patch, aiTried: basis, aiTriedAt: Date.now() });
   }
 }
 
@@ -582,7 +610,7 @@ async function processQueue() {
       const cfg = await getSettings();
       const batch = cfg.mode === 'ai' && providerOf(cfg).serial ? 1 : 3;
       for (;;) {
-        const fresh = (await getJobs()).filter((j) => j.status === 'novo' && !tried.has(j.id)).slice(0, batch);
+        const fresh = (await getJobs()).filter((j) => j.status === 'novo' && !tried.has(j.id) && !(j.retryAt > Date.now())).slice(0, batch);
         if (!fresh.length) break;
         fresh.forEach((j) => tried.add(j.id));
         await Promise.all(fresh.map((j) => prepare(j.id)));
@@ -590,13 +618,15 @@ async function processQueue() {
       }
 
       // 1b) with the AI on, a few jobs to apply for on the website get its evaluation
-      if (cfg.mode === 'ai' && cfg.aiScoreSite) await scoreSiteJobs(cfg);
+      //     (only with nothing waiting to be sent, so no email waits for them)
+      if (cfg.mode === 'ai' && cfg.aiScoreSite && !(await getJobs()).some((j) => j.status === 'fila')) await scoreSiteJobs(cfg);
 
-      // 2) autopilot: ready jobs with enough fit go into the queue (one whose fit is unknown waits for the user)
+      // 2) autopilot: ready jobs with enough fit go into the queue (one whose fit is unknown waits for the user,
+      //    unless the minimum fit is zero)
       const s = await getSettings();
       if (s.autoSend)
         for (const j of await getJobs())
-          if (j.status === 'pronto' && j.fit != null && j.fit >= Number(s.minFit)) await patchJob(j.id, { status: 'fila', queuedAt: Date.now() });
+          if (j.status === 'pronto' && (j.fit != null ? j.fit >= Number(s.minFit) : Number(s.minFit) <= 0)) await patchJob(j.id, { status: 'fila', queuedAt: Date.now() });
 
       // 3) send one from the queue, respecting the daily limit, and go back to step 1
       if ((await sentToday()) >= Number(s.dailyLimit)) break;
@@ -893,8 +923,8 @@ const handlers = {
     return { filled: res?.filled || 0, unknown: (res?.questions || []).map((q) => q.label) };
   },
   'resume:analyze': async () => {
-    const s = await getSettings();
     const r = await withAi(async (ai) => analyzeResume(ai, await getResumePdf()));
+    const s = await getSettings(); // as it is now: the user may have typed something while the AI read
     // nothing is replaced by an empty answer; the resume text only by a transcription that keeps its facts
     await setSettings({
       ...(r.resume_text && { resumeText: r.resume_text }),
@@ -904,6 +934,7 @@ const handlers = {
       location: s.location || r.location,
       keywords: s.keywords || r.job_titles.join('\n'),
     });
+    recalcFit(); // a new resume text or skills change the local fit
     return { keptOwnText: r.keptOwnText, skills: r.skills.length };
   },
   'job:patch': async (m) => {

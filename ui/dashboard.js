@@ -799,9 +799,10 @@ $('#analyzeBtn').addEventListener('click', (e) =>
     S.settings = await getSettings();
     fillSettings();
     toast(
-      res.keptOwnText
-        ? 'Pronto: preenchi habilidades e sugestões de busca. Mantive o texto do currículo lido do PDF: a versão da IA perdia informações dele.'
-        : 'Pronto: preenchi nome, habilidades e sugestões de busca. Confira abaixo.',
+      [
+        res.skills ? 'Pronto: atualizei as habilidades e preenchi o que estava vazio. Confira abaixo.' : 'A IA não trouxe habilidades que estejam no currículo; preenchi só o que estava vazio.',
+        res.keptOwnText ? 'Mantive o texto do currículo lido do PDF: a versão da IA perdia informações dele.' : '',
+      ].filter(Boolean).join(' '),
       { ms: 8000 }
     );
   })
