@@ -1,0 +1,11 @@
+#!/bin/sh
+# Runs the quick checks before a push leaves the machine. Turn it on once, in the repository:
+#   git config core.hooksPath dev/hooks
+# The CI runs every suite, the real-browser one included, on the push itself.
+cd "$(git rev-parse --show-toplevel)" || exit 1
+echo "Verificações antes do push (node dev/check.mjs --rapido)…"
+node dev/check.mjs --rapido || {
+  echo
+  echo "Push cancelado: há verificações falhando. Corrija (ou, por sua conta, git push --no-verify)."
+  exit 1
+}

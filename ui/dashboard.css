@@ -80,9 +80,10 @@ svg { width: 17px; height: 17px; flex: none; }
 .toolbar { display: flex; gap: 8px; padding: 12px; border-bottom: 1px solid var(--line); }
 .toolbar input { flex: 1; min-width: 0; }
 .toolbar select { width: auto; flex: none; max-width: 50%; }
-#bulk { display: none; align-items: center; gap: 8px; padding: 8px 12px; background: var(--accent-soft); border-bottom: 1px solid var(--line); font-size: 13px; }
+#bulk { display: none; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; padding: 8px 12px; background: var(--accent-soft); border-bottom: 1px solid var(--line); font-size: 13px; }
 #bulk.on { display: flex; }
-#bulk span { flex: 1; font-weight: 600; color: var(--accent); }
+#bulk span { flex: 1; font-weight: 600; color: var(--accent); white-space: nowrap; }
+#bulk span.muted { font-weight: 400; color: var(--muted); white-space: normal; }
 #bulk button { padding: 4px 10px; }
 #list { flex: 1; overflow-y: auto; outline: none; }
 .item { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-bottom: 1px solid var(--line); cursor: pointer; position: relative; }

@@ -1,5 +1,7 @@
 # Auto Vagas
 
+[![Testes e publicação](https://github.com/gglucche/auto-vagas/actions/workflows/ci.yml/badge.svg)](https://github.com/gglucche/auto-vagas/actions/workflows/ci.yml)
+
 Extensão gratuita e de código aberto para o Google Chrome que procura vagas, prepara cada candidatura com o seu currículo (o padrão ou um adaptado por IA) e se candidata por você: por e-mail, pelo seu Gmail, ou no próprio LinkedIn, nas vagas de Candidatura simplificada. Também funciona no Brave e no Edge.
 
 ![Painel com as vagas para revisar, a análise da IA e o e-mail pronto](docs/painel.png)
@@ -15,7 +17,7 @@ Extensão gratuita e de código aberto para o Google Chrome que procura vagas, p
 
 ## Como instalar
 
-1. Baixe o código: **Code → Download ZIP** nesta página e descompacte, ou `git clone https://github.com/gglucche/auto-vagas.git`.
+1. Baixe a versão mais recente em [Releases](https://github.com/gglucche/auto-vagas/releases) (o ZIP `auto-vagas-<versão>.zip`, testado antes de ser publicado) e descompacte. Ou pegue o código como está: **Code → Download ZIP** nesta página, ou `git clone https://github.com/gglucche/auto-vagas.git`.
 2. No Chrome, abra `chrome://extensions`.
 3. Ligue o **Modo do desenvolvedor**, no canto superior direito.
 4. Clique em **Carregar sem compactação** e escolha a pasta descompactada (`auto-vagas` ou `auto-vagas-main`).
@@ -72,12 +74,19 @@ As respostas vêm do que você informou em Configurações e, com uma chave de I
 Não há etapa de build: o navegador carrega a pasta como está. Ao mudar o código de fundo, suba a versão em `manifest.json` e em `lib/build.js`, sempre iguais.
 
 ```bash
+node dev/check.mjs         # todas as verificações, na ordem, parando na primeira que falha (--rapido: sem o navegador)
 node dev/test.mjs          # testes com a API chrome.* simulada
 node dev/test-quality.mjs  # aderência contra notas de recrutadores e conferência do texto e das respostas da IA
 node dev/test-pdf.mjs      # leitura do PDF do currículo
 node dev/test-browser.mjs  # a extensão instalada em um Chrome, Brave ou Edge sem janela
 node dev/server.mjs        # o painel em http://localhost:5178, com dados de exemplo
 node dev/screenshots.mjs   # refaz as imagens deste README
+```
+
+**Bugs não voltam.** Cada bug corrigido vira uma verificação em `dev/test*.mjs`, com o nome dizendo o que era (o botão de candidatura que abria uma aba e era bloqueado, o "Enviar" da janela de mensagens que era clicado, a busca que não trazia nada depois de apagar as vagas…). O CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) roda tudo a cada push e pull request, inclusive no Chrome de verdade, e um push em `main` que passa com uma versão ainda não publicada ganha a tag `v<versão>` e uma release com o ZIP da extensão. Para barrar um push com falha antes de ele sair da sua máquina, ligue o hook uma vez:
+
+```bash
+git config core.hooksPath dev/hooks
 ```
 
 ## Licença

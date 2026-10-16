@@ -459,6 +459,33 @@ try {
   const applyTo = (ids) => dash.evaluate(`chrome.runtime.sendMessage({ type: 'apply:start', ids: ${JSON.stringify(ids)} })`);
   const sentFor = (n) => submitted.find((x) => x.job === '/jobs/view/' + n);
 
+  // the list: the checkbox above it selects every job and clears them; the bulk buttons stay inside the pane (they
+  // used to overflow under the detail pane, out of reach); a job with no email opens on the ad, with no email field
+  const bulk = await dash.evaluate(`(async () => {
+    const tick = () => new Promise((r) => setTimeout(r, 300));
+    document.querySelector('[data-view="noemail"]').click();
+    await tick();
+    document.querySelector('#checkAll').click();
+    await tick();
+    const items = [...document.querySelectorAll('#list .item input[type=checkbox]')];
+    const bar = document.querySelector('#bulk');
+    const edge = bar.getBoundingClientRect().right + 1;
+    const r = {
+      items: items.length, checked: items.filter((i) => i.checked).length, label: bar.querySelector('span')?.textContent.trim(),
+      buttons: [...bar.querySelectorAll('button')].map((b) => [b.textContent.trim(), b.getBoundingClientRect().right <= edge]),
+      emailTab: !!document.querySelector('#detail [data-tab="email"]'), emailField: !!document.querySelector('#detail [data-f="email"]'), tab: document.querySelector('#detail .tabs button.active')?.textContent,
+    };
+    document.querySelector('#checkAll').click();
+    await tick();
+    r.cleared = [...document.querySelectorAll('#list .item input[type=checkbox]')].filter((i) => i.checked).length;
+    document.querySelector('#detail [data-act="gotEmail"]')?.click();
+    await tick();
+    r.emailAfter = !!document.querySelector('#detail [data-f="email"]') && document.activeElement?.dataset.f === 'email';
+    return r;
+  })()`);
+  check('a caixa no alto da lista seleciona e limpa todas as vagas, e os botões em lote ficam à vista', bulk.items === 7 && bulk.checked === 7 && bulk.cleared === 0 && bulk.label === '7 selecionada(s)' && bulk.buttons.length >= 2 && bulk.buttons.every(([, inside]) => inside), JSON.stringify(bulk));
+  check('vaga sem e-mail abre no anúncio, sem campo de e-mail; “Achei um e-mail” abre o campo', !bulk.emailTab && !bulk.emailField && bulk.tab === 'Anúncio' && bulk.emailAfter === true, JSON.stringify([bulk.emailTab, bulk.emailField, bulk.tab, bulk.emailAfter]));
+
   await applyTo(['e1']);
   let job = await waitJob('e1', (x) => x.status === 'enviado');
   check('candidatura simplificada: clica, percorre as etapas, anexa o currículo e envia', job.status === 'enviado' && job.via === 'linkedin' && !!sentFor(1), JSON.stringify([job.status, job.applyState, job.error]));

@@ -171,16 +171,20 @@ function renderList() {
   if (!list.some((j) => j.id === S.sel)) S.sel = matchMedia('(max-width: 760px)').matches ? null : list[0]?.id || null;
   for (const id of S.checked) if (!list.some((j) => j.id === id)) S.checked.delete(id);
 
-  // bulk Easy Apply: the selected jobs or, with nothing selected, every job in the list
+  // the bar above the list: a checkbox that selects (or clears) every job, and the actions for the selection;
+  // bulk apply takes the selected jobs or, with nothing selected, every job in the list
   const easy = S.view === 'noemail' ? (S.checked.size ? list.filter((j) => S.checked.has(j.id)) : list).filter(canApply).length : 0;
   const applyAll = easy ? `<button class="primary" data-act="bulkApply" title="Abre cada vaga em uma janela, preenche o formulário com seus dados e o currículo e envia">⚡ Candidatar ${S.checked.size ? `nas ${easy} selecionadas` : `nas ${easy} vagas`}</button>` : '';
-  $('#bulk').classList.toggle('on', S.checked.size > 0 || !!applyAll);
-  $('#bulk').innerHTML = S.checked.size
-    ? `<span>${S.checked.size} selecionada(s)</span>${applyAll}
-       ${S.view === 'review' ? '<button class="primary" data-act="bulkSend">Enviar todas</button>' : ''}
-       ${S.view === 'archive' ? '<button data-act="bulkRestore">Restaurar</button>' : '<button data-act="bulkDiscard">Descartar</button>'}
-       <button class="ghost" data-act="bulkAll">Selecionar tudo</button><button class="ghost" data-act="bulkNone">Limpar</button>`
-    : applyAll && `${applyAll}<span class="muted">preenche e envia cada uma</span>`;
+  const all = list.length > 0 && list.every((j) => S.checked.has(j.id));
+  $('#bulk').classList.toggle('on', list.length > 0);
+  $('#bulk').innerHTML = `<input type="checkbox" id="checkAll" ${all ? 'checked' : ''} title="${all ? 'Limpar a seleção' : 'Selecionar todas as vagas da lista'}" aria-label="Selecionar todas">
+    <span>${S.checked.size ? `${S.checked.size} selecionada(s)` : `${list.length} vaga(s)`}</span>
+    ${
+      S.checked.size
+        ? `${applyAll}${S.view === 'review' ? '<button class="primary" data-act="bulkSend">Enviar todas</button>' : ''}${S.view === 'archive' ? '<button data-act="bulkRestore">Restaurar</button>' : '<button data-act="bulkDiscard">Descartar</button>'}`
+        : applyAll && `${applyAll}<span class="muted">preenche e envia cada uma</span>`
+    }`;
+  $('#checkAll').indeterminate = S.checked.size > 0 && !all;
 
   // website applications: what is automatic and what still needs the user
   const waitingLogin = [...S.jobs.values()].filter((j) => j.applyState === 'login' && j.status === 'sem_email');
@@ -251,9 +255,14 @@ function renderDetail() {
       ? `📎 ${esc(S.meta.resumePdf)} (currículo padrão)`
       : `⚠ Nenhum currículo — <a href="#" data-view="settings">suba o PDF nas Configurações</a>`;
 
-  const tabs = [['email', 'E-mail'], ['resume', 'Currículo'], ['ad', 'Anúncio']];
+  // the email only when there is one to send to (or the user says they found one): a job to apply for on a
+  // website opens on the ad
+  const hasEmail = !!j.email || S.emailFor === j.id;
+  const tabs = hasEmail ? [['email', 'E-mail'], ['resume', 'Currículo'], ['ad', 'Anúncio']] : [['ad', 'Anúncio'], ['resume', 'Currículo']];
+  if (!tabs.some(([k]) => k === S.tab)) S.tab = tabs[0][0];
   const pane = {
     email: `
+      ${!j.email && !sent ? `<p class="muted">Vaga que pede candidatura por e-mail? Informe o endereço: ela vai para “Para revisar”, com o e-mail pronto.</p>` : ''}
       <div class="field"><label>Para</label><input data-f="email" value="${esc(j.email)}" placeholder="e-mail do recrutador" ${sent ? 'readonly' : ''}></div>
       <div class="field"><label>Assunto</label><input data-f="subject" value="${esc(j.subject)}" ${sent ? 'readonly' : ''}></div>
       <textarea data-f="body" rows="11" ${sent ? 'readonly' : ''} placeholder="Texto do e-mail">${esc(j.body)}</textarea>
@@ -360,7 +369,7 @@ function footHtml(j, busy) {
       const apply = canApply(j) ? `<button class="primary" data-act="apply" ${running ? 'disabled' : ''} title="${how}">${label}</button>` : '';
       const site = `<a class="btn" href="${esc(j.url)}" target="_blank" rel="noopener">Abrir vaga ↗</a>`;
       return `${apply}${site}${ai}<button data-act="markSent">Já me candidatei</button><button class="danger ghost" data-act="discard">Descartar</button>
-        <span class="hint">Achou um e-mail? Preencha “Para” e a vaga vai para revisão.</span>`;
+        ${j.email ? '' : '<button class="ghost" data-act="gotEmail" title="A vaga pede candidatura por e-mail? Informe o endereço e ela vai para revisão, com o e-mail pronto">Achei um e-mail</button>'}`;
     }
     case 'enviado':
       return `<label style="flex:1">Anotações<textarea data-f="notes" rows="2" placeholder="Contato, data da entrevista, pretensão…">${esc(j.notes)}</textarea></label>`;
@@ -638,15 +647,23 @@ const actions = {
     restore([...S.checked]);
     S.checked.clear();
   },
-  bulkAll: () => {
-    visible().forEach((j) => S.checked.add(j.id));
-    render('list');
-  },
-  bulkNone: () => {
-    S.checked.clear();
-    render('list');
+  // a job without an email whose ad asks for one: the email tab appears, to type the address in
+  gotEmail: () => {
+    S.emailFor = S.sel;
+    S.tab = 'email';
+    shown = '';
+    render('detail');
+    setTimeout(() => $('#detail [data-f="email"]')?.focus()); // once the detail is drawn
   },
 };
+
+// the checkbox above the list: every job in the list, or none
+$('#bulk').addEventListener('change', (e) => {
+  if (e.target.id !== 'checkAll') return;
+  if (e.target.checked) visible().forEach((j) => S.checked.add(j.id));
+  else S.checked.clear();
+  render('list');
+});
 
 document.addEventListener('click', (e) => {
   const t = e.target;

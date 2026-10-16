@@ -1,0 +1,2 @@
+# the hook runs under sh: it must keep LF line endings on every platform
+dev/hooks/* text eol=lf

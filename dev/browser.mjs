@@ -70,7 +70,10 @@ export async function launch(browser, profile, extraArgs = []) {
       '--headless=new', '--remote-debugging-port=0', '--remote-allow-origins=*', `--user-data-dir=${profile}`,
       // only the "pipe" connection installs extensions: Chrome no longer accepts --load-extension
       '--remote-debugging-pipe', '--enable-unsafe-extension-debugging',
-      '--no-first-run', '--no-default-browser-check', '--window-size=1400,1100', ...extraArgs, 'about:blank',
+      '--no-first-run', '--no-default-browser-check', '--window-size=1400,1100',
+      // on a CI runner (no sandbox user namespaces, small /dev/shm, no GPU)
+      ...(process.env.CI ? ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'] : []),
+      ...extraArgs, 'about:blank',
     ],
     { stdio: ['ignore', 'ignore', 'ignore', 'pipe', 'pipe'] }
   );

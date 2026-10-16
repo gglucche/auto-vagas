@@ -1,0 +1,70 @@
+# Every push and pull request runs every test suite (dev/check.mjs): each bug fixed so far has a check in them,
+# so a change that brings one back fails here before it reaches anyone. A push to main that passes with a version
+# not yet published (manifest.json) gets a tag and a GitHub release with the extension packed for "Carregar sem
+# compactação" (Load unpacked).
+name: Testes e publicação
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  testes:
+    name: Testes (API simulada, qualidade, PDF e Chrome de verdade)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Navegador do runner
+        run: google-chrome --version
+      - name: Todas as verificações
+        run: node dev/check.mjs --browser=/usr/bin/google-chrome
+        env:
+          CI: 1
+
+  publicacao:
+    name: Publicação da versão
+    needs: testes
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Versão em manifest.json
+        id: v
+        run: echo "version=$(node -p "require('./manifest.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Já publicada?
+        id: tag
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/v${{ steps.v.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "A versão ${{ steps.v.outputs.version }} já tem release; suba a versão em manifest.json e lib/build.js para publicar outra."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Pacote da extensão
+        if: steps.tag.outputs.exists == 'false'
+        run: |
+          mkdir -p dist/auto-vagas
+          rsync -a --exclude='.git' --exclude='.github' --exclude='.claude' --exclude='dev' --exclude='docs' --exclude='dist' --exclude='node_modules' ./ dist/auto-vagas/
+          (cd dist && zip -qr "auto-vagas-${{ steps.v.outputs.version }}.zip" auto-vagas)
+          ls -la dist
+      - name: Release
+        if: steps.tag.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.v.outputs.version }}" "dist/auto-vagas-${{ steps.v.outputs.version }}.zip" \
+            --title "Auto Vagas ${{ steps.v.outputs.version }}" \
+            --generate-notes \
+            --notes "Descompacte o ZIP e, em chrome://extensions, com o Modo do desenvolvedor ligado, clique em “Carregar sem compactação” e escolha a pasta auto-vagas. Para atualizar, troque os arquivos da pasta e aperte F5 no painel."
