@@ -25,6 +25,7 @@
       </select>
     </div>
     <div id="bulk"></div>
+    <div id="viewNote"></div>
     <div id="list" tabindex="-1"></div>
   </section>
 
@@ -92,10 +93,11 @@
         </div>
         <div class="row">
           <label class="check"><input type="checkbox" data-key="remoteOnly"> Só vagas remotas</label>
+          <label class="check" title="Sites internacionais de vagas remotas, anúncios que não estão em português e vagas em outro país"><input type="checkbox" data-key="foreignOnly"> Só vagas de fora do Brasil</label>
           <label class="check"><input type="checkbox" data-key="srcLinkedinJobs"> LinkedIn</label>
-          <label class="check"><input type="checkbox" data-key="srcBoards"> Gupy, InfoJobs, Vagas.com, Remotar e Himalayas</label>
+          <label class="check"><input type="checkbox" data-key="srcBoards"> Gupy, InfoJobs, Vagas.com, Remotar e os sites internacionais de vagas remotas (Himalayas, Remotive, Jobicy)</label>
         </div>
-        <p class="muted">Esses sites são consultados direto, todos ao mesmo tempo, sem abrir aba e sem usar nenhuma conta sua. Eles quase nunca publicam e-mail: as vagas aparecem em “Candidatar no site”.</p>
+        <p class="muted">Esses sites são consultados direto, todos ao mesmo tempo, sem abrir aba e sem usar nenhuma conta sua. Eles quase nunca publicam e-mail: as vagas aparecem em “Candidatar no site”. Dos sites internacionais entram só as vagas abertas a quem mora no seu país. “Só vagas de fora” deixa passar as de empresas estrangeiras (anúncio em inglês ou vaga em outro país) e as dos sites internacionais; para achar mais delas, inclua termos em inglês (“Oracle APEX developer”).</p>
         <div class="grid2">
           <label>Buscar sozinho a cada
             <select data-key="scanEveryHours">
@@ -145,7 +147,11 @@
 
       <div class="card">
         <h3><span class="step">4</span> Candidatura no site</h3>
-        <p class="muted">Para as vagas de “Candidatura simplificada” do LinkedIn: a extensão abre a vaga em uma janela, preenche o formulário com as respostas abaixo, anexa o seu currículo e envia — uma vaga ou várias de uma vez. Ela não inventa resposta: pergunta que não souber para a candidatura e aparece aqui, para você responder uma vez só.</p>
+        <p class="muted">Em qualquer vaga de “Candidatar no site”: a extensão abre a vaga em uma janela, clica em candidatar, preenche o formulário com as respostas abaixo e o seu currículo, passa pelas etapas e envia — uma vaga ou várias de uma vez. Vale para a Candidatura simplificada do LinkedIn, para a Gupy, para o site da empresa e para os sites internacionais. Ela não inventa resposta: quando não sabe responder, a candidatura para e a pergunta aparece aqui e na vaga, para você responder uma vez só. Login e criação de conta só você faz: a candidatura espera na janela e continua depois.</p>
+        <div class="row"><label class="check"><input type="checkbox" data-key="aiAnswers"> Usar a IA para responder pelo currículo as perguntas que as respostas abaixo não cobrem</label></div>
+        <p class="muted" id="applyAiNote"></p>
+        <div class="row"><label class="check"><input type="checkbox" data-key="applyAuto"> <span><b>Piloto automático</b> — candidatar sozinho às vagas com a aderência mínima do passo 3, no LinkedIn e nos outros sites (abre uma janela quando houver vagas; para em login ou em pergunta que não sabe)</span></label></div>
+        <p class="muted" id="sitesNote"></p>
         <div id="applyPending"></div>
         <div class="grid2">
           <label>Celular, com DDD <input data-key="phone" placeholder="19 99999-8888"></label>
@@ -171,7 +177,7 @@
           <label>Limite de candidaturas pelo site por dia <input data-key="applyDailyLimit" type="number" min="1" max="60"></label>
         </div>
         <details><summary id="applyAnswersTitle">Respostas salvas</summary><div id="applyAnswers"></div></details>
-        <p class="muted">Em formulários de outros sites, abra a página e clique no ícone da extensão → “Preencher esta página”: ela preenche o que souber, etapa por etapa, e você confere e envia. Atenção: o LinkedIn não permite automação nos termos de uso e pode restringir contas que exageram; por isso há limite diário e pausa entre as candidaturas.</p>
+        <p class="muted">Quando uma candidatura para com a janela aberta, um cartão na página oferece preencher de novo e registra a vaga quando a página agradecer. Em qualquer outra página, use o ícone da extensão → “Preencher esta página”. Atenção: o LinkedIn não permite automação nos termos de uso e pode restringir contas que exageram; por isso há limite diário e pausa entre as candidaturas.</p>
       </div>
 
       <div class="card">

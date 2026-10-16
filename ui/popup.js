@@ -52,7 +52,10 @@ $('#fill').onclick = async () => {
   const res = await call('apply:fill');
   if (!res?.ok) return ($('#msg').textContent = res?.error || 'Falhou.');
   $('#msg').textContent =
-    `Preenchi ${res.filled} campo(s).` + (res.unknown.length ? ` Sem resposta: ${res.unknown.slice(0, 4).join('; ')}. Preencha na página: a extensão guarda para a próxima vez.` : ' Confira e envie.');
+    `Preenchi ${res.filled} campo(s).` +
+    (res.unknown.length
+      ? ` Sem resposta: ${res.unknown.slice(0, 4).join('; ')}. Preencha na página: a extensão guarda para a próxima vez.` + (res.ai ? '' : ' Com a IA configurada no painel, ela responde perguntas assim pelo seu currículo.')
+      : ' Confira e envie.');
 };
 
 $('#capture').onclick = async () => {

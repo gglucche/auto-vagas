@@ -31,9 +31,31 @@ const VIEWS = {
 const PAGES = { stats: 'Estatísticas', settings: 'Configurações' };
 const SOURCE = { linkedin_jobs: 'LinkedIn', linkedin_post: 'Post no LinkedIn', google_jobs: 'Google', gupy: 'Gupy', infojobs: 'InfoJobs', vagas: 'Vagas.com', remotar: 'Remotar', himalayas: 'Himalayas', captura: 'Capturada' };
 const STAGES = { aguardando: 'Aguardando', respondeu: 'Responderam', entrevista: 'Entrevista', oferta: 'Oferta', rejeitado: 'Recusada' };
-// LinkedIn job with Easy Apply (or not checked yet): the extension can fill in and submit the application.
-const canApply = (j) => j.source === 'linkedin_jobs' && j.status === 'sem_email' && j.easyApply !== false;
-const APPLY_PILL = { fila: ['Na fila', 'acc'], rodando: ['Candidatando…', 'acc'], revisar: ['Conferir e enviar', 'warn'], pendente: ['Falta resposta', 'bad'] };
+// Any job to apply for on a website: the extension opens it in a window, fills in the form and submits (LinkedIn's
+// Easy Apply, or the job page's apply button and the form that follows on any other site).
+const canApply = (j) => j.status === 'sem_email' && /^https?:\/\//.test(j.url || '');
+const isLinkedIn = (url) => /^https:\/\/([\w-]+\.)?linkedin\.com\//.test(url || '');
+const linkedinJob = (j) => j.source === 'linkedin_jobs' || isLinkedIn(j.url);
+const easyApplyJob = (j) => linkedinJob(j) && j.easyApply !== false;
+const hostOf = (url) => {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+};
+// With an AI key, the AI answers the form questions the user's saved answers don't cover.
+const aiAnswersOn = () => S.settings.aiAnswers !== false && !!aiKey(S.settings);
+const APPLY_PILL = { fila: ['Na fila', 'acc'], rodando: ['Candidatando…', 'acc'], revisar: ['Conferir e enviar', 'warn'], pendente: ['Falta resposta', 'bad'], login: ['Faça login', 'warn'] };
+// Acting on sites other than LinkedIn needs the optional permission for them: asked once, on the user's click.
+const SITES = { origins: ['https://*/*', 'http://*/*'] };
+async function allowSites() {
+  if (S.sites) return true;
+  S.sites = await (chrome.permissions?.request(SITES) ?? Promise.resolve(false)).catch(() => false);
+  if (!S.sites) toast('Sem a permissão para os sites, a extensão só candidata nas vagas do LinkedIn.', { bad: true, ms: 7000 });
+  render('nav', 'list');
+  return S.sites;
+}
 
 const STATUS_PILL = {
   novo: ['Preparando…', 'acc'], fila: ['Na fila', 'acc'], erro: ['Erro', 'bad'], ignorado: ['Ignorada pela IA', ''], descartado: ['Descartada', ''],
@@ -96,7 +118,7 @@ function visible() {
   if (!v) return [];
   const q = S.q.trim().toLowerCase();
   const list = [...S.jobs.values()].filter(
-    (j) => v.statuses.includes(j.status) && !S.sending.has(j.id) && (!q || `${j.title} ${j.company} ${j.email}`.toLowerCase().includes(q))
+    (j) => v.statuses.includes(j.status) && !S.sending.has(j.id) && (!q || `${j.title} ${j.company} ${j.email} ${(j.tags || []).join(' ')}`.toLowerCase().includes(q))
   );
   const byDate = (a, b) => (b.sentAt || b.foundAt) - (a.sentAt || a.foundAt);
   return list.sort(S.sort === 'fit' && S.view !== 'sent' ? (a, b) => (b.fit ?? -1) - (a.fit ?? -1) || byDate(a, b) : byDate);
@@ -134,7 +156,8 @@ function renderNav() {
        <div class="progress"><i style="width:${Math.round((100 * (sc.i + 0.5)) / Math.max(sc.total, 1))}%"></i></div>
        <span class="muted">${esc(sc.label || 'Iniciando…')} · ${sc.found} nova(s)</span>`
     : `<button class="primary" data-act="scan" title="Buscar vagas agora">${ICON.scan}<span class="lbl">Buscar vagas agora</span></button>
-       <span class="muted">${sc.last ? `Última busca ${ago(sc.last)}` : 'Nenhuma busca ainda'}</span>`;
+       <span class="muted">${sc.last ? `Última busca ${ago(sc.last)}` : 'Nenhuma busca ainda'}</span>
+       ${sc.last ? `<button class="ghost again" data-act="scanReset" title="Apaga as vagas em aberto, esquece os anúncios já lidos e busca de novo">Buscar do zero</button>` : ''}`;
 
   const isPage = !!PAGES[S.view];
   $('#app').classList.toggle('is-page', isPage);
@@ -150,7 +173,7 @@ function renderList() {
 
   // bulk Easy Apply: the selected jobs or, with nothing selected, every job in the list
   const easy = S.view === 'noemail' ? (S.checked.size ? list.filter((j) => S.checked.has(j.id)) : list).filter(canApply).length : 0;
-  const applyAll = easy ? `<button class="primary" data-act="bulkApply">⚡ Candidatar ${S.checked.size ? `nas ${easy} selecionadas` : `nas ${easy} do LinkedIn`}</button>` : '';
+  const applyAll = easy ? `<button class="primary" data-act="bulkApply" title="Abre cada vaga em uma janela, preenche o formulário com seus dados e o currículo e envia">⚡ Candidatar ${S.checked.size ? `nas ${easy} selecionadas` : `nas ${easy} vagas`}</button>` : '';
   $('#bulk').classList.toggle('on', S.checked.size > 0 || !!applyAll);
   $('#bulk').innerHTML = S.checked.size
     ? `<span>${S.checked.size} selecionada(s)</span>${applyAll}
@@ -159,12 +182,28 @@ function renderList() {
        <button class="ghost" data-act="bulkAll">Selecionar tudo</button><button class="ghost" data-act="bulkNone">Limpar</button>`
     : applyAll && `${applyAll}<span class="muted">preenche e envia cada uma</span>`;
 
+  // website applications: what is automatic and what still needs the user
+  const waitingLogin = [...S.jobs.values()].filter((j) => j.applyState === 'login' && j.status === 'sem_email');
+  const hosts = [...new Set(waitingLogin.map((j) => j.loginHost || hostOf(j.url)).filter(Boolean))];
+  $('#viewNote').innerHTML =
+    S.view !== 'noemail' || !list.length
+      ? ''
+      : waitingLogin.length
+        ? `<div class="banner"><b>${waitingLogin.length} candidatura(s) esperando o seu login</b> em ${esc(hosts.join(', '))}. Entre na sua conta nesse(s) site(s) neste navegador e clique em <button class="ghost" data-act="retryLogin">Tentar de novo</button> — o resto é automático.</div>`
+        : !S.sites && list.some((j) => canApply(j) && !linkedinJob(j))
+          ? `<div class="banner info">Para a extensão candidatar também fora do LinkedIn (Gupy, sites de empresas…), <button class="ghost" data-act="allowSites">permita o acesso aos sites</button>. Ela só age nas janelas que ela mesma abre.</div>`
+          : !aiAnswersOn()
+            ? `<div class="banner info">Sem IA, a candidatura para em toda pergunta que você ainda não respondeu. <a href="#" data-view="settings">Configure a IA</a> (o Groq tem cota gratuita) para ela responder pelo seu currículo; só o que só você sabe, como pretensão salarial, fica com você.</div>`
+            : !S.settings.applyAuto && list.some(canApply)
+              ? `<div class="banner info">Para candidatar sem clicar: ligue o <a href="#" data-view="settings">piloto automático</a>. Ele abre cada vaga com a aderência mínima, preenche e envia; só para em login ou em pergunta que não sabe.</div>`
+              : '';
+
   $('#list').innerHTML = list.length
     ? list
         .map((j) => {
           const pill = S.view === 'sent'
             ? followUpDue(j) ? ['Follow-up', 'warn'] : [STAGES[j.stage || 'aguardando'], j.stage === 'rejeitado' ? '' : j.stage && j.stage !== 'aguardando' ? 'ok' : '']
-            : APPLY_PILL[j.applyState] || (canApply(j) && j.easyApply ? ['Simplificada', 'ok'] : STATUS_PILL[j.status]);
+            : APPLY_PILL[j.applyState] || (canApply(j) && linkedinJob(j) && j.easyApply ? ['Simplificada', 'ok'] : STATUS_PILL[j.status]);
           return `<div class="item ${j.id === S.sel ? 'sel' : ''}" data-id="${j.id}">
             <input type="checkbox" ${S.checked.has(j.id) ? 'checked' : ''} aria-label="Selecionar">
             <div class="fit ${fitClass(j.fit)}">${j.fit ?? '–'}</div>
@@ -196,7 +235,10 @@ function renderDetail() {
   const j = S.jobs.get(S.sel);
   const key = j ? `${j.id}|${j.status}` : '';
   // don't redraw over a field the user is editing
-  if (key === shown && $('#detail').contains(document.activeElement) && document.activeElement.matches('[data-f]')) return;
+  if (key === shown && $('#detail').contains(document.activeElement) && document.activeElement.matches('[data-f], [data-ans], [data-fix]')) return;
+  // answers typed for this job and not saved yet survive the redraw
+  const typed = key === shown ? [...$('#detail').querySelectorAll('[data-ans], [data-fix]')].map((el) => [el.matches('[data-ans]') ? 'ans' : 'fix', el.dataset.ans ?? el.dataset.fix, el.value]) : [];
+  const wasOpen = key === shown && !!$('#detail .ai-answers[open]');
   shown = key;
   if (!j) return ($('#detail').innerHTML = `<div class="empty">Selecione uma vaga na lista.</div>`);
 
@@ -234,7 +276,8 @@ function renderDetail() {
       </div>
       <a class="btn" href="${esc(j.url)}" target="_blank" rel="noopener">Abrir vaga ↗</a>
     </div>
-    ${j.error ? `<div class="banner">${esc(j.error)}</div>` : ''}
+    ${j.applyState === 'pendente' && j.applyQuestions?.length && !sent ? pendingHtml(j) : j.error ? `<div class="banner">${esc(j.error)}</div>` : ''}
+    ${j.applyAi?.length ? aiAnswersHtml(j) : ''}
     ${j.status === 'novo' ? `<div class="banner info">Preparando a candidatura…</div>` : ''}
     ${j.applyState === 'revisar' ? `<div class="banner info">Formulário preenchido. Confira na janela do LinkedIn e clique em “Enviar candidatura”.</div>` : ''}
     ${j.status === 'ignorado' || j.status === 'descartado' ? (j.note ? `<div class="banner info">${esc(j.note)}</div>` : '') : ''}
@@ -257,7 +300,33 @@ function renderDetail() {
     <div class="tabs">${tabs.map(([k, l]) => `<button data-tab="${k}" class="${S.tab === k ? 'active' : ''}">${l}</button>`).join('')}</div>
     <div class="pane">${pane}</div>
     <div class="d-foot">${footHtml(j, busy)}</div>`;
+  for (const [kind, i, value] of typed) {
+    const el = $(`#detail [data-${kind}="${i}"]`);
+    if (el) el.value = value;
+  }
+  if (wasOpen) $('#detail .ai-answers')?.setAttribute('open', '');
 }
+
+// A field to answer a form question with: the form's options, when it had any.
+const answerField = (q, attr) =>
+  q.options?.length
+    ? `<select ${attr}><option value="">Escolha…</option>${q.options.filter((o) => !/^(selecion|select|escolh|choose)/i.test(o.trim())).map((o) => `<option>${esc(o)}</option>`).join('')}</select>`
+    : q.kind === 'textarea'
+      ? `<textarea ${attr} rows="3" placeholder="Sua resposta"></textarea>`
+      : `<input ${attr} placeholder="Sua resposta">`;
+
+// The questions that stopped this job's application, to answer right here: the job then goes back into the queue.
+const pendingHtml = (j) => `<div class="alert ask" style="margin-top:14px"><b>Responda para a candidatura continuar</b>
+    ${j.applyQuestions.map((q, i) => `<label>${esc(q.label)}${answerField(q, `data-ans="${i}"`)}</label>`).join('')}
+    <span class="row"><button class="primary" data-act="answerPending">Responder e candidatar de novo</button><span class="muted">As respostas ficam salvas para as próximas vagas.</span></span></div>`;
+
+// What the AI answered in this job's form and why; a correction becomes the user's own answer for the next ones.
+const aiAnswersHtml = (j) => `<details class="ai-answers"><summary>Respostas da IA no formulário (${j.applyAi.length})</summary>
+    <p class="muted">Tiradas do seu currículo. Se alguma estiver errada, corrija aqui: a sua resposta passa a valer nas próximas candidaturas.</p>
+    ${j.applyAi
+      .map((x, i) => `<label>${esc(x.q)} <span class="muted">${x.absent ? '(o currículo não menciona)' : x.why ? `— “${esc(x.why)}”` : ''}</span><input data-fix="${i}" value="${esc(x.a)}"></label>`)
+      .join('')}
+    <span class="row"><button data-act="fixAi">Salvar correções</button></span></details>`;
 
 // One requirement from the AI's evaluation: met (✓), partly (~) or not (✗), with the resume excerpt that proves it.
 const REQ_MARK = { sim: ['✓', 'ok'], parcial: ['~', 'part'], nao: ['✗', 'no'] };
@@ -285,10 +354,11 @@ function footHtml(j, busy) {
       return `<span class="muted">${j.status === 'fila' ? 'Na fila de envio — sai em instantes.' : 'Aguarde…'}</span><button class="danger ghost" data-act="discard">Descartar</button>`;
     case 'sem_email': {
       const running = ['fila', 'rodando'].includes(j.applyState);
-      const apply = canApply(j) ? `<button class="primary" data-act="apply" ${running ? 'disabled' : ''}>${running ? 'Candidatando…' : '⚡ Candidatar pelo LinkedIn'}</button>` : '';
-      const site = apply
-        ? `<a class="btn" href="${esc(j.url)}" target="_blank" rel="noopener">Abrir vaga ↗</a>`
-        : `<a class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" href="${esc(j.url)}" target="_blank" rel="noopener">Candidatar no site ↗</a>`;
+      const easy = easyApplyJob(j);
+      const label = running ? 'Candidatando…' : j.applyState === 'login' ? '⚡ Candidatar de novo' : easy ? '⚡ Candidatar pelo LinkedIn' : '⚡ Candidatar no site';
+      const how = easy ? 'Preenche e envia a candidatura simplificada no LinkedIn' : 'Abre a vaga em uma janela, clica em candidatar, preenche o formulário com seus dados e o currículo e envia';
+      const apply = canApply(j) ? `<button class="primary" data-act="apply" ${running ? 'disabled' : ''} title="${how}">${label}</button>` : '';
+      const site = `<a class="btn" href="${esc(j.url)}" target="_blank" rel="noopener">Abrir vaga ↗</a>`;
       return `${apply}${site}${ai}<button data-act="markSent">Já me candidatei</button><button class="danger ghost" data-act="discard">Descartar</button>
         <span class="hint">Achou um e-mail? Preencha “Para” e a vaga vai para revisão.</span>`;
     }
@@ -505,14 +575,62 @@ const actions = {
     render();
   },
   apply: async () => {
-    await call('apply:start', { ids: [S.sel] });
-    toast('Abrindo a vaga no LinkedIn para preencher a candidatura…', { ms: 6000 });
+    const j = S.jobs.get(S.sel);
+    if (!j) return;
+    if (!linkedinJob(j) && !(await allowSites())) return;
+    await call('apply:start', { ids: [j.id] });
+    toast(
+      easyApplyJob(j)
+        ? 'Abrindo a vaga no LinkedIn para preencher a candidatura…'
+        : 'Abrindo a vaga em uma janela: a extensão clica em candidatar, preenche o formulário e envia. Ela só para se o site pedir login ou uma resposta que ela não sabe.',
+      { ms: 8000 }
+    );
+  },
+  allowSites: () => allowSites(),
+  retryLogin: async () => {
+    const res = await call('apply:retryLogin', {});
+    toast(res?.queued ? `${res.queued} candidatura(s) de volta à fila.` : 'Nenhuma candidatura esperando login.');
+  },
+  scanReset: async () => {
+    if (!confirm('Buscar do zero?\n\nApaga as vagas em aberto (Para revisar e Candidatar no site), esquece os anúncios já lidos e busca de novo. As candidaturas enviadas e as arquivadas ficam.')) return;
+    const res = await call('scan:reset');
+    if (!res?.ok) return toast(res?.error || 'Não deu.', { bad: true, ms: 7000 });
+    toast(`${res.removed} vaga(s) apagada(s). Buscando de novo…`, { ms: 6000 });
+  },
+  answerPending: async () => {
+    const j = S.jobs.get(S.sel);
+    const asked = j?.applyQuestions || [];
+    const pairs = asked.map((q, i) => ({ label: q.label, value: $(`[data-ans="${i}"]`)?.value.trim() })).filter((p) => p.value);
+    if (!pairs.length) return toast('Responda pelo menos uma pergunta.', { bad: true });
+    const res = await call('apply:answer', { pairs });
+    if (!res?.ok) return toast(res?.error || 'Não consegui salvar.', { bad: true });
+    toast(
+      res.queued
+        ? `Respostas salvas ✓ ${res.queued > 1 ? `${res.queued} candidaturas voltaram` : 'A candidatura voltou'} para a fila.`
+        : pairs.length < asked.length
+          ? 'Respostas salvas ✓ Responda todas para a candidatura continuar.'
+          : 'Respostas salvas ✓',
+      { ms: 7000 }
+    );
+  },
+  fixAi: async () => {
+    const j = S.jobs.get(S.sel);
+    const pairs = (j?.applyAi || [])
+      .map((x, i) => ({ label: x.q, value: $(`[data-fix="${i}"]`)?.value.trim(), was: x.a }))
+      .filter((p) => p.value && p.value !== p.was)
+      .map(({ label, value }) => ({ label, value }));
+    if (!pairs.length) return toast('Nenhuma resposta mudou.');
+    await call('apply:learn', { pairs });
+    toast(`${pairs.length} resposta(s) salva(s) como suas ✓ Valem a partir da próxima candidatura.`, { ms: 7000 });
   },
   bulkApply: async () => {
-    const ids = (S.checked.size ? visible().filter((j) => S.checked.has(j.id)) : visible()).filter(canApply).map((j) => j.id);
+    let jobs = (S.checked.size ? visible().filter((j) => S.checked.has(j.id)) : visible()).filter(canApply);
+    if (jobs.some((j) => !linkedinJob(j)) && !(await allowSites())) jobs = jobs.filter(linkedinJob);
+    const ids = jobs.map((j) => j.id);
     S.checked.clear();
+    if (!ids.length) return;
     await call('apply:start', { ids });
-    toast(`${ids.length} candidatura(s) na fila: a janela do LinkedIn abre e preenche uma por vez.`, { ms: 12000, action: 'Parar', onAction: () => call('apply:stop') });
+    toast(`${ids.length} candidatura(s) na fila: uma janela abre e preenche uma por vez. As que pararem em login ou pergunta ficam marcadas na lista.`, { ms: 12000, action: 'Parar', onAction: () => call('apply:stop') });
     render('list');
   },
   bulkDiscard: () => discard([...S.checked]),
@@ -864,24 +982,33 @@ $('#clearArchive').addEventListener('click', async () => {
   toast(`${ids.length} vaga(s) apagada(s).`);
 });
 $('#wipe').addEventListener('click', async () => {
-  if (!confirm('Apagar TODAS as vagas e candidaturas? Isso não pode ser desfeito.')) return;
+  if (!confirm('Apagar TODAS as vagas e candidaturas? Isso não pode ser desfeito. A próxima busca lê todos os anúncios de novo.')) return;
   await call('jobs:wipe');
   toast('Tudo apagado.');
 });
+// The autopilot and the applications outside LinkedIn need the permission for the sites: asked on the click.
+$('[data-key="applyAuto"]').addEventListener('change', (e) => e.target.checked && allowSites().then(renderSites));
+function renderSites() {
+  $('#sitesNote').innerHTML = S.sites
+    ? '✓ A extensão pode agir nos sites das vagas (só nas janelas que ela mesma abre).'
+    : 'Fora do LinkedIn, a extensão precisa de permissão para agir nos sites das vagas: <button type="button" id="allowSitesBtn" class="ghost">permitir</button>. Ela só age nas janelas que ela mesma abre, nunca nas suas abas.';
+  $('#allowSitesBtn')?.addEventListener('click', () => allowSites().then(renderSites));
+}
 
 // ---------- storage sync ----------
 // Questions that stopped an application on a job website, and the answers the user has already saved.
 async function renderApply() {
   const { applyPending = [] } = await chrome.storage.local.get('applyPending');
-  const field = (p, i) =>
-    p.options?.length
-      ? `<select data-pending="${i}"><option value="">Escolha…</option>${p.options.filter((o) => !/^(selecion|select|escolh|choose)/i.test(o.trim())).map((o) => `<option>${esc(o)}</option>`).join('')}</select>`
-      : `<input data-pending="${i}" placeholder="Sua resposta">`;
   $('#applyPending').innerHTML = applyPending.length
     ? `<div class="alert ask"><b>${applyPending.length} pergunta(s) esperando a sua resposta</b>
-        ${applyPending.map((p, i) => `<label>${esc(p.label)} <span class="muted">${p.job ? '— ' + esc(p.job) : ''}</span>${field(p, i)}</label>`).join('')}
-        <span class="row"><button type="button" class="primary" id="applySave">Salvar respostas</button><span class="muted">Depois é só clicar em Candidatar de novo nas vagas que pararam.</span></span></div>`
+        ${applyPending.map((p, i) => `<label>${esc(p.label)} <span class="muted">${p.job ? '— ' + esc(p.job) : ''}</span>${answerField(p, `data-pending="${i}"`)}</label>`).join('')}
+        <span class="row"><button type="button" class="primary" id="applySave">Salvar respostas</button><span class="muted">As vagas do LinkedIn que pararam nessas perguntas voltam sozinhas para a fila.</span></span></div>`
     : '';
+  $('#applyAiNote').textContent = aiAnswersOn()
+    ? `IA ligada (${providerOf(S.settings).label}): ela responde pelo seu currículo as perguntas que as respostas abaixo não cobrem, e só confirma o que o currículo comprova.`
+    : aiKey(S.settings)
+      ? 'A IA está desligada para as perguntas: a candidatura para em toda pergunta que você ainda não respondeu.'
+      : 'Sem IA (passo 1), a candidatura para em toda pergunta que você ainda não respondeu. Com uma chave (o Groq tem cota gratuita), a IA responde pelo seu currículo.';
   const saved = Object.entries(S.settings.applyAnswers || {});
   $('#applyAnswersTitle').textContent = `Respostas salvas (${saved.length})`;
   $('#applyAnswers').innerHTML = saved.length
@@ -891,15 +1018,10 @@ async function renderApply() {
 $('#applyPending').addEventListener('click', async (e) => {
   if (e.target.id !== 'applySave') return;
   const { applyPending = [] } = await chrome.storage.local.get('applyPending');
-  const applyAnswers = { ...S.settings.applyAnswers };
-  const left = applyPending.filter((p, i) => {
-    const value = $(`[data-pending="${i}"]`)?.value.trim();
-    if (value) applyAnswers[p.key] = value;
-    return !value;
-  });
-  await setSettings({ applyAnswers });
-  await chrome.storage.local.set({ applyPending: left });
-  toast('Respostas salvas ✓');
+  const pairs = applyPending.map((p, i) => ({ label: p.label, value: $(`[data-pending="${i}"]`)?.value.trim() })).filter((p) => p.value);
+  if (!pairs.length) return toast('Responda pelo menos uma pergunta.', { bad: true });
+  const res = await call('apply:answer', { pairs });
+  toast(res?.queued ? `Respostas salvas ✓ ${res.queued} candidatura(s) de volta à fila.` : 'Respostas salvas ✓');
 });
 $('#applyAnswers').addEventListener('click', async (e) => {
   const q = e.target.dataset.forget;
@@ -943,6 +1065,8 @@ else if (background.updatedFrom) {
 }
 
 S.settings = await getSettings();
+S.sites = await (chrome.permissions?.contains(SITES) ?? Promise.resolve(false)).catch(() => false);
+renderSites();
 S.scan = (await chrome.storage.local.get('scan')).scan || {};
 for (const j of await getJobs()) S.jobs.set(j.id, j);
 await loadMeta();

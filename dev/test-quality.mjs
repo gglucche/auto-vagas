@@ -231,6 +231,45 @@ replies = [answer({ ...goodText, body: 'Hello,\n\n' + 'I am interested in this r
 got = await writeApplication({ ...settings, openaiModel: 'modelo-f' }, job, null, strong);
 check('e-mail no idioma errado mesmo depois da correção: fica vazio (vai o modelo de e-mail do usuário), com aviso', got.body === '' && /modelo de e-mail/.test(got.warnings.join()), JSON.stringify(got.warnings));
 
+// ---------- 5) the AI's answers to the questions of an application form ----------
+const { acceptAnswers } = await mod('lib/ai.js');
+const formBase = `Fulana de Souza
+fulana@exemplo.example · Campinas, SP
+# Experiência
+Desenvolvedora Oracle APEX — Empresa Alfa (03/2018 – atual)
+- Aplicações em Oracle APEX e PL/SQL
+- Integrações REST com JavaScript e jQuery
+# Formação
+- Bacharelado em Sistemas de Informação — Unicamp (2015)`;
+const formData = 'Nome: Fulana de Souza\nPretensão salarial: 12000\nRespostas que a pessoa já deu em outras candidaturas:\n- voce aceita contratacao pj → Sim';
+const form = (label, kind, options, r) => ({ q: { label, kind, options }, r });
+const formCases = [
+  // [question, the model's answer, what must come out]
+  [form('Você possui certificação Oracle Cloud?', 'radio', ['Sim', 'Não'], { fonte: 'curriculo', resposta: 'Não', evidencia: '' }), 'Não'],
+  [form('Há quantos anos você usa Kubernetes no trabalho?', 'number', null, { fonte: 'curriculo', resposta: '0 anos', evidencia: '' }), '0'],
+  [form('Há quantos anos você usa Kubernetes?', 'number', null, { fonte: 'curriculo', resposta: '3', evidencia: 'Kubernetes em produção' }), null],
+  [form('Você tem experiência com JavaScript?', 'radio', ['Sim', 'Não'], { fonte: 'curriculo', resposta: 'Não', evidencia: '' }), null],
+  [form('Você possui CNH categoria B?', 'radio', ['Sim', 'Não'], { fonte: 'curriculo', resposta: 'Não', evidencia: '' }), null],
+  [form('Aceita trabalhar como PJ?', 'radio', ['Selecionar opção', 'Yes', 'No'], { fonte: 'dados', resposta: 'Sim', evidencia: 'voce aceita contratacao pj → Sim' }), 'Yes'],
+  [form('Aceita trabalhar como PJ? (2)', 'radio', ['Yes', 'No'], { fonte: 'dados', resposta: 'Sim', evidencia: 'aceito PJ' }), null],
+  [form('Você tem experiência com Kubernetes?', 'radio', ['Sim', 'Não'], { fonte: 'curriculo', resposta: 'Sim', evidencia: 'Integrações REST com JavaScript e jQuery' }), null],
+  [form('Você tem graduação completa?', 'radio', ['Sim', 'Não'], { fonte: 'curriculo', resposta: 'Sim', evidencia: 'Bacharelado em Sistemas de Informação — Unicamp (2015)' }), 'Sim'],
+  [form('Qual a sua pretensão para CLT?', 'text', null, { fonte: 'nao_sei', resposta: '', evidencia: '' }), null],
+  [form('Qual o seu cargo atual?', 'text', null, { fonte: 'curriculo', resposta: '**Desenvolvedora Oracle APEX**', evidencia: 'Desenvolvedora Oracle APEX — Empresa Alfa' }), 'Desenvolvedora Oracle APEX'],
+  [form('Fale sobre a sua experiência', 'textarea', null, { fonte: 'curriculo', resposta: 'Desde 2018 desenvolvo em Oracle APEX e Kafka, com 40% menos retrabalho.', evidencia: 'Aplicações em Oracle APEX e PL/SQL' }), null],
+  [form('Fale sobre você', 'textarea', null, { fonte: 'curriculo', resposta: 'Olá, sou [seu nome] e trabalho com Oracle APEX.', evidencia: 'Aplicações em Oracle APEX e PL/SQL' }), null],
+  [form('Qual seu nível em Oracle APEX?', 'select', ['Básico', 'Intermediário', 'Avançado'], { fonte: 'curriculo', resposta: 'Expert', evidencia: 'Aplicações em Oracle APEX e PL/SQL' }), null],
+];
+const formOut = { respostas: formCases.map(([c], i) => ({ n: i + 1, ...c.r })) };
+const formGot = acceptAnswers(formCases.map(([c]) => c.q), formOut, { base: formBase, dados: formData, job: { title: 'Dev APEX', company: 'Beta' } });
+const formWrong = formCases.filter(([c, want], i) => (formGot[i]?.value ?? null) !== want).map(([c], i) => `${c.q.label} → ${JSON.stringify(formGot[formCases.findIndex(([x]) => x === c)])}`);
+check('respostas da IA no formulário: “não” e 0 só sobre experiência e formação que o currículo não mostra; “sim” só com trecho real e a tecnologia no currículo; dados só da pessoa; texto sem invenção nem campo a preencher; opção que não existe fica de fora',
+  !formWrong.length, formWrong.join(' | '));
+const longText = acceptAnswers([{ label: 'Resumo', kind: 'textarea', max: 60 }], { respostas: [{ n: 1, fonte: 'curriculo', resposta: 'Desenvolvo aplicações em Oracle APEX e PL/SQL. Faço integrações REST com JavaScript e jQuery.', evidencia: 'Aplicações em Oracle APEX e PL/SQL' }] }, { base: formBase })[0];
+check('texto maior que o campo: cortado no fim de uma frase', longText?.value === 'Desenvolvo aplicações em Oracle APEX e PL/SQL.', JSON.stringify(longText));
+const unnumbered = acceptAnswers([{ label: 'Você tem graduação completa?', kind: 'radio', options: ['Sim', 'Não'] }], { respostas: [{ n: 0, fonte: 'curriculo', resposta: 'sim', evidencia: 'Bacharelado em Sistemas de Informação' }] }, { base: formBase })[0];
+check('modelo que não numera as respostas: vale a ordem', unnumbered?.value === 'Sim', JSON.stringify(unnumbered));
+
 const failed = results.filter((x) => !x).length;
 console.log(`\n${results.length - failed} de ${results.length} verificações passaram.`);
 process.exit(failed ? 1 : 0);

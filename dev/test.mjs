@@ -19,22 +19,21 @@ const ev = () => {
   const fns = [];
   return { addListener: (f) => fns.push(f), fns };
 };
-const onMessage = ev(), onInstalled = ev(), onAlarm = ev();
+const onMessage = ev(), onInstalled = ev(), onAlarm = ev(), onTabCreated = ev(), onTabUpdated = ev(), onTabRemoved = ev();
 const calls = { notifications: [], badge: [], tabsCreated: [], windows: 0 };
 const clone = (v) => (v === undefined ? v : JSON.parse(JSON.stringify(v)));
-globalThis.chrome = {
-  storage: {
-    local: {
-      async get(q) {
-        const keys = q == null ? Object.keys(data) : typeof q === 'string' ? [q] : Array.isArray(q) ? q : Object.keys(q);
-        return Object.fromEntries(keys.filter((k) => k in data).map((k) => [k, clone(data[k])]));
-      },
-      async getKeys() { return Object.keys(data); },
-      async set(o) { for (const [k, v] of Object.entries(o)) data[k] = clone(v); },
-      async remove(k) { for (const key of [].concat(k)) delete data[key]; },
-    },
-    onChanged: ev(),
+const area = (store) => ({
+  async get(q) {
+    const keys = q == null ? Object.keys(store) : typeof q === 'string' ? [q] : Array.isArray(q) ? q : Object.keys(q);
+    return Object.fromEntries(keys.filter((k) => k in store).map((k) => [k, clone(store[k])]));
   },
+  async getKeys() { return Object.keys(store); },
+  async set(o) { for (const [k, v] of Object.entries(o)) store[k] = clone(v); },
+  async remove(k) { for (const key of [].concat(k)) delete store[key]; },
+});
+const session = {};
+globalThis.chrome = {
+  storage: { local: area(data), session: area(session), onChanged: ev() },
   runtime: { getURL: (p) => 'chrome-extension://teste/' + p, onInstalled, onStartup: ev(), onMessage, openOptionsPage: async () => {} },
   alarms: { create() {}, clear: async () => true, onAlarm },
   action: { setBadgeText: (o) => calls.badge.push(o.text), setBadgeBackgroundColor() {} },
@@ -45,9 +44,11 @@ globalThis.chrome = {
     update: async () => {},
     get: async () => ({ status: 'complete' }),
     sendMessage: async () => ({ ok: true, count: 0 }),
+    onCreated: onTabCreated, onUpdated: onTabUpdated, onRemoved: onTabRemoved,
   },
   windows: { create: async () => ({ id: ++calls.windows, tabs: [{ id: 1 }] }), remove: async () => {}, update: async () => {}, getLastFocused: async () => ({ id: 99 }) },
   i18n: { getUILanguage: () => 'pt-BR' },
+  permissions: { contains: async () => true, request: async () => true },
   identity: {
     getRedirectURL: () => 'https://teste.chromiumapp.org/',
     launchWebAuthFlow: async (o) => {
@@ -99,7 +100,18 @@ const aiAnswerDirty = {
 };
 const aiTask = (body) => {
   const system = body.messages[0].content;
-  return /recrutador experiente/.test(system) ? 'eval' : /escreve a candidatura/.test(system) ? 'write' : /extrai dados/.test(system) ? 'profile' : 'probe';
+  return /recrutador experiente/.test(system) ? 'eval' : /escreve a candidatura/.test(system) ? 'write' : /extrai dados/.test(system) ? 'profile' : /formulário de candidatura/.test(system) ? 'form' : 'probe';
+};
+// What a model answers to the questions of an application form, by question. Two of them must not get through: years
+// with a technology "proven" by an excerpt that isn't in the resume, and a "no" that is only a guess.
+const no = (fonte = 'curriculo') => ({ fonte, resposta: 'Não', evidencia: '' });
+const aiForm = {
+  'Você possui certificação AWS?': no(),
+  'Você tem experiência com jQuery?': { fonte: 'curriculo', resposta: 'Sim', evidencia: 'JavaScript, jQuery' },
+  'Há quantos anos você usa Kubernetes?': { fonte: 'curriculo', resposta: '4', evidencia: 'Kubernetes em produção' },
+  'Você aceita trabalhar presencialmente em Curitiba?': no(),
+  'Qual a sua pretensão salarial para PJ?': { fonte: 'nao_sei', resposta: '', evidencia: '' },
+  'Conte por que você quer trabalhar conosco': { fonte: 'curriculo', resposta: 'Trabalho com Oracle APEX e PL/SQL, com JavaScript e jQuery nas telas, e quero levar essa experiência ao time.', evidencia: 'Desenvolvedor Oracle APEX com experiência em PL/SQL' },
 };
 // The AI provider's catalog as the free key sees it: not everything listed can be used.
 const catalog = [
@@ -140,10 +152,10 @@ globalThis.fetch = async (url, init) => {
       <span class="description__job-criteria-text">Pleno-sênior</span><span class="description__job-criteria-text">Tempo integral</span>`);
   }
   // job sites queried directly (lib/sources.js): small responses, in each site's real format
-  if (/^https:\/\/(portal\.gupy\.io|www\.infojobs\.com\.br|www\.vagas\.com\.br|api\.remotar\.com\.br|himalayas\.app)\//.test(url)) {
+  if (/^https:\/\/(portal\.gupy\.io|www\.infojobs\.com\.br|www\.vagas\.com\.br|api\.remotar\.com\.br|himalayas\.app|remotive\.com|jobicy\.com)\//.test(url)) {
     const u = new URL(url);
     const page = (text) => ({ ok: true, status: 200, headers: { get: () => null }, text: async () => text });
-    const term = decodeURIComponent(u.pathname.split('term=')[1] || u.searchParams.get('palabra') || u.searchParams.get('search') || u.searchParams.get('q') || u.pathname);
+    const term = decodeURIComponent(u.pathname.split('term=')[1] || u.searchParams.get('palabra') || u.searchParams.get('search') || u.searchParams.get('tag') || u.searchParams.get('q') || u.pathname);
     const apex = /apex/i.test(term);
     const recent = new Date(Date.now() - 3 * 86400e3).toISOString();
     const posting = (o) => `<html><script type="application/ld+json">${JSON.stringify({ '@context': 'http://schema.org', '@type': 'JobPosting', datePosted: recent, ...o })}</script></html>`;
@@ -172,6 +184,15 @@ globalThis.fetch = async (url, init) => {
         { id: 5, title: 'Pessoa Desenvolvedora Oracle APEX Sênior', subtitle: 'APEX, PL/SQL e REST', description: '<p>Aplicações em Oracle APEX.</p>', company: { name: 'Remota Tech' }, createdAt: recent, type: 'remote', jobTags: [{ tag: { name: '100% Remoto' } }] },
         { id: 6, title: 'Analista de BI Pl', description: '<p>Power BI e SQL.</p>', company: { name: 'Riachuelo' }, createdAt: recent, type: 'remote' },
       ] : [] }));
+    if (u.hostname === 'remotive.com')
+      return page(JSON.stringify({ jobs: apex ? [
+        { id: 1, title: 'Oracle APEX Engineer', company_name: 'Remote Ltd', candidate_required_location: 'Worldwide', url: 'https://remotive.com/remote-jobs/software-dev/oracle-apex-engineer-1', description: '<p>Oracle APEX and PL/SQL, fully remote, any country.</p>', publication_date: recent, salary: '$80k', tags: ['oracle'] },
+        { id: 2, title: 'APEX Developer', company_name: 'US Only Co', candidate_required_location: 'USA', url: 'https://remotive.com/remote-jobs/software-dev/apex-developer-2', description: '<p>Oracle APEX, US residents only.</p>', publication_date: recent },
+      ] : [] }));
+    if (u.hostname === 'jobicy.com')
+      return page(JSON.stringify({ jobs: apex ? [
+        { id: 3, jobTitle: 'Oracle APEX Specialist', companyName: 'Jobi Co', jobGeo: 'LATAM', url: 'https://jobicy.com/jobs/3-oracle-apex-specialist', jobDescription: '<p>Oracle APEX and PL/SQL for a fintech, remote in Latin America.</p>', pubDate: recent, jobLevel: 'Senior' },
+      ] : [] }));
     return page(JSON.stringify({ jobs: apex ? [
       { title: 'Oracle APEX Developer', companyName: 'CACI', locationRestrictions: ['United States'], description: '<p>Oracle APEX and PL/SQL, fully remote.</p>', pubDate: Math.round(Date.now() / 1000) - 86400, applicationLink: 'https://himalayas.app/companies/caci/jobs/1' },
       { title: 'Senior Oracle APEX Engineer', companyName: 'Remote Co', locationRestrictions: ['Brazil', 'Argentina'], description: '<p>Oracle APEX, remote.</p>', pubDate: Math.round(Date.now() / 1000) - 86400, applicationLink: 'https://himalayas.app/companies/remote-co/jobs/2' },
@@ -197,6 +218,10 @@ globalThis.fetch = async (url, init) => {
     if (task === 'eval') {
       await net.onEval?.(ad);
       return reply(200, { choices: [{ message: { content: '```json\n' + JSON.stringify(/Spark/.test(ad) ? aiEvalLow : aiEval) + '\n```' } }] });
+    }
+    if (task === 'form') {
+      const asked = [...ad.matchAll(/^(\d+)\. "(.+)" — /gm)].map((m) => [Number(m[1]), m[2]]);
+      return reply(200, { choices: [{ message: { content: JSON.stringify({ respostas: asked.map(([n, q]) => ({ n, ...(aiForm[q] || { fonte: 'nao_sei', resposta: '', evidencia: '' }) })) }) } }] });
     }
     if (task === 'write') {
       const fixing = body.messages.length > 2; // the correction round
@@ -256,7 +281,7 @@ const postJob = (n, email) => ({
 });
 
 // ---------- scenario ----------
-await mod('background.js');
+const background = await mod('background.js');
 await onInstalled.fns[0]({ reason: 'install' });
 await sleep(50);
 check('instalação abre o painel', calls.tabsCreated.some((u) => u.endsWith('ui/dashboard.html')));
@@ -560,16 +585,19 @@ check('LinkedIn pela busca pública: lê as páginas até o máximo por termo, s
 const firstSearch = liSearches()[0];
 check('o lugar vira o código de região do LinkedIn, a primeira busca olha 30 dias e leva o filtro de remoto',
   firstSearch?.params.get('geoId') === '106057199' && firstSearch.params.get('f_TPR') === 'r2592000' && firstSearch.params.get('f_WT') === '2' && firstSearch.params.get('keywords') === 'Oracle APEX', String(firstSearch?.params));
-check('cada termo é buscado em cada site (2 termos, 6 fontes)',
-  ['portal.gupy.io', 'api.remotar.com.br', 'himalayas.app'].every((h) => boardCalls(h).length === 2) && boardCalls('www.infojobs.com.br').filter((c) => c.path.includes('empregos')).length === 2 &&
+check('cada termo é buscado em cada site (2 termos, 8 fontes)',
+  ['portal.gupy.io', 'api.remotar.com.br', 'himalayas.app', 'remotive.com', 'jobicy.com'].every((h) => boardCalls(h).length === 2) && boardCalls('www.infojobs.com.br').filter((c) => c.path.includes('empregos')).length === 2 &&
     boardCalls('www.vagas.com.br').filter((c) => c.path.includes('vagas-de-')).map((c) => c.path).join() === '/vagas-de-oracle-apex,/vagas-de-pl-sql' && liSearches().some((c) => c.params.get('keywords') === 'PL/SQL'),
   JSON.stringify(net.boards.map((c) => c.host + c.path)));
 check('nenhuma consulta leva os cookies das contas do usuário', [...net.li, ...net.boards].every((c) => c.init.credentials === 'omit'));
-check('entram as vagas de cada site que citam o termo: Gupy ou Vagas.com (a mesma vaga), InfoJobs, Remotar e Himalayas',
-  bySource('gupy').length + bySource('vagas').length === 1 && bySource('infojobs').length === 1 && bySource('remotar').length === 1 && bySource('himalayas').length === 1,
+check('entram as vagas de cada site que citam o termo: Gupy ou Vagas.com (a mesma vaga), InfoJobs, Remotar, Himalayas, Remotive e Jobicy',
+  bySource('gupy').length + bySource('vagas').length === 1 && bySource('infojobs').length === 1 && bySource('remotar').length === 1 && bySource('himalayas').length === 1 && bySource('remotive').length === 1 && bySource('jobicy').length === 1,
   JSON.stringify(jobs().filter((j) => !['linkedin_jobs', 'linkedin_post', 'google_jobs'].includes(j.source)).map((j) => `${j.source}: ${j.title} — ${j.company}`)));
 check('ficam de fora: presencial (busca só remota), anúncio antigo, vaga sem a tecnologia e vaga restrita a outro país',
-  !jobs().some((j) => ['Fábrica', 'Velha', 'Loja', 'Riachuelo', 'CACI'].includes(j.company)), JSON.stringify(jobs().map((j) => j.company)));
+  !jobs().some((j) => ['Fábrica', 'Velha', 'Loja', 'Riachuelo', 'CACI', 'US Only Co'].includes(j.company)), JSON.stringify(jobs().map((j) => j.company)));
+check('vaga de fora (site internacional ou anúncio em inglês) leva a etiqueta Internacional; a brasileira não',
+  bySource('remotive')[0]?.tags[0] === 'Internacional' && bySource('himalayas')[0]?.tags[0] === 'Internacional' && !bySource('remotar')[0]?.tags.includes('Internacional') && !bySource('infojobs')[0]?.tags.includes('Internacional'),
+  JSON.stringify([bySource('remotive')[0]?.tags, bySource('remotar')[0]?.tags]));
 const mailed = bySource('infojobs')[0];
 check('anúncio com e-mail na descrição fica pronto para revisão; os demais vão para “candidatar no site”',
   mailed?.status === 'pronto' && mailed.email === 'selecao@infoempresa.example' && mailed.company === 'Info Empresa' && mailed.location === 'Campinas, SP' && bySource('remotar')[0].status === 'sem_email' &&
@@ -578,7 +606,7 @@ const liJob = bySource('linkedin_jobs').find((j) => j.url.endsWith('/1002/'));
 check('descrição vem completa, em texto, com os itens da lista e os critérios da vaga',
   liJob?.description.includes('Oracle APEX e PL/SQL & JavaScript') && liJob.description.includes('- Requisito: Git') && liJob.description.includes('Pleno-sênior · Tempo integral') && liJob.keyword === 'Oracle APEX', JSON.stringify(liJob?.description));
 check('o registro resume a busca: tempo, termos, região e quantas cada site leu e trouxe de novo',
-  /^Busca em \d+ s — 2 termo\(s\), Brasil: LinkedIn 24 lida\(s\), 12 nova\(s\) · Gupy 4 lida\(s\), [01] nova\(s\) · InfoJobs 1 lida\(s\), 1 nova\(s\) · Vagas\.com 1 lida\(s\), [01] nova\(s\) · Remotar 2 lida\(s\), 1 nova\(s\) · Himalayas 1 lida\(s\), 1 nova\(s\)\.$/.test(data.log.find((l) => l.msg.startsWith('Busca em'))?.msg || ''),
+  /^Busca em \d+ s — 2 termo\(s\), Brasil: LinkedIn 24 lida\(s\), 12 nova\(s\) · Gupy 4 lida\(s\), [01] nova\(s\) · InfoJobs 1 lida\(s\), 1 nova\(s\) · Vagas\.com 1 lida\(s\), [01] nova\(s\) · Remotar 2 lida\(s\), 1 nova\(s\) · Himalayas 1 lida\(s\), 1 nova\(s\) · Remotive 1 lida\(s\), 1 nova\(s\) · Jobicy 1 lida\(s\), 1 nova\(s\)\.$/.test(data.log.find((l) => l.msg.startsWith('Busca em'))?.msg || ''),
   data.log.find((l) => l.msg.startsWith('Busca em'))?.msg);
 
 const [searchesBefore, detailsBefore, boardDetails] = [liSearches().length, liDetails().length, net.boards.filter((c) => /vaga-de-|\/vagas\/v/.test(c.path)).length];
@@ -639,12 +667,23 @@ check('respostas: aceita termo obrigatório, não segue a empresa, usa a pretens
 
 // 22) website application queue (the LinkedIn page is simulated: it returns what the form would)
 const site = { runs: [], url: 'https://www.linkedin.com/jobs/view/1/', answer: () => ({ status: 'enviada' }) };
-chrome.scripting = { executeScript: async () => [] };
-chrome.tabs.get = async () => ({ status: 'complete', url: site.url });
-chrome.tabs.sendMessage = async (_tab, msg) => (msg.type === 'apply:run' ? (site.runs.push(msg), site.answer(msg)) : { ok: true, count: 0 });
+// what the page's probes answer (frameProbe, sentProbe, loginProbe run in the page through executeScript)
+Object.assign(site, { sent: false, loginPage: true, injected: [] });
+chrome.scripting = {
+  executeScript: async (o) => {
+    site.injected.push(o);
+    if (!o.func) return [];
+    if (o.func.name === 'frameProbe') return [{ frameId: 0, result: { fields: 0, file: false, password: false, apply: true } }];
+    if (o.func.name === 'sentProbe') return [{ frameId: 0, result: site.sent }];
+    if (o.func.name === 'loginProbe') return [{ frameId: 0, result: site.loginPage }];
+    return [];
+  },
+};
+chrome.tabs.get = async (id) => ({ id, status: 'complete', url: site.url });
+chrome.tabs.sendMessage = async (tab, msg) => (msg.type === 'apply:run' ? (site.runs.push({ ...msg, tab }), site.answer(msg)) : { ok: true, count: 0 });
 const job = (id) => jobs().find((j) => j.id === id);
 const easy = bySource('linkedin_jobs').filter((j) => j.status === 'sem_email');
-data.settings = { ...data.settings, phone: '19 99999-8888', applyDailyLimit: 2, applyReview: false };
+data.settings = { ...data.settings, phone: '19 99999-8888', applyDailyLimit: 2, applyReview: false, aiAnswers: false }; // the AI comes in at 23
 const winsApply = calls.windows;
 r = await send({ type: 'apply:start', ids: [easy[0].id] });
 await until(() => job(easy[0].id).status === 'enviado', 15000);
@@ -659,7 +698,7 @@ site.answer = () => ({ status: 'pendente', questions: [{ label: 'Você possui ce
 await send({ type: 'apply:start', ids: [easy[1].id] });
 await until(() => job(easy[1].id).applyState === 'pendente', 15000);
 check('pergunta sem resposta: a candidatura para, a vaga explica o que falta e a pergunta vai para o painel',
-  job(easy[1].id).status === 'sem_email' && /Falta responder: “Você possui certificação Oracle Cloud\?”/.test(job(easy[1].id).error) && data.applyPending?.[0]?.options?.join() === 'Sim,Não' && data.applyLog.count === 1,
+  job(easy[1].id).status === 'sem_email' && /falta responder “Você possui certificação Oracle Cloud\?”/.test(job(easy[1].id).error) && data.applyPending?.[0]?.options?.join() === 'Sim,Não' && data.applyLog.count === 1,
   JSON.stringify([job(easy[1].id).applyState, job(easy[1].id).error, data.applyPending]));
 await send({ type: 'apply:learn', pairs: [{ label: 'Você possui certificação Oracle Cloud? *', value: 'Não' }] });
 check('resposta dada pelo usuário é guardada e a pergunta sai da lista de pendentes',
@@ -682,10 +721,199 @@ await until(() => (data.applyQueue || []).length === 0, 15000);
 check('sem login no LinkedIn: a fila é esvaziada, a vaga diz o que fazer e nada fica tentando de novo',
   /faça login no LinkedIn/.test(job(easy[2].id).error) && !job(easy[2].id).applyState && /pausadas/.test(data.log[0].msg), JSON.stringify([job(easy[2].id).error, data.log[0].msg]));
 site.url = 'https://www.linkedin.com/jobs/view/1/';
-site.answer = () => ({ status: 'externa' });
+// no Easy Apply: the application goes on through the job's "Candidatar-se" (the company's site); here the page finds nothing
+site.answer = (m) => (m.mode === 'easy' ? { status: 'externa' } : { status: 'erro', error: 'não achei o botão de candidatura nem um formulário nesta página' });
 await send({ type: 'apply:start', ids: [easy[2].id] });
-await until(() => job(easy[2].id).easyApply === false, 15000);
-check('vaga sem candidatura simplificada: fica marcada para candidatura no site da empresa', job(easy[2].id).easyApply === false && job(easy[2].id).status === 'sem_email' && /site da empresa/.test(job(easy[2].id).error));
+await until(() => job(easy[2].id).easyApply === false && /não achei/.test(job(easy[2].id).error || ''), 15000);
+check('vaga sem candidatura simplificada: fica marcada assim e a candidatura segue pelo site da vaga (aqui, sem botão: a vaga explica)',
+  job(easy[2].id).easyApply === false && job(easy[2].id).status === 'sem_email' && /não achei o botão/.test(job(easy[2].id).error) && site.runs.at(-1).mode === 'site' && site.runs.at(-2).mode === 'easy',
+  JSON.stringify([job(easy[2].id).easyApply, job(easy[2].id).error, site.runs.slice(-2).map((x) => x.mode)]));
+site.answer = () => ({ status: 'enviada' });
+
+// 23) with an AI key, the AI answers what the user's answers don't cover, from the resume; what only the user knows
+// (salary, moving, a "no" that would be a guess) and what the resume doesn't prove stay with the user
+data.settings = { ...data.settings, aiAnswers: true };
+const formQs = [
+  { label: 'Celular', kind: 'text', required: true },
+  { label: 'Você possui certificação AWS?', kind: 'radio', options: ['Sim', 'Não'], required: true },
+  { label: 'Você tem experiência com jQuery?', kind: 'radio', options: ['Yes', 'No'], required: true },
+  { label: 'Há quantos anos você usa Kubernetes?', kind: 'number', required: true },
+  { label: 'Você aceita trabalhar presencialmente em Curitiba?', kind: 'radio', options: ['Sim', 'Não'], required: true },
+  { label: 'Qual a sua pretensão salarial para PJ?', kind: 'text', required: true },
+  { label: 'Conte por que você quer trabalhar conosco', kind: 'textarea', required: false, max: 300 },
+  { label: 'Seu CPF', kind: 'text', required: true },
+];
+const formJob = easy[3];
+let formCalls = net.ai.length;
+r = await send({ type: 'apply:answers', jobId: formJob.id, questions: formQs });
+const formCall = net.ai.slice(formCalls).find((c) => c.task === 'form');
+const formAsked = formCall ? JSON.parse(formCall.init.body).messages[1].content : '';
+check('IA no formulário: responde pelo currículo o “sim” comprovado, o “não” de certificação e o texto livre; mantém o que o usuário já respondeu',
+  r?.answers?.[0] === '19999998888' && r.answers[1] === 'Não' && r.answers[2] === 'Yes' && /^Trabalho com Oracle APEX/.test(r.answers[6] || ''),
+  JSON.stringify(r?.answers));
+check('IA no formulário: anos “comprovados” por trecho que não está no currículo, “não” que seria palpite e pretensão ficam para o usuário',
+  r?.answers?.[3] === null && r.answers[4] === null && r.answers[5] === null, JSON.stringify(r?.answers));
+check('IA no formulário: o pedido leva currículo, dados e anúncio, só as perguntas em aberto e nunca CPF ou senha',
+  formAsked.includes(resumeText) && formAsked.includes('<anuncio') && !formAsked.includes('"Celular"') && !/CPF/.test(formAsked) && /Respostas que a pessoa já deu/.test(formAsked),
+  formAsked.slice(0, 300));
+check('respostas da IA ficam na vaga, com o trecho do currículo, para o usuário conferir',
+  job(formJob.id).applyAi?.length === 3 && job(formJob.id).applyAi.find((x) => x.q.includes('jQuery'))?.why === 'JavaScript, jQuery' && job(formJob.id).applyAi.find((x) => x.q.includes('certificação'))?.absent === true,
+  JSON.stringify(job(formJob.id).applyAi));
+data.settings = { ...data.settings, aiAnswers: false };
+formCalls = net.ai.length;
+r = await send({ type: 'apply:answers', jobId: formJob.id, questions: formQs.slice(0, 3) });
+check('IA desligada para formulários: nenhuma chamada', net.ai.length === formCalls && r.answers[2] === null, JSON.stringify(r?.answers));
+data.settings = { ...data.settings, aiAnswers: true };
+
+// 24) a job that stopped on a question: answered in the dashboard, it goes back into the queue by itself
+const stuck = easy[4];
+site.answer = () => ({ status: 'pendente', questions: [{ label: 'Você aceita trabalhar presencialmente em Curitiba?', kind: 'radio', options: ['Sim', 'Não'] }] });
+await send({ type: 'apply:start', ids: [stuck.id] });
+await until(() => job(stuck.id).applyState === 'pendente', 15000);
+check('candidatura parada guarda as perguntas na vaga, para responder ali mesmo',
+  job(stuck.id).applyQuestions?.[0]?.label === 'Você aceita trabalhar presencialmente em Curitiba?' && /Responda abaixo/.test(job(stuck.id).error), JSON.stringify([job(stuck.id).applyQuestions, job(stuck.id).error]));
+site.answer = () => ({ status: 'enviada' });
+r = await send({ type: 'apply:answer', pairs: [{ label: 'Você aceita trabalhar presencialmente em Curitiba?', value: 'Não' }] });
+await until(() => job(stuck.id).status === 'enviado', 15000);
+check('respondida no painel: a resposta fica salva e a vaga volta sozinha para a fila e é enviada',
+  r?.queued === 1 && job(stuck.id).status === 'enviado' && !job(stuck.id).applyQuestions?.length && data.settings.applyAnswers[questionKey('Você aceita trabalhar presencialmente em Curitiba?')] === 'Não',
+  JSON.stringify([r, job(stuck.id).status]));
+
+// 25) autopilot: website jobs with the minimum fit are applied to without a click, once each
+for (const j of jobs()) if (j.status === 'sem_email') data['job:' + j.id].applyTriedAt = 1; // the earlier ones are out of the way
+const runsBefore = site.runs.length;
+const pilot = await send({ type: 'jobsFound', jobs: [1, 2, 3].map((n) => ({ source: 'linkedin_jobs', title: `Desenvolvedor Oracle APEX piloto ${n}`, company: `Piloto ${n}`, location: 'Remoto', url: `https://www.linkedin.com/jobs/view/90${n}/`, emails: [], easyApply: n === 3 ? false : 'sim', description: n === 2 ? 'Vaga de Spark, Hadoop, Kafka e Airflow.' : 'Vaga remota de Oracle APEX e PL/SQL com JavaScript.' })) });
+const pilots = [1, 2, 3].map((n) => jobs().find((j) => j.title.endsWith(`piloto ${n}`)));
+data.settings = { ...data.settings, applyAuto: true, minFit: 50, mode: 'template', applyDailyLimit: 50 };
+await send({ type: 'settings:changed' });
+onAlarm.fns[0]({ name: 'queue' });
+await until(() => job(pilots[0].id).status === 'enviado', 20000);
+await sleep(300);
+await until(() => job(pilots[2].id).status === 'enviado', 20000);
+check('piloto automático: candidata sozinho à vaga aderente com candidatura simplificada',
+  pilot?.added === 3 && job(pilots[0].id).status === 'enviado' && job(pilots[0].id).via === 'linkedin' && site.runs.slice(runsBefore).some((x) => x.jobId === pilots[0].id && x.batch === true && x.mode === 'easy'), JSON.stringify([pilot, job(pilots[0].id).status, job(pilots[0].id).fit]));
+check('piloto automático: a vaga sem candidatura simplificada é feita pelo site da vaga; a de baixa aderência fica',
+  job(pilots[2].id).status === 'enviado' && job(pilots[2].id).via === 'site' && site.runs.slice(runsBefore).some((x) => x.jobId === pilots[2].id && x.mode === 'site') && job(pilots[1].id).status === 'sem_email' && !job(pilots[1].id).applyTriedAt && job(pilots[1].id).fit < 50,
+  JSON.stringify([job(pilots[2].id).status, job(pilots[2].id).via, job(pilots[1].id).fit]));
+site.url = 'https://www.linkedin.com/login?session_redirect=x';
+const another = await send({ type: 'jobsFound', jobs: [{ source: 'linkedin_jobs', title: 'Desenvolvedor Oracle APEX piloto 4', company: 'Piloto 4', location: 'Remoto', url: 'https://www.linkedin.com/jobs/view/904/', emails: [], easyApply: 'sim', description: 'Vaga remota de Oracle APEX e PL/SQL com JavaScript.' }] });
+const p4 = jobs().find((j) => j.title.endsWith('piloto 4'));
+onAlarm.fns[0]({ name: 'queue' });
+await until(() => /faça login/.test(job(p4.id).error || ''), 15000);
+const runsLogin = site.runs.length;
+const windowsLogin = calls.windows;
+onAlarm.fns[0]({ name: 'queue' });
+await sleep(600);
+check('piloto automático sem login no LinkedIn: para e não reabre a janela a cada minuto',
+  another?.added === 1 && !!data.applyHold && site.runs.length === runsLogin && calls.windows === windowsLogin && !(data.applyQueue || []).length, JSON.stringify([data.applyHold, site.runs.length - runsLogin]));
+site.url = 'https://www.linkedin.com/jobs/view/1/';
+data.settings = { ...data.settings, applyAuto: false };
+
+// 26) any site: the application goes through the job page's apply button and the form that follows, across page
+// loads and a login wall; a thanks page marks the job; a page that asks for an email turns the job into an email one
+const siteJobs = () => jobs().filter((j) => j.status === 'sem_email' && !/linkedin\.com/.test(j.url));
+for (const j of siteJobs()) data['job:' + j.id].applyTriedAt = 0;
+const [w1, w2, w3, w4, w5] = siteJobs();
+site.url = w1.url;
+site.loginPage = true;
+site.sent = false;
+let calls26 = 0;
+// round 1: the page moved on (the apply button loaded the form page); round 2: a login page; after the login, round 3 sends
+site.answer = (m) => {
+  if (m.mode !== 'site') return { status: 'enviada' };
+  calls26++;
+  if (calls26 === 1) throw new Error('The message port closed before a response was received.');
+  if (calls26 === 2) {
+    setTimeout(() => Object.assign(site, { loginPage: false, url: 'https://empresa.example/vagas/1/apply' }), 300);
+    return { status: 'login' };
+  }
+  return { status: 'enviada' };
+};
+const applied26 = data.applyLog?.count || 0;
+await send({ type: 'apply:start', ids: [w1.id] });
+await until(() => job(w1.id).status === 'enviado', 20000);
+const rounds26 = site.runs.filter((x) => x.jobId === w1.id);
+check('candidatura em outro site: segue pela página que carregou depois do clique, espera o login do usuário e envia; conta no limite diário',
+  job(w1.id).status === 'enviado' && job(w1.id).via === 'site' && rounds26.length === 3 && rounds26.every((x) => x.mode === 'site') && rounds26[1].acted === true && rounds26[2].acted === false && data.applyLog.count === applied26 + 1 && data.log[0].msg.includes('no site da vaga'),
+  JSON.stringify([job(w1.id).status, job(w1.id).via, rounds26.map((x) => [x.round, x.acted]), data.applyLog, data.log[0].msg]));
+
+// the apply button opened the form in a new tab: the application goes on there
+site.url = w2.url;
+let calls26b = 0;
+site.answer = (m) => {
+  if (++calls26b === 1) {
+    setTimeout(() => onTabCreated.fns.forEach((f) => f({ id: 777, openerTabId: 1, windowId: 1 })), 300);
+    return { status: 'clicado' };
+  }
+  return { status: 'enviada' };
+};
+await send({ type: 'apply:start', ids: [w2.id] });
+await until(() => job(w2.id).status === 'enviado', 20000);
+const rounds26b = site.runs.filter((x) => x.jobId === w2.id);
+check('o botão de candidatura abriu uma aba nova: a candidatura continua nela', job(w2.id).status === 'enviado' && rounds26b.length === 2 && rounds26b[0].tab === 1 && rounds26b[1].tab === 777 && rounds26b[1].clicked === 1,
+  JSON.stringify(rounds26b.map((x) => [x.tab, x.clicked, x.round])));
+
+// a question nobody can answer: the job stops, the window stays with the helper card, and the thanks page (the user finished by hand) marks it
+site.url = w3.url;
+site.answer = () => ({ status: 'pendente', questions: [{ label: 'Você possui CNH categoria B?', kind: 'radio', options: ['Sim', 'Não'] }] });
+site.injected.length = 0;
+await send({ type: 'apply:start', ids: [w3.id] });
+await until(() => job(w3.id).applyState === 'pendente', 15000);
+await sleep(200);
+const helperIn = site.injected.filter((o) => o.files?.includes('content/helper.js')).map((o) => o.target.tabId);
+const info26 = await new Promise((resolve) => onMessage.fns[0]({ type: 'site:job' }, { tab: { id: 1 } }, resolve));
+check('pergunta sem resposta em outro site: a vaga guarda a pergunta e a janela fica aberta com o cartão, que sabe a vaga',
+  job(w3.id).applyQuestions?.[0]?.label === 'Você possui CNH categoria B?' && helperIn.includes(1) && info26?.job?.title === w3.title && info26.stopped === true, JSON.stringify([job(w3.id).applyQuestions, helperIn, info26]));
+site.sent = true; // the user finished it: the page says the application was received
+await until(() => job(w3.id).status === 'enviado', 15000);
+check('a página de agradecimento marca a vaga como enviada', job(w3.id).status === 'enviado' && job(w3.id).via === 'site', JSON.stringify([job(w3.id).status, job(w3.id).via]));
+site.sent = false;
+
+// the site asks for an application by email: the job joins the email flow
+site.url = w4.url;
+site.answer = () => ({ status: 'email', email: 'rh@empresa-quatro.example' });
+await send({ type: 'apply:start', ids: [w4.id] });
+await until(() => job(w4.id).status === 'pronto', 15000);
+check('vaga cujo site pede candidatura por e-mail: ganha o e-mail e vai para “Para revisar”, já preparada',
+  job(w4.id).status === 'pronto' && job(w4.id).email === 'rh@empresa-quatro.example' && !!job(w4.id).subject, JSON.stringify([job(w4.id).status, job(w4.id).email]));
+
+// a login wall in a batch: the user doesn't come; the jobs of that site wait with the explanation, the others go on
+site.loginPage = true;
+site.answer = (m) => (/empresa-cinco/.test(site.url) ? { status: 'login' } : { status: 'enviada' });
+data['job:' + w5.id].url = 'https://empresa-cinco.example/vagas/5';
+const w6 = { ...w5, id: 'w6extra', dupKey: 'w6extra', title: 'Outra vaga APEX', url: 'https://empresa-cinco.example/vagas/6', status: 'sem_email', applyTriedAt: 0 };
+data['job:w6extra'] = w6;
+const w7 = { ...w5, id: 'w7extra', dupKey: 'w7extra', title: 'Vaga APEX noutro site', url: 'https://empresa-sete.example/vagas/7', status: 'sem_email', applyTriedAt: 0 };
+data['job:w7extra'] = w7;
+chrome.tabs.update = async (_id, { url }) => (site.url = url);
+chrome.windows.create = async (o) => ((site.url = o.url), { id: ++calls.windows, tabs: [{ id: 1 }] });
+background.tuning.loginWait.batch = 3000; // the user doesn't come: the test can't wait minutes
+await send({ type: 'apply:start', ids: [w5.id, 'w6extra', 'w7extra'] });
+await until(() => job('w7extra').status === 'enviado', 4 * 60_000);
+check('login num lote: a extensão espera um pouco, marca as vagas daquele site como “faça login” (sem abrir o site de novo) e segue com as outras',
+  job(w5.id).applyState === 'login' && job(w5.id).loginHost === 'empresa-cinco.example' && /login de empresa-cinco\.example/.test(job(w5.id).error) && job('w6extra').applyState === 'login' && job('w7extra').status === 'enviado' && !site.runs.some((x) => x.jobId === 'w6extra'),
+  JSON.stringify([job(w5.id).applyState, job(w5.id).error, job('w6extra').applyState, job('w7extra').status]));
+site.loginPage = false;
+site.answer = () => ({ status: 'enviada' });
+r = await send({ type: 'apply:retryLogin', host: 'empresa-cinco.example' });
+await until(() => job(w5.id).status === 'enviado' && job('w6extra').status === 'enviado', 30000);
+check('“Tentar de novo” depois do login: as vagas daquele site voltam para a fila e são enviadas', r?.queued === 2 && job(w5.id).status === 'enviado' && job('w6extra').status === 'enviado', JSON.stringify([r, job(w5.id).status, job('w6extra').status]));
+
+// 27) starting over: the reopened jobs go away, the ads already read come back; "só vagas de fora" keeps the foreign ones
+const sentKept = jobs().filter((j) => j.status === 'enviado').length;
+data.settings = { ...data.settings, foreignOnly: true, applyAuto: false, mode: 'template', location: 'Brasil' };
+const liBefore = liSearches().length;
+r = await send({ type: 'scan:reset' });
+await until(() => data.scan?.running === false && !jobs().some((j) => j.status === 'novo'), 90000);
+await sleep(300);
+const reopened = jobs().filter((j) => ['novo', 'pronto', 'sem_email', 'erro', 'fila'].includes(j.status));
+check('buscar do zero: apaga as vagas em aberto, mantém as enviadas, esquece os anúncios lidos (o LinkedIn volta a olhar 30 dias) e busca de novo',
+  r?.ok && r.removed > 0 && jobs().filter((j) => j.status === 'enviado').length === sentKept && liSearches().length > liBefore && liSearches().at(-1).params.get('f_TPR') === 'r2592000' && !data.seenJobs?.length,
+  JSON.stringify([r, sentKept, liSearches().at(-1)?.params.get('f_TPR')]));
+check('só vagas de fora: entram as dos sites internacionais e ficam de fora as brasileiras em português; InfoJobs e Vagas.com nem são consultados',
+  reopened.length > 0 && reopened.every((j) => j.tags.includes('Internacional')) && reopened.some((j) => j.source === 'remotive') && reopened.some((j) => j.source === 'jobicy') &&
+    !reopened.some((j) => ['gupy', 'infojobs', 'vagas', 'remotar'].includes(j.source)) && boardCalls('www.infojobs.com.br').length === net.boards.filter((c) => c.host === 'www.infojobs.com.br').length && /só de fora/.test(data.log.find((l) => l.msg.startsWith('Busca em'))?.msg || ''),
+  JSON.stringify(reopened.map((j) => `${j.source}: ${j.title} [${j.tags.join(',')}]`)));
 
 const failed = results.filter((x) => !x).length;
 console.log(`\n${results.length - failed} de ${results.length} verificações passaram.`);

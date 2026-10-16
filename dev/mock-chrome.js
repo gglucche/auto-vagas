@@ -21,6 +21,12 @@
     job('a4', { title: 'Engenheiro de Dados', company: 'Gama Dados', email: 'vagas@gama.exemplo.com.br', fit: 32, status: 'erro', error: 'Gmail (400): endereço inválido.', matched: ['sql'], missing: ['spark', 'airflow', 'python'], source: 'google_jobs' }),
     job('a5', { title: 'Desenvolvedor Full Stack', company: 'Delta Tech', email: 'jobs@delta.exemplo.com', status: 'novo', fit: null }),
     job('b1', { title: 'Desenvolvedor(a) Android Sênior | Kotlin', company: 'Ômega Mobile', status: 'sem_email', source: 'google_jobs', fit: 20, url: 'https://www.google.com/search?q=vaga' }),
+    // an Easy Apply that stopped on questions only the person can answer, after the AI answered the others
+    job('b2', { title: 'Analista Oracle APEX Pleno', company: 'Sigma Varejo', status: 'sem_email', easyApply: true, fit: 81, applyState: 'pendente', foundAt: now - 3 * h,
+      error: 'A candidatura parou: falta responder “Você aceita trabalhar presencialmente em Curitiba?”, “Qual a sua pretensão salarial (CLT)?”. Responda abaixo e ela recomeça sozinha.',
+      applyQuestions: [{ label: 'Você aceita trabalhar presencialmente em Curitiba?', kind: 'radio', options: ['Sim', 'Não'] }, { label: 'Qual a sua pretensão salarial (CLT)?', kind: 'text', options: [] }],
+      applyAi: [{ q: 'Há quantos anos você usa Oracle APEX?', a: '8', why: 'Desenvolvedor Oracle APEX (2016 – atual)' }, { q: 'Você possui certificação Oracle Cloud?', a: 'Não', why: '', absent: true }] }),
+    job('b3', { title: 'Desenvolvedor PL/SQL', company: 'Tau Logística', status: 'sem_email', easyApply: true, fit: 74, foundAt: now - 4 * h }),
     job('c1', { title: 'Consultor Oracle APEX', company: 'Épsilon Energia', email: 'rh@epsilon.exemplo.com.br', status: 'enviado', stage: 'entrevista', sentAt: now - 30 * h, fit: 90, notes: 'Entrevista quinta 15h com a Paula.' }),
     job('c2', { title: 'Desenvolvedor PL/SQL', company: 'Banco Z', email: 'rh@bancoz.exemplo.com', status: 'enviado', stage: 'aguardando', sentAt: now - 9 * 24 * h, fit: 76 }),
     job('c3', { title: 'Analista de Sistemas', company: 'Zeta Software', email: 'vagas@zeta.exemplo.com', status: 'enviado', stage: 'rejeitado', sentAt: now - 3 * 24 * h, fit: 60 }),
@@ -87,5 +93,6 @@
     runtime: { sendMessage, getURL: (p) => '/' + p, id: 'mock' },
     identity: { getRedirectURL: () => 'https://abcdefghijklmnop.chromiumapp.org/' },
     tabs: { query: async () => [], create: async () => {} },
+    permissions: { request: async () => true, contains: async () => !new URLSearchParams(location.search).has('nosites') },
   };
 })();

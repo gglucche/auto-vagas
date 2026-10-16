@@ -37,19 +37,25 @@ Tudo fica em **Configurações**, em quatro passos:
 
 ## Como funciona
 
-**Busca.** Cada termo vira uma consulta no LinkedIn, Gupy, InfoJobs, Vagas.com, Remotar e Himalayas, feita direto por HTTP: não abre aba e não usa a sua conta. Ficam só as vagas que citam as tecnologias do termo, dos últimos 45 dias, sem repetição entre os sites. Roda no botão **Buscar vagas agora** ou sozinha a cada 3, 6, 12 ou 24 horas.
+**Busca.** Cada termo vira uma consulta no LinkedIn, Gupy, InfoJobs, Vagas.com, Remotar e nos sites internacionais de vagas remotas (Himalayas, Remotive e Jobicy), feita direto por HTTP: não abre aba e não usa a sua conta. Ficam só as vagas que citam as tecnologias do termo, dos últimos 45 dias, sem repetição entre os sites; dos sites internacionais, só as abertas a quem mora no seu país. Roda no botão **Buscar vagas agora** ou sozinha a cada 3, 6, 12 ou 24 horas. Um anúncio já lido não é lido de novo; **Buscar do zero** apaga as vagas em aberto, esquece os anúncios lidos e busca tudo outra vez (as candidaturas enviadas ficam).
+
+**Vagas de fora.** A opção **Só vagas de fora do Brasil** deixa passar apenas as vagas de empresas estrangeiras: as dos sites internacionais, os anúncios que não estão em português e as vagas em outro país. Toda vaga assim leva a etiqueta "Internacional", com ou sem a opção. Para achar mais delas, inclua termos em inglês ("Oracle APEX developer").
 
 **Aderência.** A nota de 0 a 100 olha o que um recrutador olha primeiro: a tecnologia do título, os requisitos obrigatórios, o tipo de função e o nível. Diferenciais contam pouco; benefícios e a descrição da empresa não contam; Git, Scrum e inglês, que quase toda vaga pede, pesam pouco. Quando a nota fica limitada, o painel diz o motivo, como "é vaga de estágio" ou "Angular, do título da vaga, não aparece no seu currículo". Com a IA ligada, ela avalia requisito por requisito e mostra o trecho do seu currículo que prova cada um. O que ela diz que você tem sem um trecho que prove conta só pela metade. A IA também avalia, aos poucos, as vagas para candidatar no site.
 
 **Para revisar.** Vagas com e-mail de contato. Cada uma chega com a nota de aderência ao seu currículo, o e-mail escrito e o currículo anexado. Confira e clique em **Enviar candidatura**, ou ligue o **Piloto automático**, que envia sozinho dentro do limite diário e da aderência mínima que você escolher. Com a IA, o e-mail e o currículo adaptado só são escritos para vagas com aderência de 40 ou mais; nas outras fica o seu modelo, e **Adaptar com IA** escreve quando você pedir. Antes de chegar a você, o texto da IA é conferido: sai markdown e campo para preencher, e o que não está no seu currículo volta para a IA corrigir ou é tirado.
 
-**Candidatar no site.** Vagas sem e-mail, que são a maioria. Nas de Candidatura simplificada do LinkedIn, **⚡ Candidatar** abre a vaga em uma janela, passa pelas etapas, anexa o currículo e envia. O botão do topo faz todas, uma depois da outra. A extensão não inventa respostas: uma pergunta que ela não sabe interrompe aquela candidatura e aparece em Configurações, para você responder uma vez só.
+**Candidatar no site.** Vagas sem e-mail, que são a maioria. **⚡ Candidatar** abre a vaga em uma janela e faz a candidatura: na Candidatura simplificada do LinkedIn, passa pelas etapas, anexa o currículo e envia; em qualquer outro site (Gupy, o site da empresa, os sites internacionais, o "Candidatar-se" do LinkedIn que leva ao site da empresa), clica no botão de candidatura, preenche o formulário que aparece, anexa o currículo, passa pelas etapas e envia, mesmo quando cada etapa é uma página nova. Uma página que confirma com um clique, um site que pede a candidatura por e-mail (a vaga vai para "Para revisar", com o e-mail pronto) e a página de agradecimento são reconhecidos. O botão do topo faz todas, uma depois da outra, e o **Piloto automático** faz isso sozinho, depois de cada busca, com as vagas de aderência mínima, dentro do limite diário. Fora do LinkedIn, a extensão pede uma vez a permissão para agir nos sites; ela só age nas janelas que ela mesma abre.
+
+Login e criação de conta só você faz: a candidatura para na página de login, avisa, e continua sozinha depois que você entra (num lote, as outras vagas daquele site esperam o seu login e voltam com **Tentar de novo**).
+
+As respostas vêm do que você informou em Configurações e, com uma chave de IA (o Groq tem cota gratuita), do seu currículo. A IA só confirma o que o currículo comprova: um "sim" precisa de um trecho real dele, e "não" ou "0 anos" só valem para experiência e formação que ele não menciona. O que só você sabe, como pretensão salarial ou mudar de cidade, fica com você. Uma pergunta assim interrompe aquela candidatura e aparece na própria vaga. Responda ali e ela volta sozinha para a fila; a resposta vale para as próximas. As respostas que a IA deu ficam na vaga, com o trecho do currículo, para você conferir e corrigir. Sem IA, toda pergunta nova interrompe a candidatura até você responder.
 
 ![Candidatura simplificada em lote](docs/candidatar.png)
 
 **Candidaturas.** O que já foi enviado, com a etapa de cada uma (Aguardando, Responderam, Entrevista, Oferta, Recusada) e o lembrete de follow-up.
 
-**Outros sites.** No formulário de candidatura de qualquer site, clique no ícone da extensão e em **Preencher esta página**. Ela preenche o que souber; você confere e envia.
+**Quando ela para.** Se uma candidatura para com a janela aberta (uma pergunta sua, um formulário que não avançou), um cartão na página oferece preencher de novo e registra a vaga quando a página agradecer. Em qualquer outra página, clique no ícone da extensão e em **Preencher esta página**: ela preenche o que souber, sem clicar em nada.
 
 ![Popup da extensão](docs/popup.png)
 
@@ -67,7 +73,7 @@ Não há etapa de build: o navegador carrega a pasta como está. Ao mudar o cód
 
 ```bash
 node dev/test.mjs          # testes com a API chrome.* simulada
-node dev/test-quality.mjs  # aderência contra notas de recrutadores e conferência do texto da IA
+node dev/test-quality.mjs  # aderência contra notas de recrutadores e conferência do texto e das respostas da IA
 node dev/test-pdf.mjs      # leitura do PDF do currículo
 node dev/test-browser.mjs  # a extensão instalada em um Chrome, Brave ou Edge sem janela
 node dev/server.mjs        # o painel em http://localhost:5178, com dados de exemplo

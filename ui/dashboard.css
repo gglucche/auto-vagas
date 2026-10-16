@@ -71,6 +71,9 @@ svg { width: 17px; height: 17px; flex: none; }
 #scanBox button { width: 100%; justify-content: center; padding: 10px; }
 .progress { height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; margin: 8px 0 4px; }
 .progress i { display: block; height: 100%; background: var(--accent); transition: width .4s; }
+#scanBox button.again { width: auto; display: block; margin: 2px auto 0; padding: 2px 8px; font-size: 12px; color: var(--muted); }
+#scanBox button.again:hover { color: var(--text); }
+.banner button.ghost, p.muted button.ghost { padding: 0 2px; font-size: inherit; font-weight: 600; color: inherit; text-decoration: underline; vertical-align: baseline; line-height: inherit; }
 #scanBox .muted { display: block; text-align: center; font-size: 12px; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- List ---------- */
@@ -162,6 +165,10 @@ code { background: var(--panel2); padding: 2px 6px; border-radius: 5px; font-siz
 .alert[hidden] { display: none; }
 .alert.ask { border-left-color: var(--warn); background: var(--warn-soft); }
 .alert.ask label { width: 100%; }
+#viewNote .banner { margin: 8px 12px 0; font-size: 13px; }
+.ai-answers { margin-top: 14px; padding: 10px 12px; border-radius: 8px; background: var(--panel); border: 1px solid var(--line); }
+.ai-answers label { margin-bottom: 8px; color: var(--text); }
+.ai-answers p { margin: 0 0 8px; font-size: 12.5px; }
 .answers { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; font-size: 13px; }
 .answers button { padding: 2px 8px; font-size: 12px; }
 hr { border: 0; border-top: 1px solid var(--line); margin: 4px 0; width: 100%; }

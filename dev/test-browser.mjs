@@ -214,11 +214,67 @@ document.getElementById('easy').addEventListener('click', () => setTimeout(rende
 // job number -> [kind, window, confirmation]: 'nova' is the window LinkedIn shows today, 'antiga' the older one
 const KINDS = { 1: ['simples', 'nova'], 2: ['pergunta', 'nova'], 3: ['externa', 'antiga'], 4: ['ja', 'antiga'], 5: ['simples', 'nova'], 6: ['simples', 'antiga'], 7: ['simples', 'nova', 'pagina'] };
 const submitted = []; // what the replica received for each submitted application
+
+// Four sites, as the walker meets them:
+// - empresa: a careers site whose job page opens a single-page form (name, contact, resume, questions) in a new
+//   tab, and thanks on another page; one required question nobody can answer;
+// - ats: a hiring system with a login wall and three steps, each a page load, ending in "Candidatura enviada";
+// - board: a job board with a one-click "Candidatar-se" that confirms in place;
+// - mail: a job page whose "Candidatar-se" is an email link.
+const head = (title) => `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${title}</title></head><body>`;
+const companyPage = (kind) =>
+  head('Empresa Y — Carreiras') +
+  (kind === 'vaga'
+    ? '<header><nav><a href="/empresa/vagas">Vagas</a> <a href="/empresa/login">Entrar</a></nav></header><main><h1>Analista Oracle APEX</h1><p>Empresa Y · Remoto</p><p>Requisitos: Oracle APEX e PL/SQL. Depois de enviada, sua candidatura passa por uma triagem.</p><a href="/empresa/form/1" target="_blank">Candidatar-se</a></main>'
+    : kind === 'form'
+      ? `<h1>Candidatura — Analista Oracle APEX</h1><form id="f" action="/empresa/obrigado" method="get">
+        <label for="nome">Nome completo *</label><input id="nome" name="nome" required>
+        <label for="email">E-mail *</label><input id="email" name="email" type="email" required>
+        <label for="tel">Telefone</label><input id="tel" name="telefone" type="tel">
+        <label for="cidade">Cidade</label><input id="cidade" name="cidade">
+        <label for="cv">Currículo (PDF) *</label><input id="cv" name="curriculo" type="file" accept="application/pdf" required>
+        <label for="pret">Pretensão salarial</label><input id="pret" name="pretensao">
+        <label for="porque">Por que você quer trabalhar na Empresa Y?</label><textarea id="porque" name="porque"></textarea>
+        <fieldset><legend>Você possui CNH categoria B? *</legend><label><input type="radio" name="cnh" value="Sim" required> Sim</label><label><input type="radio" name="cnh" value="Não"> Não</label></fieldset>
+        <button type="submit">Enviar candidatura</button></form>
+        <script>document.getElementById('f').onsubmit = (e) => {
+          const f = e.target, file = f.curriculo.files[0];
+          if (!f.cnh.value) { e.preventDefault(); return; }
+          fetch('/site-submitted', { method: 'POST', body: JSON.stringify({ nome: f.nome.value, email: f.email.value, telefone: f.telefone.value, cidade: f.cidade.value, pretensao: f.pretensao.value, porque: f.porque.value, cnh: f.cnh.value, file: file && { name: file.name, size: file.size } }), keepalive: true });
+        };</script>`
+      : '<h1>Obrigado por se candidatar!</h1><p>Recebemos sua candidatura para Analista Oracle APEX.</p>') +
+  '</body></html>';
+const atsPage = (part, query, cookie) => {
+  const step = (n, inner, button) => `<h1>Candidatura — Desenvolvedor PL/SQL</h1><p>Etapa ${n} de 3</p>${inner}`;
+  if (part === 'vaga') return head('ATS — Vaga') + '<main><h1>Desenvolvedor PL/SQL</h1><p>Empresa Z · Híbrido</p><p>Requisitos: PL/SQL e Oracle APEX.</p><button type="button" id="apply">Candidatar-se</button></main><script>document.getElementById(\'apply\').onclick = () => location.href = document.cookie.includes(\'sess=1\') ? \'/ats/apply/2/1\' : \'/ats/login?next=/ats/apply/2/1\';</script></body></html>';
+  if (part === 'login') return head('ATS — Entrar') + '<h1>Entre na sua conta</h1><form><label for="u">E-mail</label><input id="u" name="u" type="email"><label for="p">Senha</label><input id="p" name="p" type="password"><button type="submit">Entrar</button></form><p><a href="/ats/signup">Criar conta</a></p></body></html>';
+  if (!cookie.includes('sess=1')) return head('ATS — Entrar') + '<p>Sessão expirada.</p></body></html>';
+  if (part === '1') return head('ATS — Dados') + step(1, '<form action="/ats/apply/2/2" method="get"><label for="nome">Nome *</label><input id="nome" name="nome" required><label for="email">E-mail *</label><input id="email" name="email" required><label for="tel">Celular *</label><input id="tel" name="telefone" required><button type="submit">Continuar</button></form>') + '</body></html>';
+  if (part === '2') return head('ATS — Currículo') + step(2, '<div><p>Anexe o seu currículo</p><label for="cv">Currículo *</label><input id="cv" type="file" accept=".pdf"><button type="button" id="go">Continuar</button></div><script>document.getElementById(\'go\').onclick = async () => { const f = document.getElementById(\'cv\').files[0]; if (!f) return alert(\'Anexe o currículo\'); await fetch(\'/ats-file\', { method: \'POST\', body: JSON.stringify({ name: f.name, size: f.size }) }); location.href = \'/ats/apply/2/3\'; };</script>') + '</body></html>';
+  if (part === '3') return head('ATS — Perguntas') + step(3, '<form action="/ats/apply/2/done" method="get"><label for="anos">Há quantos anos você usa Oracle APEX? *</label><input id="anos" name="anos" type="number" required><label for="ingles">Nível de inglês *</label><select id="ingles" name="ingles" required><option value="">Selecione</option><option>Básico</option><option>Intermediário</option><option>Avançado</option><option>Fluente</option></select><button type="submit">Finalizar candidatura</button></form>') + '</body></html>';
+  return head('ATS — Pronto') + `<h1>Candidatura enviada com sucesso!</h1><p>Boa sorte, ${query.get('anos') || '?'} anos de APEX e inglês ${query.get('ingles') || '?'}.</p></body></html>`;
+};
+const boardPage = () => head('Quadro de vagas') + '<main><h1>Consultor Oracle APEX</h1><p>Empresa W · Remoto</p><div id="box"><button type="button" id="apply">Candidatar-se</button></div></main><script>document.getElementById(\'apply\').onclick = async () => { await fetch(\'/board-applied\', { method: \'POST\', body: \'{}\' }); document.getElementById(\'box\').innerHTML = \'<p>Candidatura realizada com sucesso! Boa sorte.</p>\'; };</script></body></html>';
+const mailPage = () => head('Vaga por e-mail') + '<main><h1>Desenvolvedor Oracle Forms</h1><p>Empresa M</p><p>Para participar, envie o currículo.</p><a href="mailto:rh@empresa-mail.example?subject=Vaga%20Forms">Candidatar-se por e-mail</a></main></body></html>';
+const siteSubmitted = [];
+const ats = { file: null, done: null };
+let boardApplied = 0;
 let chatTouched = 0; // times the messaging window got a file or a send
 
 // Local server: a fake login provider (to exercise chrome.identity without needing an account) and the test job.
 let back = '';
 const provider = http.createServer((req, res) => {
+  const url = new URL(req.url, 'http://x');
+  const html = (body) => res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }).end(body);
+  const company = /^\/empresa\/(vaga|form|obrigado)/.exec(url.pathname);
+  if (company) return html(companyPage(company[1]));
+  const atsPart = /^\/ats\/(vaga|login|apply\/2\/(1|2|3|done))/.exec(url.pathname);
+  if (atsPart) {
+    if (atsPart[2] === 'done') ats.done = Object.fromEntries(url.searchParams);
+    return html(atsPage(atsPart[2] || atsPart[1], url.searchParams, req.headers.cookie || ''));
+  }
+  if (url.pathname.startsWith('/board/vaga')) return html(boardPage());
+  if (url.pathname.startsWith('/mail/vaga')) return html(mailPage());
   const view = /^\/jobs\/view\/(\d+)/.exec(req.url);
   if (view) {
     const [kind, ui, confirm] = KINDS[view[1]];
@@ -229,16 +285,19 @@ const provider = http.createServer((req, res) => {
     req.on('data', (chunk) => (body += chunk));
     req.on('end', () => {
       if (req.url === '/submitted') submitted.push(JSON.parse(body));
+      if (req.url === '/site-submitted') siteSubmitted.push(JSON.parse(body));
+      if (req.url === '/ats-file') ats.file = JSON.parse(body);
+      if (req.url === '/board-applied') boardApplied++;
       if (req.url === '/chat') chatTouched++;
       res.writeHead(204).end();
     });
     return;
   }
-  const html = (body) => res.writeHead(200, { 'content-type': 'text/html' }).end(`<!doctype html><title>login de teste</title>${body}`);
+  const page = (body) => res.writeHead(200, { 'content-type': 'text/html' }).end(`<!doctype html><title>login de teste</title>${body}`);
   if (req.url.startsWith('/direto')) return res.writeHead(302, { location: back + '#access_token=FALSO_DIRETO&expires_in=3600' }).end();
   if (req.url.startsWith('/recusa')) return res.writeHead(302, { location: back + '#error=interaction_required' }).end();
-  if (req.url.startsWith('/script')) return html(`<script>setTimeout(() => location.replace(${JSON.stringify(back + '#access_token=FALSO_SCRIPT&expires_in=3600')}), 1200)</script>`);
-  return html('página que não devolve nada');
+  if (req.url.startsWith('/script')) return page(`<script>setTimeout(() => location.replace(${JSON.stringify(back + '#access_token=FALSO_SCRIPT&expires_in=3600')}), 1200)</script>`);
+  return page('página que não devolve nada');
 });
 await new Promise((r) => provider.listen(0, '127.0.0.1', r));
 
@@ -430,7 +489,7 @@ try {
 
   await applyTo(['e3', 'e4']);
   const outside = await waitJob('e3', (x) => x.easyApply === false);
-  const already = await waitJob('e4', (x) => x.status === 'enviado', 60000);
+  const already = await waitJob('e4', (x) => x.status === 'enviado', 120000);
   check('em lote: vaga com candidatura no site da empresa fica marcada assim, e vaga já candidatada vira candidatura feita',
     outside.easyApply === false && outside.status === 'sem_email' && already.status === 'enviado' && /já tinha se candidatado/.test(already.note || ''), JSON.stringify([outside.easyApply, outside.error, already.status, already.note]));
 
@@ -447,6 +506,83 @@ try {
   }
   job = await waitJob('e5', (x) => x.status === 'enviado', 30000);
   check('quando o usuário clica em Enviar na página, a extensão registra a candidatura', job.status === 'enviado' && !!sentFor(5), JSON.stringify([job.status, job.applyState]));
+
+  // ---------- any site: the extension applies through the job page, step by step ----------
+  const siteJob = (id, source, title, company, url) => ({ id, dupKey: id, source, title, company, location: 'Remoto', url, description: 'Oracle APEX e PL/SQL', emails: [], email: '', status: 'sem_email', foundAt: Date.now(), tags: [] });
+  await dash.evaluate(`(async () => {
+    const { settings } = await chrome.storage.local.get('settings');
+    await chrome.storage.local.set({
+      settings: { ...settings, applyReview: false, salary: '12000', subjectTemplate: 'Candidatura – {vaga}', bodyTemplate: 'Olá, segue meu currículo. {nome}' },
+      'job:s1': ${JSON.stringify(siteJob('s1', 'gupy', 'Analista Oracle APEX', 'Empresa Y', base + 'empresa/vaga/1'))},
+      'job:s2': ${JSON.stringify(siteJob('s2', 'vagas', 'Desenvolvedor PL/SQL', 'Empresa Z', base + 'ats/vaga/2'))},
+      'job:s3': ${JSON.stringify(siteJob('s3', 'remotar', 'Consultor Oracle APEX', 'Empresa W', base + 'board/vaga/3'))},
+      'job:s4': ${JSON.stringify(siteJob('s4', 'himalayas', 'Desenvolvedor Oracle Forms', 'Empresa M', base + 'mail/vaga/4'))},
+    });
+  })()`);
+  const trace = () =>
+    dash
+      .evaluate(`chrome.storage.local.get(['log', 'applyQueue', 'job:s1', 'job:s2']).then((x) => ({ queue: x.applyQueue, log: (x.log || []).slice(0, 10).map((l) => l.msg), s1: x['job:s1'] && [x['job:s1'].applyState, x['job:s1'].error, x['job:s1'].applyDebug?.status], s2: x['job:s2'] && [x['job:s2'].applyState, x['job:s2'].error] }))`)
+      .catch((e) => e.message);
+  const pageAt = async (re, ms = 15000) => {
+    for (const end = Date.now() + ms; Date.now() < end; await sleep(300)) {
+      const t = (await c.api('/json/list')).find((x) => x.type === 'page' && re.test(x.url));
+      if (t) return connect(t.webSocketDebuggerUrl);
+    }
+    return null;
+  };
+
+  // 1) a single-page form in a new tab; one required question nobody answers: the job stops, then goes on by itself once answered
+  await applyTo(['s1']);
+  job = await waitJob('s1', (x) => x.applyState === 'pendente' || x.status === 'enviado' || (x.error && x.applyState !== 'rodando'));
+  check('site da empresa: clica em Candidatar-se (link para aba nova, seguido nesta aba), preenche o formulário e para na pergunta que ninguém sabe',
+    job.applyState === 'pendente' && job.applyQuestions?.[0]?.label === 'Você possui CNH categoria B?' && !siteSubmitted.length, JSON.stringify([job.applyState, job.error, job.applyQuestions]));
+  const formTab = await pageAt(/\/empresa\/form\/1/, 3000);
+  const filled = formTab ? await formTab.evaluate(`({ nome: nome.value, email: email.value, tel: tel.value, cidade: cidade.value, pret: pret.value, cv: cv.files[0]?.name })`).catch(() => null) : null;
+  check('o formulário ficou preenchido na janela (nome, e-mail, telefone, cidade, pretensão e o currículo anexado), à espera da resposta',
+    filled?.nome === 'Fulano de Tal' && filled.email === 'eu@gmail.example' && filled.tel === '19999998888' && filled.cidade === 'Campinas' && filled.pret === '12000' && filled.cv === 'CV de teste.pdf', JSON.stringify(filled));
+  formTab?.close();
+  await dash.evaluate(`chrome.runtime.sendMessage({ type: 'apply:answer', pairs: [{ label: 'Você possui CNH categoria B?', value: 'Não' }] })`);
+  job = await waitJob('s1', (x) => x.status === 'enviado' || (x.error && !['rodando', 'fila'].includes(x.applyState)), 60000);
+  check('respondida no painel, a candidatura recomeça sozinha: formulário enviado com a resposta e o currículo, página de agradecimento reconhecida',
+    job.status === 'enviado' && job.via === 'site' && siteSubmitted[0]?.cnh === 'Não' && siteSubmitted[0].file?.name === 'CV de teste.pdf' && siteSubmitted[0].nome === 'Fulano de Tal', JSON.stringify([job.status, job.via, job.error, siteSubmitted[0], await trace()]));
+
+  // 2) a hiring system with a login wall and three steps, each a page load
+  await applyTo(['s2']);
+  job = await waitJob('s2', (x) => x.applyState === 'login' || x.status === 'enviado' || (x.error && !['rodando', 'fila'].includes(x.applyState)));
+  check('sistema com login: a candidatura para na página de login, com a explicação, e espera', job.applyState === 'login' && /login de 127\.0\.0\.1/.test(job.error || ''), JSON.stringify([job.applyState, job.error, await trace()]));
+  const loginTab = await pageAt(/\/ats\/login/, 5000);
+  if (loginTab) {
+    // the user logs in (a session cookie) and the site sends them on
+    await loginTab.evaluate(`(document.cookie = 'sess=1; path=/', location.href = '/ats/apply/2/1')`).catch(() => {});
+    loginTab.close();
+  }
+  job = await waitJob('s2', (x) => x.status === 'enviado' || (x.error && !['rodando', 'fila', 'login'].includes(x.applyState)), 90000);
+  check('depois do login: passa pelas três etapas (dados, currículo anexado, perguntas respondidas pelo perfil) e reconhece o envio',
+    job.status === 'enviado' && job.via === 'site' && ats.file?.name === 'CV de teste.pdf' && ats.done?.anos === '8' && ats.done?.ingles === 'Avançado', JSON.stringify([job.status, job.applyState, job.error, ats]));
+
+  // 3) one click that confirms in place; 4) an email link
+  await applyTo(['s3', 's4']);
+  job = await waitJob('s3', (x) => x.status === 'enviado' || (x.error && !['rodando', 'fila'].includes(x.applyState)), 60000);
+  check('quadro de vagas com candidatura de um clique: clica e reconhece a confirmação na própria página', job.status === 'enviado' && job.via === 'site' && boardApplied === 1, JSON.stringify([job.status, job.error, boardApplied]));
+  job = await waitJob('s4', (x) => x.status === 'pronto' || (x.error && !['rodando', 'fila'].includes(x.applyState)), 60000);
+  check('vaga cujo botão é um link de e-mail: a vaga ganha o endereço e vai para revisão, com o e-mail preparado',
+    job.status === 'pronto' && job.email === 'rh@empresa-mail.example' && /Oracle Forms/.test(job.subject || ''), JSON.stringify([job.status, job.email, job.subject, job.error]));
+  // 5) review mode on a site: everything filled in, the user clicks Enviar, the thanks page marks the job
+  await dash.evaluate(`(async () => {
+    const { settings } = await chrome.storage.local.get('settings');
+    await chrome.storage.local.set({ settings: { ...settings, applyReview: true }, 'job:s5': ${JSON.stringify(siteJob('s5', 'gupy', 'Analista Oracle APEX II', 'Empresa Y', base + 'empresa/vaga/1'))} });
+  })()`);
+  await applyTo(['s5']);
+  job = await waitJob('s5', (x) => x.applyState === 'revisar' || x.status === 'enviado' || (x.error && !['rodando', 'fila'].includes(x.applyState)), 60000);
+  check('modo conferir em outro site: preenche tudo e para antes de enviar', job.applyState === 'revisar' && siteSubmitted.length === 1, JSON.stringify([job.applyState, job.error, siteSubmitted.length]));
+  const reviewTab = await pageAt(/\/empresa\/form\/1/, 5000);
+  await reviewTab?.evaluate(`document.querySelector('button[type=submit]').click()`).catch(() => {});
+  reviewTab?.close();
+  job = await waitJob('s5', (x) => x.status === 'enviado', 60000);
+  check('o usuário clica em Enviar na página: a página de agradecimento é reconhecida e a vaga registrada', job.status === 'enviado' && job.via === 'site' && siteSubmitted.length === 2, JSON.stringify([job.status, job.applyState, siteSubmitted.length]));
+  await dash.evaluate(`chrome.storage.local.get('settings').then(({ settings }) => chrome.storage.local.set({ settings: { ...settings, applyReview: false } }))`);
+  const applied = await dash.evaluate(`chrome.storage.local.get('applyLog').then((x) => x.applyLog)`);
+  check('as candidaturas feitas pela extensão contam no limite diário (LinkedIn e outros sites)', applied?.count >= 9, JSON.stringify(applied));
 
   setBuild('9.9.8'); // a fix lands in the files; the browser keeps running the background code it stored
   await dash.send('Page.reload').catch(() => {}); // the user presses F5 on the dashboard

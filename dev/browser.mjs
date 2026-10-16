@@ -77,7 +77,16 @@ export async function launch(browser, profile, extraArgs = []) {
   children.push(child);
   for (let i = 0; i < 80 && !fs.existsSync(portFile); i++) await sleep(250);
   if (!fs.existsSync(portFile)) throw new Error('o navegador não abriu: ' + browser);
-  const port = fs.readFileSync(portFile, 'utf8').split('\n')[0].trim();
+  // the browser may still be writing the file
+  let port = '';
+  for (let i = 0; i < 20 && !port; i++) {
+    try {
+      port = fs.readFileSync(portFile, 'utf8').split('\n')[0].trim();
+    } catch {
+      await sleep(250);
+    }
+  }
+  if (!port) throw new Error('o navegador não informou a porta de depuração');
   const api = (p, init) => fetch(`http://127.0.0.1:${port}${p}`, { ...init, signal: AbortSignal.timeout(10000) }).then((r) => r.json());
 
   // commands over the pipe: JSON messages separated by \0
