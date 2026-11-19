@@ -39,7 +39,7 @@
     settings: { name: 'Fulano de Tal', email: 'fulano@exemplo.com.br', keywords: 'desenvolvedor oracle apex\nanalista pl/sql', location: 'São Paulo, Brasil', gmailClientId: 'x.apps.googleusercontent.com', skills: 'oracle apex, pl/sql, javascript' },
     resumePdf: { name: 'curriculo-fulano.pdf', b64: '' },
     gmailToken: { token: 't', exp: now + h },
-    scan: { running: false, last: now - 40 * 60e3, i: 0, total: 0, found: 0 },
+    scan: { running: false, last: now - 40 * 60e3, i: 0, total: 0, found: 0, result: { read: 62, why: { 'fora do termo': 38, 'já lidas': 21, 'pouca aderência': 3 }, limited: false } },
     sentLog: { date: new Date().toLocaleDateString('sv'), count: 2 },
     log: [{ t: now - h, msg: 'Vagas do LinkedIn · desenvolvedor oracle apex: 12 anúncio(s) lido(s).' }],
     ...Object.fromEntries(jobs.map((j) => ['job:' + j.id, j])),

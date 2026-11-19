@@ -5,7 +5,7 @@ import { textToPdf, pdfToB64 } from './lib/pdf.js';
 import { extractTags, localFit, normKey } from './lib/match.js';
 import { BUILD } from './lib/build.js';
 import { resolvePlace, WORLD } from './lib/linkedin.js';
-import { SOURCES, searchTerms, relevant, inTitle, tooOld, foreign } from './lib/sources.js';
+import { SOURCES, searchTerms, relevant, inTitle, tooOld, foreign, titleWorth } from './lib/sources.js';
 import { answerFor, questionKey, SECRET } from './lib/answers.js';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -66,7 +66,7 @@ async function setupAlarms() {
 }
 
 chrome.alarms.onAlarm.addListener((a) => {
-  if (a.name === 'scan') runScan();
+  if (a.name === 'scan' || a.name === 'scan-resume') runScan();
   if (a.name === 'queue') {
     processQueue();
     runApply(); // resumes website applications left in the queue
@@ -194,17 +194,37 @@ function rejection(term, card, ctx, s) {
   return '';
 }
 
-// One search: one term in one source. Reads the list, fills in the description only for jobs not seen yet,
-// filters and stores. state is shared by the whole scan (what is already on the dashboard, what was already rejected).
+// One search: one term in one source. Reads the list, fills in the description only for cards not read yet and
+// worth it, filters and stores. state is shared by the whole scan (what is already on the dashboard, what was
+// already read). Every card counts in the stats, with the reason it was left out, so the search can explain itself.
 async function scanSource(src, term, ctx, state, s) {
   const stat = state.stats[src.id];
-  const cards = (await src.list(term, ctx)).slice(0, ctx.max);
-  stat.read += cards.length;
   const basis = hashId(`${term}|${ctx.remoteOnly}`);
   const seenKey = (card) => `${hashId(card.url)}:${basis}`;
-  const fresh = cards.filter((c) => c.url && !state.known.has(hashId(c.url)) && !state.seen[seenKey(c)]);
+  const unseen = (card) => !!card.url && !state.known.has(hashId(card.url)) && !state.seen[seenKey(card)];
+  // a title with nothing of the term (LinkedIn's suggestions) isn't worth a request for the details
+  const worth = (card) => !src.details || titleWorth(term, card);
+  const leftOut = (why, n = 1) => (stat.why[why] = (stat.why[why] || 0) + n);
+  const dupKey = (card) => (card.company ? normKey(card.title, card.company) : '');
+  const cards = await src.list(term, { ...ctx, wanted: (card) => unseen(card) && worth(card) });
+  stat.read += cards.length;
+  const fresh = cards.filter(unseen);
+  if (cards.length > fresh.length) leftOut('já lidas', cards.length - fresh.length);
+  const toRead = [];
+  for (const card of fresh) {
+    if (!worth(card)) {
+      state.seen[seenKey(card)] = Date.now();
+      leftOut('fora do termo');
+    } else if (dupKey(card) && state.dups.has(dupKey(card))) {
+      state.seen[seenKey(card)] = Date.now(); // the same job again: another id for another location, or another site
+      leftOut('repetidas');
+    } else if (toRead.length < ctx.max) {
+      toRead.push(card);
+      if (dupKey(card)) state.dups.add(dupKey(card));
+    } // the rest wait for the next search
+  }
   if (src.details)
-    await pool(fresh, src.parallel || 2, async (card) => {
+    await pool(toRead, src.parallel || 2, async (card) => {
       if (scan.stop || state.off[src.id]) return void (card.skipped = true);
       if (src.pause) await sleep(src.pause * (1 + Math.random()));
       try {
@@ -215,10 +235,14 @@ async function scanSource(src, term, ctx, state, s) {
       }
     });
   const jobs = [];
-  for (const card of fresh) {
+  for (const card of toRead) {
     if (card.skipped) continue;
     state.seen[seenKey(card)] = Date.now(); // read: rejected, stored or a repeat from another site; not worth querying again
-    if (rejection(term, card, ctx, s)) continue;
+    const why = rejection(term, card, ctx, s);
+    if (why) {
+      leftOut(why);
+      continue;
+    }
     const description = (card.description || '').slice(0, 8000);
     const emails = [...new Set((description.match(EMAIL_RE) || []).map((e) => e.toLowerCase()))];
     const job = { source: src.id, title: card.title, company: card.company || '', location: card.location || '', url: card.url, description, emails };
@@ -227,7 +251,11 @@ async function scanSource(src, term, ctx, state, s) {
     state.known.add(hashId(card.url));
   }
   stat.kept += jobs.length;
-  if (jobs.length) stat.added += (await addJobs(jobs, term)).added;
+  if (jobs.length) {
+    const { added } = await addJobs(jobs, term);
+    stat.added += added;
+    if (jobs.length > added) leftOut('repetidas', jobs.length - added); // the same job from another site or term
+  }
 }
 
 async function runScan() {
@@ -237,7 +265,7 @@ async function runScan() {
   const sources = SOURCES.filter((src) => s[src.setting]);
   const pages = pageSearches(s, terms);
   if (!terms.length || !(sources.length || pages.length)) return log('Busca: defina palavras-chave e ao menos uma fonte nas Configurações.');
-  Object.assign(scan, { running: true, stop: false, i: 0, total: sources.length * terms.length + pages.length, label: '', found: 0, winId: null, stoleFocus: false });
+  Object.assign(scan, { running: true, stop: false, i: 0, total: sources.length * terms.length + pages.length, label: '', found: 0, winId: null, stoleFocus: false, result: null });
   await publishScan();
   const started = Date.now();
   const max = Number(s.maxPerSearch) || 15;
@@ -246,14 +274,18 @@ async function runScan() {
   try {
     if (sources.length) {
       const place = await linkedinPlace(s.location);
-      const { liScanAt = {}, seenJobs = {} } = await chrome.storage.local.get(['liScanAt', 'seenJobs']);
+      const { seenJobs = {} } = await chrome.storage.local.get('seenJobs');
+      const existing = await getJobs();
       const state = {
-        known: new Set((await getJobs()).map((j) => j.id)),
+        known: new Set(existing.map((j) => j.id)),
+        dups: new Set(existing.map((j) => j.dupKey).filter(Boolean)),
         seen: Object.fromEntries(Object.entries(seenJobs).filter(([, t]) => Date.now() - t < 45 * DAY_MS)),
-        stats: Object.fromEntries(sources.map((src) => [src.id, { read: 0, kept: 0, added: 0, error: '' }])),
+        stats: Object.fromEntries(sources.map((src) => [src.id, { read: 0, kept: 0, added: 0, error: '', why: {} }])),
         off: {},
       };
-      const base = { geoId: place.geoId, country: countryOf(place), remoteOnly: s.remoteOnly, foreignOnly: !!s.foreignOnly, max };
+      // LinkedIn: always the last 30 days, in up to 5 pages; what was read before is skipped without a request, so a
+      // job that was beyond the first pages last time gets its turn now
+      const base = { geoId: place.geoId, country: countryOf(place), remoteOnly: s.remoteOnly, foreignOnly: !!s.foreignOnly, max, seconds: 30 * 86400, pages: 5 };
       // sources in parallel; within each source, one term at a time (so as not to rush any site)
       await Promise.all(
         sources.map(async (src) => {
@@ -262,12 +294,8 @@ async function runScan() {
               scan.label = `${src.label} · ${term}`;
               scan.keyword = term;
               publishScan();
-              // LinkedIn: the first search for each term looks back 30 days; later ones, the time since the previous one
-              const key = `${term}|${place.geoId}|${s.remoteOnly}`;
-              const seconds = liScanAt[key] ? Math.min(30 * 86400, Math.max(86400, (Date.now() - liScanAt[key]) / 1000 + 3600)) : 30 * 86400;
               try {
-                await scanSource(src, term, { ...base, seconds }, state, s);
-                if (src.id === 'linkedin_jobs' && !state.off[src.id]) liScanAt[key] = Date.now();
+                await scanSource(src, term, base, state, s);
               } catch (e) {
                 state.stats[src.id].error = e.message;
                 if (e.limited) state.off[src.id] = e.message;
@@ -278,11 +306,17 @@ async function runScan() {
           }
         })
       );
-      await chrome.storage.local.set({ liScanAt, seenJobs: state.seen });
+      await chrome.storage.local.set({ seenJobs: state.seen });
+      const reasons = (why) => Object.entries(why).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${n} ${k}`).join(', ');
       const parts = sources.map((src) => {
         const st = state.stats[src.id];
-        return `${src.label} ${st.read} lida(s), ${st.added} nova(s)${st.error ? ` (${st.error})` : ''}`;
+        const why = reasons(st.why);
+        return `${src.label} ${st.read} lida(s), ${st.added} nova(s)${why ? ` (${why})` : ''}${st.error ? ` (${st.error})` : ''}`;
       });
+      // what the dashboard shows under the search button when nothing new came
+      const why = {};
+      for (const st of Object.values(state.stats)) for (const [k, n] of Object.entries(st.why)) why[k] = (why[k] || 0) + n;
+      scan.result = { read: Object.values(state.stats).reduce((a, st) => a + st.read, 0), why, limited: Object.values(state.stats).some((st) => st.error) };
       await log(`Busca em ${Math.round((Date.now() - started) / 1000)} s — ${terms.length} termo(s), ${place.name}${s.foreignOnly ? ', só de fora' : ''}: ${parts.join(' · ')}.`);
     }
 
@@ -312,7 +346,15 @@ async function runScan() {
   } finally {
     scan.running = false;
     scan.i = scan.total;
-    await publishScan({ last: Date.now() });
+    // a site that cut the requests off (LinkedIn does, after a few): the search goes on by itself after a while
+    const resume = !!scan.result?.limited && !scan.stop && (scan.resumes || 0) < 2;
+    scan.resumes = resume ? (scan.resumes || 0) + 1 : 0;
+    if (scan.result) scan.result.resume = resume;
+    if (resume) {
+      chrome.alarms.create('scan-resume', { delayInMinutes: 20 });
+      await log('Um site limitou as consultas: a busca continua sozinha em 20 min, de onde parou.');
+    }
+    await publishScan({ last: Date.now(), result: scan.result });
     if (scan.winId) chrome.windows.remove(scan.winId).catch(() => {});
     // give focus back to the window the user was in, if the search had to come to the front
     if (scan.stoleFocus && before?.id) chrome.windows.update(before.id, { focused: true }).catch(() => {});

@@ -156,13 +156,25 @@ function renderNav() {
        <div class="progress"><i style="width:${Math.round((100 * (sc.i + 0.5)) / Math.max(sc.total, 1))}%"></i></div>
        <span class="muted">${esc(sc.label || 'Iniciando…')} · ${sc.found} nova(s)</span>`
     : `<button class="primary" data-act="scan" title="Buscar vagas agora">${ICON.scan}<span class="lbl">Buscar vagas agora</span></button>
-       <span class="muted">${sc.last ? `Última busca ${ago(sc.last)}` : 'Nenhuma busca ainda'}</span>
+       <span class="muted">${sc.last ? `Última busca ${ago(sc.last)}${sc.result ? ` · ${sc.found || 0} nova(s)` : ''}` : 'Nenhuma busca ainda'}</span>
+       ${scanWhy(sc)}
        ${sc.last ? `<button class="ghost again" data-act="scanReset" title="Apaga as vagas em aberto, esquece os anúncios já lidos e busca de novo">Buscar do zero</button>` : ''}`;
 
   const isPage = !!PAGES[S.view];
   $('#app').classList.toggle('is-page', isPage);
   $('#app').classList.toggle('has-sel', !!S.sel);
   for (const p of Object.keys(PAGES)) $('#' + p).classList.toggle('active', S.view === p);
+}
+
+// Why the last search brought nothing new: the reasons the sites' cards were left out, most common first.
+// (LinkedIn pads its results with suggestions that have nothing to do with the term: those are "fora do termo".)
+function scanWhy(sc) {
+  const r = sc.result;
+  if (!r || sc.found || !r.read) return '';
+  const why = Object.entries(r.why || {}).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k, n]) => `${n} ${k}`).join(', ');
+  const hint = r.why?.['fora do termo'] > (r.why?.['já lidas'] || 0) ? 'Termos curtos, só com a tecnologia, acham mais.' : 'Tudo o que os sites mostram já foi lido; o que for publicado entra na próxima.';
+  const limited = r.limited ? (r.resume ? '; um site limitou as consultas, e a busca continua sozinha em 20 min' : '; um site limitou as consultas por agora') : '';
+  return `<span class="muted why" title="O que cada site mostrou e o motivo de ficar de fora está no registro de atividade (Configurações → Dados)">Nada novo em ${r.read} lida(s): ${esc(why)}${limited}. ${hint}</span>`;
 }
 
 function renderList() {

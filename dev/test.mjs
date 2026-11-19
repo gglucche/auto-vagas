@@ -20,7 +20,7 @@ const ev = () => {
   return { addListener: (f) => fns.push(f), fns };
 };
 const onMessage = ev(), onInstalled = ev(), onAlarm = ev(), onTabCreated = ev(), onTabUpdated = ev(), onTabRemoved = ev();
-const calls = { notifications: [], badge: [], tabsCreated: [], windows: 0 };
+const calls = { notifications: [], badge: [], tabsCreated: [], windows: 0, alarms: [] };
 const clone = (v) => (v === undefined ? v : JSON.parse(JSON.stringify(v)));
 const area = (store) => ({
   async get(q) {
@@ -35,7 +35,7 @@ const session = {};
 globalThis.chrome = {
   storage: { local: area(data), session: area(session), onChanged: ev() },
   runtime: { getURL: (p) => 'chrome-extension://teste/' + p, onInstalled, onStartup: ev(), onMessage, openOptionsPage: async () => {} },
-  alarms: { create() {}, clear: async () => true, onAlarm },
+  alarms: { create: (name, opts) => calls.alarms.push([name, opts]), clear: async () => true, onAlarm },
   action: { setBadgeText: (o) => calls.badge.push(o.text), setBadgeBackgroundColor() {} },
   notifications: { create: (o) => calls.notifications.push(o.message), onClicked: ev() },
   tabs: {
@@ -143,8 +143,11 @@ globalThis.fetch = async (url, init) => {
       return page(200, JSON.stringify(/brasil/i.test(u.searchParams.get('query')) ? [{ id: '106057199', displayName: 'Brasil' }, { id: '104413988', displayName: 'Brasília, Distrito Federal, Brasil' }] : []));
     if (u.pathname.endsWith('/search')) {
       const start = Number(u.searchParams.get('start'));
-      const ids = start === 0 ? [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010] : start === 10 ? [1011, 1012, 1013] : [];
-      return page(200, ids.map((id) => `<li><div class="base-card" data-entity-urn="urn:li:jobPosting:${id}"><h3 class="base-search-card__title"> Vaga LinkedIn ${id} </h3><h4 class="base-search-card__subtitle"><a href="#">Empresa LI ${id}</a></h4><span class="job-search-card__location">São Paulo, SP</span></div></li>`).join('\n'));
+      // 1099 is one of the suggestions LinkedIn mixes into the list when the term matches little: nothing of the term in the title
+      // 1098 is the same job as 1001 under another id (LinkedIn lists a job once per location)
+      const ids = start === 0 ? [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1099, 1098] : start === 10 ? [1011, 1012, 1013] : [];
+      const shown = (id) => (id === 1098 ? 1001 : id);
+      return page(200, ids.map((id) => `<li><div class="base-card" data-entity-urn="urn:li:jobPosting:${id}"><h3 class="base-search-card__title"> ${id === 1099 ? 'Fiscal de loja' : 'Desenvolvedor Oracle APEX'} ${shown(id)} </h3><h4 class="base-search-card__subtitle"><a href="#">Empresa LI ${shown(id)}</a></h4><span class="job-search-card__location">São Paulo, SP</span></div></li>`).join('\n'));
     }
     const id = u.pathname.split('/').pop();
     return page(200, `<h2 class="top-card-layout__title topcard__title">Desenvolvedor Oracle APEX ${id}</h2><a class="topcard__org-name-link" href="#"> Empresa LI ${id} </a><span class="topcard__flavor topcard__flavor--bullet">Campinas, SP</span>
@@ -581,7 +584,10 @@ data.settings = { ...data.settings, mode: 'template', autoSend: false, keywords:
 const windowsBefore = calls.windows;
 await scanOnce();
 await until(() => !jobs().some((j) => j.status === 'novo'), 10000);
-check('LinkedIn pela busca pública: lê as páginas até o máximo por termo, sem abrir janela', bySource('linkedin_jobs').length === 12 && calls.windows === windowsBefore, JSON.stringify([bySource('linkedin_jobs').length, calls.windows - windowsBefore]));
+check('LinkedIn pela busca pública: lê as páginas até o máximo por termo (12 no 1º termo; a que sobrou entra no 2º), sem abrir janela', bySource('linkedin_jobs').length === 13 && calls.windows === windowsBefore, JSON.stringify([bySource('linkedin_jobs').length, calls.windows - windowsBefore]));
+check('sugestão do LinkedIn (título sem nada do termo) e vaga repetida com outro id: não gastam consulta de detalhes e são contadas como fora do termo e repetidas',
+  !liDetails().some((c) => /\/(1099|1098)$/.test(c.path)) && !jobs().some((j) => j.title.startsWith('Fiscal de loja')) && /LinkedIn 30 lida\(s\), 13 nova\(s\) \(12 já lidas, 2 fora do termo, 2 repetidas\)/.test(data.log.find((l) => l.msg.startsWith('Busca em'))?.msg || ''),
+  data.log.find((l) => l.msg.startsWith('Busca em'))?.msg);
 const firstSearch = liSearches()[0];
 check('o lugar vira o código de região do LinkedIn, a primeira busca olha 30 dias e leva o filtro de remoto',
   firstSearch?.params.get('geoId') === '106057199' && firstSearch.params.get('f_TPR') === 'r2592000' && firstSearch.params.get('f_WT') === '2' && firstSearch.params.get('keywords') === 'Oracle APEX', String(firstSearch?.params));
@@ -606,14 +612,14 @@ const liJob = bySource('linkedin_jobs').find((j) => j.url.endsWith('/1002/'));
 check('descrição vem completa, em texto, com os itens da lista e os critérios da vaga',
   liJob?.description.includes('Oracle APEX e PL/SQL & JavaScript') && liJob.description.includes('- Requisito: Git') && liJob.description.includes('Pleno-sênior · Tempo integral') && liJob.keyword === 'Oracle APEX', JSON.stringify(liJob?.description));
 check('o registro resume a busca: tempo, termos, região e quantas cada site leu e trouxe de novo',
-  /^Busca em \d+ s — 2 termo\(s\), Brasil: LinkedIn 24 lida\(s\), 12 nova\(s\) · Gupy 4 lida\(s\), [01] nova\(s\) · InfoJobs 1 lida\(s\), 1 nova\(s\) · Vagas\.com 1 lida\(s\), [01] nova\(s\) · Remotar 2 lida\(s\), 1 nova\(s\) · Himalayas 1 lida\(s\), 1 nova\(s\) · Remotive 1 lida\(s\), 1 nova\(s\) · Jobicy 1 lida\(s\), 1 nova\(s\)\.$/.test(data.log.find((l) => l.msg.startsWith('Busca em'))?.msg || ''),
+  /^Busca em \d+ s — 2 termo\(s\), Brasil: LinkedIn 30 lida\(s\), 13 nova\(s\) \(12 já lidas, 2 fora do termo, 2 repetidas\) · Gupy 4 lida\(s\), [01] nova\(s\) \([^)]+\) · InfoJobs 1 lida\(s\), 1 nova\(s\) · Vagas\.com 1 lida\(s\), [01] nova\(s\)( \([^)]+\))? · Remotar 2 lida\(s\), 1 nova\(s\) \(1 fora do termo\) · Himalayas 1 lida\(s\), 1 nova\(s\) · Remotive 1 lida\(s\), 1 nova\(s\) · Jobicy 1 lida\(s\), 1 nova\(s\)\.$/.test(data.log.find((l) => l.msg.startsWith('Busca em'))?.msg || ''),
   data.log.find((l) => l.msg.startsWith('Busca em'))?.msg);
 
 const [searchesBefore, detailsBefore, boardDetails] = [liSearches().length, liDetails().length, net.boards.filter((c) => /vaga-de-|\/vagas\/v/.test(c.path)).length];
 await scanOnce();
-check('busca seguinte: LinkedIn olha só 1 dia para trás e nenhuma vaga já lida (guardada ou recusada) é consultada de novo',
-  liSearches()[searchesBefore].params.get('f_TPR') === 'r86400' && liDetails().length === detailsBefore && net.boards.filter((c) => /vaga-de-|\/vagas\/v/.test(c.path)).length === boardDetails &&
-    net.li.filter((c) => c.path.endsWith('/typeaheadHits')).length === 1 && /LinkedIn 24 lida\(s\), 0 nova\(s\) · Gupy 4 lida\(s\), 0 nova\(s\)/.test(data.log[0].msg),
+check('busca seguinte: LinkedIn olha os 30 dias de novo, mas nenhuma vaga já lida (guardada, recusada ou sugestão) é consultada de novo',
+  liSearches()[searchesBefore].params.get('f_TPR') === 'r2592000' && liDetails().length === detailsBefore && net.boards.filter((c) => /vaga-de-|\/vagas\/v/.test(c.path)).length === boardDetails &&
+    net.li.filter((c) => c.path.endsWith('/typeaheadHits')).length === 1 && /LinkedIn 30 lida\(s\), 0 nova\(s\) \(30 já lidas\) · Gupy 4 lida\(s\), 0 nova\(s\) \(4 já lidas\)/.test(data.log[0].msg),
   JSON.stringify([liSearches()[searchesBefore].params.get('f_TPR'), liDetails().length - detailsBefore, data.log[0].msg]));
 data.settings = { ...data.settings, location: 'Qualquer lugar' };
 await scanOnce();
@@ -624,8 +630,11 @@ check('“Mundo” busca em qualquer país: entra também a vaga remota restrita
 net.liLimited = true;
 const searchesLimited = liSearches().length;
 await scanOnce();
+check('LinkedIn limitou as consultas: a busca continua sozinha em 20 min (alarme), o registro avisa e o painel sabe',
+  calls.alarms.some(([name, o]) => name === 'scan-resume' && o?.delayInMinutes === 20) && data.log.some((l) => /continua sozinha em 20 min/.test(l.msg)) && data.scan?.result?.limited === true && data.scan.result.resume === true,
+  JSON.stringify([calls.alarms.at(-1), data.scan?.result]));
 check('LinkedIn limitou as consultas: o resumo avisa, o segundo termo não insiste e os outros sites seguem normalmente',
-  liSearches().length === searchesLimited + 1 && /LinkedIn 0 lida\(s\), 0 nova\(s\) \(limitou as consultas por agora\) · Gupy 4 lida\(s\)/.test(data.log[0].msg), JSON.stringify([liSearches().length - searchesLimited, data.log[0].msg]));
+  liSearches().length === searchesLimited + 1 && /LinkedIn 0 lida\(s\), 0 nova\(s\) \(limitou as consultas por agora\) · Gupy 4 lida\(s\)/.test(data.log.find((l) => l.msg.startsWith('Busca em'))?.msg || ''), JSON.stringify([liSearches().length - searchesLimited, data.log[0].msg]));
 net.liLimited = false;
 
 // 20) users of the previous version: sources that open a window are turned off once, with a notice
